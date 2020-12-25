@@ -1,0 +1,327 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>防止过拟合-正则化(Regularization) | 阿平的自我修养</title><meta name="keywords" content="Supervised Learning"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1. Introduction正则化 (Regularization) 是机器学习中一种比较常用的技术, 其主要的目的是控制模型的复杂度, 减小过拟合的可能性, 增加模型的泛化能力.   如上图, 红色这条“想象力”过于丰富上下横跳的曲线就是过拟合情形. 结合上图和正则化的英文 Regularizaiton-Regular-Regularize, 直译应该是: 规则化. 什么是规则? 你妈喊你6点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="防止过拟合-正则化(Regularization)">
+<meta property="og:url" content="https://www.facequant.com/2020/11/13/%E9%98%B2%E6%AD%A2%E8%BF%87%E6%8B%9F%E5%90%88-%E6%AD%A3%E5%88%99%E5%8C%96-Regularization/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="1. Introduction正则化 (Regularization) 是机器学习中一种比较常用的技术, 其主要的目的是控制模型的复杂度, 减小过拟合的可能性, 增加模型的泛化能力.   如上图, 红色这条“想象力”过于丰富上下横跳的曲线就是过拟合情形. 结合上图和正则化的英文 Regularizaiton-Regular-Regularize, 直译应该是: 规则化. 什么是规则? 你妈喊你6点">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_o6H_R3Do1zpch-3MZk_fjQ.png">
+<meta property="article:published_time" content="2020-11-13T06:30:48.000Z">
+<meta property="article:modified_time" content="2020-12-25T18:30:08.681Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Supervised Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_o6H_R3Do1zpch-3MZk_fjQ.png"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/11/13/%E9%98%B2%E6%AD%A2%E8%BF%87%E6%8B%9F%E5%90%88-%E6%AD%A3%E5%88%99%E5%8C%96-Regularization/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-26 02:30:08'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="no-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">防止过拟合-正则化(Regularization)</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-13T06:30:48.000Z" title="发表于 2020-11-13 14:30:48">2020-11-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-25T18:30:08.681Z" title="更新于 2020-12-26 02:30:08">2020-12-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Machine-Learning/">Machine Learning</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><p>正则化 (Regularization) 是机器学习中一种比较常用的技术, 其主要的目的是控制模型的复杂度, 减小过拟合的可能性, 增加模型的泛化能力. </p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201029033026156.png" alt="image-20201029033026156" style="zoom:50%;" /></p>
+<p>如上图, 红色这条“想象力”过于丰富上下横跳的曲线就是过拟合情形. 结合上图和正则化的英文 Regularizaiton-Regular-Regularize, <strong>直译应该是: 规则化</strong>. 什么是规则? 你妈喊你6点前回家吃饭, 这就是规则, 一个<strong>限制</strong>. 同理, 在这里, <strong>规则化就是说给需要训练的目标函数加上一些规则 (限制), 让他们不要自我膨胀</strong>. 正则化, 看起来, 挺不好理解的, 追其根源, 还是“正则”这两字在中文中实在没有一个直观的对应, 如果能翻译成<strong>规则化</strong>, 更好理解. </p>
+<p>最基本的正则化方法是在原目标 (代价) 函数中添加惩罚项, 对复杂度高的模型进行“惩罚”. 其数学表达形式为:</p>
+<script type="math/tex; mode=display">
+\widetilde{J}(w;X,y)=J(w;X,y)+\alpha\Omega(w)</script><p>式中 $X,y$ 为训练样本和相应标签, $w$ 为权重系数向量; $J()$ 为目标函数, $\Omega()$ 即为惩罚项, 可以理解为模型”规模”的某种度量; 参数 $\alpha$ 控制正则化强弱. 不同的 $\Omega$ 函数对权重 $w$ 的最优解有不同的偏好, 因而会产生不同的正则化效果. 最常用的 $\Omega$ 函数有两种, 即 $l_1$ 范数和 $l_2$ 范数, 相应称之为 $l_1$ 正则化和 $l_2$ 正则化, 此时有:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&l_1:\Omega=||w||_1=\sum_i|w_i| \\
+&l_2:\Omega=||w||_2^2=\sum_iw_i^2
+\end{aligned}</script><h3 id="2-Math-Explanation"><a href="#2-Math-Explanation" class="headerlink" title="2. Math Explanation"></a>2. Math Explanation</h3><p>我们可以从带约束条件的优化求解和最大后验概率两种思路来推导 $l_1,l_2$ 正则化.</p>
+<ol>
+<li><p><strong>正则化理解之基于约束条件的最优化</strong></p>
+<p>对于模型权重系数 $w$ 求解是通过最小化目标函数实现的, 即求解:</p>
+<script type="math/tex; mode=display">
+\min_wJ(w;X,y)</script><p>我们知道, 模型的复杂度可以用 VC 维来衡量. 通常情况下, 模型 VC 维与参数 $w$ 的个数成线性关系: 即 $w$ 数量越多, VC 维越大, 模型越复杂. 因此, 为了限制模型的复杂度, 很自然的思路是减少系数 $w$ 的个数, 即让 $w$ 向量中一些元素为 0 或者说限制 $w$ 中的非零元素个数. 为此, 我们可以在原优化问题中加入一个约束条件:</p>
+<script type="math/tex; mode=display">
+\min_wJ(w;X,y) \\
+s.t.||w||_0\le C</script><p>$||·||_0$ 范数表示向量中非零元素的个数. 但由于该问题是一个 NP 问题且非凸函数, 不易求解, 为此我们需要稍微放松一下约束条件. 为了达到近似效果, 我们不严格要求某些权重 $w$ 为 0, 而是要求权重 $w$ 应该接近于 0, 即尽量小. 从而可以用 $l_1,l_2$ 范数来近似 $l_0$ 范数, 即:</p>
+<script type="math/tex; mode=display">
+\min_wJ(w;X,y)\quad s.t.||w||_1\le C\\
+\min_wJ(w;X,y)\quad s.t.||w||_2\le C</script><p>使用 $l_2$ 范数时, 为了方便后续处理, 我们可以对 $||w||_2$ 进行平方, 此时只需要调整 $C$ 的取值即可. 利用拉格朗日算子法, 我们可以将上述带约束条件的最优化问题转换为不带约束项的优化问题, 构造拉格朗日函数:</p>
+<script type="math/tex; mode=display">
+L(w,\alpha)=J(w;X,y)+\alpha(||w||_1-C) \\
+L(w,\alpha)=J(w;X,y)+\alpha(||w||_2^2-C)</script><p>其中 $\alpha&gt;0$, 我们假设 $\alpha$ 的最优解为 $\alpha^*$, 则对拉格朗日函数求最小化等价于:</p>
+<script type="math/tex; mode=display">
+\min_wJ(w;X,y)+\alpha^*||w||_1 \\
+\min_wJ(w;X,y)+\alpha^*||w||_2^2 \\</script><p><strong>故此, 我们得到对 $l_1,l_2$ 正则化的第一种理解:</strong></p>
+<ul>
+<li>$l_1$ 正则化等价于在原优化目标函数中增加约束条件 $||w||_1\leq C$;</li>
+<li>$l_2$ 正则化等价于在原优化目标函数中增加约束条件 $||w||_2^2\leq C$;</li>
+</ul>
+</li>
+<li><p><strong>正则化理解之最大后验概率估计</strong></p>
+<p>在<strong>最大似然估计</strong>中, 是假设权重 $w$ 是未知的参数, 从而求得对数似然函数:</p>
+<script type="math/tex; mode=display">
+l(w)=\log[P(y|X;w)]=\log[\prod_iP(y_i|x_i;w)]</script><p>通过假设 $y^i$ 的不同概率分布, 即可得到不同的模型. 例如若假设 $y_i\thicksim N(w^Tx_i,\sigma^2)$ 的高斯分布, 则有:</p>
+<script type="math/tex; mode=display">
+l(w)=\log[\prod_i\frac{1}{\sqrt{2\pi}\sigma}\exp(-\frac{(y_i-w^Tx_i)^2}{2\sigma^2})]=-\frac{1}{2\sigma^2}\sum_i(y_i-w^Tx_i)^2+C</script><p>式中 $C$ 为常数项, 由于常数项和系数项不影响 $\max l(w)$ 的解, 因而可令 $J(w;X,y)=-l(w)$ 即可得到线性回归的代价函数. </p>
+<p>在<strong>最大后验概率估计</strong>中, 是将权重 $w$ 看作随机变量, 也具有某种分布, 从而有:</p>
+<script type="math/tex; mode=display">
+P(w|X,y)=\frac{P(w,X,y)}{P(X,y)}=\frac{P(X,y|w)P(w)}{P(X,y)}\propto P(y|X,w)P(w)</script><p>同时取对数有:</p>
+<script type="math/tex; mode=display">
+\mathbf{MAP}=\log P(y|X,w)P(w)=\log P(y|X,w)+\log P(w)</script><p>可以看出, 后验概率函数在似然函数的基础之上增加了一项 $\log P(w)$. $P(w)$ 的意义是对权重系数 $w$ 的概率分布的先验假设, 在收集到训练样本 $\{X,y\}$ 后, 则可根据 $w$ 在 $\{X,y\}$ 下的后验概率对 $w$ 进行修正, 从而做出对 $w$ 更好的估计. </p>
+<ul>
+<li><p>若假设 $w_j$ 的先验分布为均值是 0 的高斯分布, 即 $w_j\thicksim N(0,\sigma^2)$, 则有:</p>
+<script type="math/tex; mode=display">
+\log P(w)=\log\prod_jP(w_j)=\log\prod_j\frac{1}{\sqrt{2\pi}\sigma}\exp(-\frac{w_j^2}{2\sigma^2})=-\frac{1}{2\sigma^2}\sum_jw_j^2+C'</script><p>可以看到, 在高斯分布下 $\log P(w)$ 的效果等价于在代价函数中增加 $l_2$ 正则项.</p>
+</li>
+<li><p>若假设 $w_j$ 的先验分布是均值为 0, 参数为 $a$ 的拉普拉斯分布, 即:</p>
+<script type="math/tex; mode=display">
+P(w_j)=\frac{1}{\sqrt{2a}}\exp(-\frac{|w_j|}{a})</script><p>则有:</p>
+<script type="math/tex; mode=display">
+\log P(w)=\log\prod_j\frac{1}{\sqrt{2a}}\exp(-\frac{|w_j|}{a})=-\frac{1}{a}\sum_j|w_j|+C'</script><p>可以看到, 在拉普拉斯分布下 $\log P(w)$ 的效果等价于在代价函数中增加 $l_1$ 正则项.</p>
+</li>
+</ul>
+<p><strong>故此, 我们得到对于 $l_1,l_2$ 正则化的第二种理解:</strong></p>
+<ul>
+<li>$l_1$ 正则化可以通过假设权重 $w$ 的先验分布为拉普拉斯分布, 由最大后验概率估计导出;</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>$l_2$ 正则化可以通过假设权重 $w$ 的先验分布为高斯分布, 由最大后验概率估计导出;</li>
+</ul>
+<h3 id="3-Effect-Analysis"><a href="#3-Effect-Analysis" class="headerlink" title="3. Effect Analysis"></a>3. Effect Analysis</h3><p>我们从直观分析和理论推导两个角度来说明 $l_1,l_2$ 正则化的效果.</p>
+<ol>
+<li><p><strong>直观理解</strong></p>
+<p><u>考虑带约束条件的优化解释, $l_2$ 正则化为:</u></p>
+<script type="math/tex; mode=display">
+\min_wJ(w;X,y)\quad s.t.||w||_2^2\le C</script><p>该问题的求解示意图如下:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201029055813729.png" alt="image-20201029055813729" style="zoom:50%;" /></p>
+<p>图中椭圆为原目标函数 $J(w)$ 的一条等高线, 圆为半径 $\sqrt{C}$ 的范数球. 由于约束条件的限制, $w$ 必须位于 $l_2$ 范数球内. 考虑边界上的一点 $w$, 图中蓝色箭头为 $J(w)$ 在该处的梯度方向 $\nabla J(w)$, 红色箭头为 $l_2$ 范数球在该处的法线方向. 由于 $w$ 不能离开边界 (否则违反约束条件), 因而在使用梯度下降更新 $w$ 时, 只能朝着 $\nabla J(w)$ 在范数球上 $w$ 处的切线方向更新, 即图中的绿色箭头方向. 如此 $w$ 将沿着边界移动, 当 $\nabla J(w)$ 与范数球上 $w$ 处的法线平行时, 此时 $\nabla J(w)$ 在切线方向的分量为 0, $w$ 将无法继续移动, 从而达到最优解 $w^*$ (图中红点所示).</p>
+<blockquote>
+<p>  <strong>为什么 $l_2$ 正则化对应的是一个圆?</strong></p>
+<p>  考虑 $z=w_1^2+w_2^2$ 就是抛物面, 俯视图是一个圆.</p>
+</blockquote>
+<p><u>考虑带约束条件的优化解释, $l_1$ 正则化为:</u></p>
+<script type="math/tex; mode=display">
+\min_wJ(w;X,y)\quad s.t.||w||_1\le C\\</script><p>该问题的求解示意图如下:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201029061347345.png" alt="image-20201029061347345" style="zoom:50%;" /></p>
+<p>其主要差别在于 $l_1,l_2$ 范数球的形状差异. 由于此时每条边界上 $w$ 的切线方向和法线方向保持不变, 在图中 $w$ 将一直朝着 $\nabla J(w)$ 在切线上的分量沿着边界向左上移动. 当 $w$ 跨过顶点到达 $w’$ 时, $\nabla J(w)$ 在切线方向的分量变为右上方, 因而 $w$ 将朝着右上方移到. 最终, $w$ 将稳定在顶点处, 达到最优解 $w^*$. 此时, 可以看到 $w_1=0$, 这也就是采用 $l_1$ 范数会使 $w$ 产生稀疏性的原因. </p>
+<p>以上分析虽是基于二维的情况, 但不难将其推广到多维情况, 其主要目的是为了直观说明 $l_1$ 和 $l_2$ 正则化最优解的差异, 以及 $l_1$ 范数为什么产生稀疏性.</p>
+<blockquote>
+<p>  <strong>Question:</strong> 为什么 $l_1$ 正则会到达w’呢? 感觉如图的形式, 可能在到达上面的顶点前就能有一个最优解, 就是梯度下降方向与法向量平行? </p>
+<p>  <strong>Answer:</strong> 这种情况是可能会出现的, 但可能性比较小, 而且实际数据维度比较大, 不太容易出现.</p>
+</blockquote>
+</li>
+<li><p><strong>理论推导</strong></p>
+<p>数学功力不够暂时搞不懂, 之后补上…</p>
+</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/11/13/%E9%98%B2%E6%AD%A2%E8%BF%87%E6%8B%9F%E5%90%88-%E6%AD%A3%E5%88%99%E5%8C%96-Regularization/">https://www.facequant.com/2020/11/13/%E9%98%B2%E6%AD%A2%E8%BF%87%E6%8B%9F%E5%90%88-%E6%AD%A3%E5%88%99%E5%8C%96-Regularization/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Supervised-Learning/">Supervised Learning</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_o6H_R3Do1zpch-3MZk_fjQ.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/11/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/NN_network.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">深度学习基础-神经网络模型</div></div></a></div><div class="next-post pull-right"><a href="/2020/11/12/%E8%AF%A6%E8%A7%A3%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92-Logistic-Regression/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/sigmoid.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">详解逻辑回归(Logistic Regression)</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/11/13/深度学习基础-神经网络模型/" title="深度学习基础-神经网络模型"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/NN_network.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">深度学习基础-神经网络模型</div></div></a></div><div><a href="/2020/11/12/详解逻辑回归-Logistic-Regression/" title="详解逻辑回归(Logistic Regression)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/sigmoid.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">详解逻辑回归(Logistic Regression)</div></div></a></div><div><a href="/2020/11/22/隐马尔可夫模型-HMM/" title="隐马尔可夫模型(HMM)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/markov-chains.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-22</div><div class="title">隐马尔可夫模型(HMM)</div></div></a></div><div><a href="/2020/11/12/决策树-Decision-Tree/" title="决策树(Decision Tree)"><img class="cover" src="https://i.pinimg.com/originals/68/f8/e8/68f8e8dd71485c0f0c4acd9ada4123fe.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">决策树(Decision Tree)</div></div></a></div><div><a href="/2020/11/12/详解线性回归-Linear-Regression/" title="详解线性回归(Linear Regression)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_QiU6DcP_r9qWLznMw0-M_Q.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">详解线性回归(Linear Regression)</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Introduction"><span class="toc-text">1. Introduction</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Math-Explanation"><span class="toc-text">2. Math Explanation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Effect-Analysis"><span class="toc-text">3. Effect Analysis</span></a></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

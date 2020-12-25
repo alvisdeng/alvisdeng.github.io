@@ -1,0 +1,646 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MIT Linear Algebra Part 1 | 阿平的自我修养</title><meta name="keywords" content="Linear Algebra"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="This is a basic subject on matrix theory and linear algebra. Emphasis is given to topics that will be useful in other disciplines, including systems of equations, vector spaces, determinants, eigenval">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MIT Linear Algebra Part 1">
+<meta property="og:url" content="https://www.facequant.com/2020/08/15/MIT-Linear-Algebra-Part-1/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="This is a basic subject on matrix theory and linear algebra. Emphasis is given to topics that will be useful in other disciplines, including systems of equations, vector spaces, determinants, eigenval">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png">
+<meta property="article:published_time" content="2020-08-15T14:11:41.000Z">
+<meta property="article:modified_time" content="2020-12-25T18:33:16.431Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Linear Algebra">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/08/15/MIT-Linear-Algebra-Part-1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-26 02:33:16'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="no-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">MIT Linear Algebra Part 1</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-08-15T14:11:41.000Z" title="发表于 2020-08-15 22:11:41">2020-08-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-25T18:33:16.431Z" title="更新于 2020-12-26 02:33:16">2020-12-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Mathematics/">Mathematics</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>30分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><p>This is a basic subject on matrix theory and linear algebra. Emphasis is given to topics that will be useful in other disciplines, including systems of equations, vector spaces, determinants, eigenvalues, similarity, and positive definite matrices.</p>
+<h2 id="Lec-1-The-Gemetry-of-Linear-Algebra"><a href="#Lec-1-The-Gemetry-of-Linear-Algebra" class="headerlink" title="Lec 1 The Gemetry of Linear Algebra"></a>Lec 1 The Gemetry of Linear Algebra</h2><h3 id="1-1-Overview"><a href="#1-1-Overview" class="headerlink" title="1.1 Overview"></a>1.1 Overview</h3><p>本节课程主要是从两个不同角度去了解什么是线性方程组.</p>
+<p><img src="https://i.loli.net/2020/08/08/V2Y1ItKxmLiCGSn.png" alt="image-20200808072306142" style="zoom: 10%;" /></p>
+<p><strong>系数矩阵(A): 方程组系数构成的矩阵</strong></p>
+<p><strong>未知向量(x): 方程未知数构成的矩阵</strong></p>
+<p><strong>向量(b): 等式右侧结果所构成的向量</strong></p>
+<h3 id="1-2-Row-Figure"><a href="#1-2-Row-Figure" class="headerlink" title="1.2 Row Figure"></a>1.2 Row Figure</h3><p>Row Figure 是指在 <code>Ax=b</code> 的矩阵表示中, 一次取一行构成方程, 并在坐标轴中做出相应的图形.</p>
+<p><img src="https://i.loli.net/2020/08/08/MlOXpC64aNeq8zA.png" alt="image-20200808072846217" style="zoom:15%;" /></p>
+<p>但不难发现, 我们很难做高维坐标轴图像, 所以我更倾向于使用 Column Figure 来理解线性方程组.</p>
+<h3 id="1-3-Column-Figure"><a href="#1-3-Column-Figure" class="headerlink" title="1.3 Column Figure"></a>1.3 Column Figure</h3><p>从 Column Figure 的角度来看, <code>b</code> 是 linear combinations of columns of <code>A</code>, 也就是 <code>Ax</code>:</p>
+<p><img src="https://i.loli.net/2020/08/08/ZwH1v36iNrQKuyW.png" alt="image-20200808073724819" style="zoom:7%;" /></p>
+<p>图像表示</p>
+<p><img src="https://i.loli.net/2020/08/08/QmNyLHzTciI8Psu.png" alt="image-20200808074347051" style="zoom:20%;" /></p>
+<h3 id="1-4-Question"><a href="#1-4-Question" class="headerlink" title="1.4 Question"></a>1.4 Question</h3><p>Can I solve <code>Ax=b</code> for every b?</p>
+<p>这个问题也等于是在问: <strong>Do the linear combination of columns of A fill N-D space?</strong></p>
+<p>这里我们暂时不解答这个问题, 在后续课程会详细讲解:)</p>
+<h2 id="Lec-2-Elimination-with-Matrices"><a href="#Lec-2-Elimination-with-Matrices" class="headerlink" title="Lec 2 Elimination with Matrices"></a>Lec 2 Elimination with Matrices</h2><h3 id="2-1-Overview"><a href="#2-1-Overview" class="headerlink" title="2.1 Overview"></a><strong>2.1 Overview</strong></h3><p>本节课程主要是介绍<strong>消元法</strong>, 即使”系统化”求解线性方程组所需的方法, Matlab 的方程组求解也是用这种方法.</p>
+<p>所谓矩阵的消元法, 与我们初等数学中学习的解二元一次方程组的消元法其实师出同门, 都是通过将不同行的方程进行消元运算来简化方程, 最后能得到简化的方程组, <strong>只不过这里我们把系数单独抽出来进行运算, 寻找一种矩阵情况下的普遍规律而已.</strong></p>
+<h3 id="2-2-Intro-Example"><a href="#2-2-Intro-Example" class="headerlink" title="2.2 Intro Example"></a>2.2 Intro Example</h3><p>我们从一个例子入手, 求解线性方程组:</p>
+<p><img src="https://i.loli.net/2020/08/08/aTuO5nrd4fsPUKb.png" alt="image-20200808080203366" style="zoom:50%;" /></p>
+<p>解题思路是”将一行乘倍数加到另一行”, 使主元所在列上的主元以下的元素全为 0.</p>
+<p><img src="https://i.loli.net/2020/08/08/qER6vzY8IcN9543.png" alt="image-20200808080917241" style="zoom:25%;" /></p>
+<p>之后将所得的新 <code>A</code> 和 <code>b</code> <strong>回带(Back Substitution)</strong> 求解.</p>
+<p><img src="https://i.loli.net/2020/08/08/Xfprjo7EuVWxNtT.png" alt="image-20200808081437713" style="zoom:10%;" /></p>
+<p>当然有有些时候, 我们会遇到主元位置上是 0 的情况, 这个时候我们只需要交换行即可.</p>
+<h3 id="2-3-Advanced-Example"><a href="#2-3-Advanced-Example" class="headerlink" title="2.3 Advanced Example"></a>2.3 Advanced Example</h3><p>上面的例子是从 Intuition 的角度来理解了消元的操作, 但是我们需要一种更系统的方法, 能够被 Computer 理解的方法. 所以我们在这里要引入<strong>消元矩阵</strong>的概念. </p>
+<p>在讲消元矩阵之前, 我们还需要了解 <code>Linear Combination of Rows</code>:</p>
+<p><img src="https://i.loli.net/2020/08/08/FdPxfUCSoArYl8T.png" alt="image-20200808082702374" style="zoom:10%;" /></p>
+<p><strong>Matrix x Column Vector = Column Vector</strong></p>
+<p><strong>Row Vector x Matrix = Row Vector</strong></p>
+<p>Ok, 在了解这个知识点之后, 如果我们需要消元下面这个矩阵, 我们需要哪些步骤?</p>
+<p><img src="https://i.loli.net/2020/08/08/aTuO5nrd4fsPUKb.png" alt="image-20200808080203366" style="zoom:50%;" /></p>
+<p><strong>Step 1:</strong> Substract 3 x Row1 from Row2</p>
+<p><img src="https://i.loli.net/2020/08/08/D2EfNaFsx3WeOPS.png" alt="image-20200808083548341" style="zoom:15%;" /></p>
+<p><strong>Step 2:</strong> Substract 2 x Row2 from Row3</p>
+<p><img src="https://i.loli.net/2020/08/08/cqWaBGTDv4AMUit.png" alt="image-20200808083843515" style="zoom:13%;" /></p>
+<p><strong>Comb of Step 1 and Step 2:</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/pWhjl25ZQsbRGHf.png" alt="image-20200808084032447" style="zoom:10%;" /></p>
+<h3 id="2-4-Extension"><a href="#2-4-Extension" class="headerlink" title="2.4 Extension"></a>2.4 Extension</h3><p>既然已经讲到了消元矩阵, 我想在这里提一下<strong>置换矩阵(Permutation Matrix)</strong>.</p>
+<p><strong>Exchange Row1 and Row2:</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/2scrH5MSUYQo3GJ.png" alt="image-20200808084527151" style="zoom:8%;" /></p>
+<p><strong>Exchange Col1 and Col2:</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/vEDgK38PTRno1M9.png" alt="image-20200808084840670" style="zoom:8%;" /></p>
+<h2 id="Lec-3-Multiplication-and-Inverse-Matrices"><a href="#Lec-3-Multiplication-and-Inverse-Matrices" class="headerlink" title="Lec 3 Multiplication and Inverse Matrices"></a>Lec 3 Multiplication and Inverse Matrices</h2><h3 id="3-1-Overview"><a href="#3-1-Overview" class="headerlink" title="3.1 Overview"></a>3.1 Overview</h3><p>上节课我们学习了矩阵和向量之间的乘法, 这节课则是学习矩阵之间的乘法, 并讨论逆矩阵的相关知识点.</p>
+<h3 id="3-2-Multiplication"><a href="#3-2-Multiplication" class="headerlink" title="3.2 Multiplication"></a>3.2 Multiplication</h3><p>矩阵的乘法有四种理解方式:</p>
+<p><strong>1) Standard Rule (Row x Column)</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/WuBxhj3zZAieVaJ.png" alt="image-20200808091144775" style="zoom:15%;" /></p>
+<p><strong>2) Column Way</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/iNTWCz59bhnrVl1.png" alt="image-20200808091515971" style="zoom:18%;" /></p>
+<p><strong>3) Row Way</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/gU5ZoeG1TJRyu2j.png" alt="image-20200808091749387" style="zoom:18%;" /></p>
+<p><strong>4) Column x Row</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/ZbKto6znOTM9UFa.png" alt="image-20200808092104530" style="zoom:18%;" /></p>
+<p>在显示生活中矩阵的 scale 往往都很大, 所以为了减小计算成本, 我们可以将矩阵划分成 Blocks, 然后再相乘, 即 <code>Block Multiplication</code>.</p>
+<p><img src="https://i.loli.net/2020/08/08/iJktpbrxYsTV93B.png" alt="image-20200808092244258" style="zoom:18%;" /></p>
+<h3 id="3-3-Inverse-Matrices"><a href="#3-3-Inverse-Matrices" class="headerlink" title="3.3 Inverse Matrices"></a><strong>3.3 Inverse Matrices</strong></h3><p>逆矩阵的定义:</p>
+<p>对于一个<strong>方阵A</strong>, 如果 A 可逆, 那么则存在一个 $A^{-1}$, 使: $AA^{-1}=I=A^{-1}A$. </p>
+<blockquote>
+<p>  A left inverse is also a right inverse, which is only true for square matrices.</p>
+</blockquote>
+<p>如果一个矩阵存在逆矩阵, 我们则称该矩阵 <code>non-singular</code>, 即非奇异的.</p>
+<p>我们先来看一个奇异矩阵, 也就是没有逆的矩阵:</p>
+<p><img src="https://i.loli.net/2020/08/08/RWKYm4kD9SXfEUc.png" alt="image-20200808122223205" style="zoom:8%;" /></p>
+<p>Why 这个矩阵是奇异的呢? 这里我介绍三个原因:</p>
+<ul>
+<li><p>我们还没有学行列式, 但是可以先记住 det(A) = 1x6 - 2x3 = 0</p>
+</li>
+<li><p>Linear combinations of columns of A can’t get $\left|\begin{matrix}1\\0\end{matrix}\right|$</p>
+</li>
+<li><p>I can find a <strong>non-zero</strong> vectro <code>x</code> with <code>Ax=0</code></p>
+</li>
+</ul>
+<p><img src="https://i.loli.net/2020/08/08/erDT64qKvnMyCZS.png" alt="image-20200808122731932" style="zoom:8%;" /></p>
+<p>Ok, 所以我们怎么计算逆矩阵呢? 直观来说, 我们可以使用 Column Way 的方式构建方程式, 因为$AA^{-1}=I=A^{-1}A$. </p>
+<p><img src="https://i.loli.net/2020/08/08/kCXJRF1mvdx6gV3.png" alt="image-20200808123222024" style="zoom:15%;" /></p>
+<p>但是对于高阶矩阵来说, 这种计算方式的成本太高了. 所以我们这里引入另外一种计算方式:<strong>高斯-若尔当方法 (Gauss-Jordan idea)</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/26XanMeTOxEI7vB.png" alt="image-20200808123723069" style="zoom:15%;" /></p>
+<p>至于 Gauss-Jordan 成立的原因也非常直观: <strong>$E[A\ I] = [I\ ?]$</strong> ==&gt; $EA = I$, so $EI = A^{-1}$</p>
+<p>最后, 再介绍两个逆矩阵的性质:</p>
+<ul>
+<li><p><strong>Inverse of the product</strong></p>
+<p>$(AB)^{-1}=B^{-1}A^{-1}$</p>
+</li>
+<li><p><strong>Inverse of the transpose</strong></p>
+<p>$(AA^{-1})^{T}=(A^{-1})^{T}A^{T}=(A^{T})^{-1}A^{T}$</p>
+</li>
+</ul>
+<h2 id="Lec-4-Factorization-into-A-LU"><a href="#Lec-4-Factorization-into-A-LU" class="headerlink" title="Lec 4 Factorization into A=LU"></a>Lec 4 Factorization into A=LU</h2><h3 id="4-1-Overview"><a href="#4-1-Overview" class="headerlink" title="4.1 Overview"></a>4.1 Overview</h3><p>本节课主要是结合了之前的消元矩阵和逆矩阵知识, 将矩阵 A 分解为下三角矩阵 L 和上三角矩阵 U.</p>
+<h3 id="4-2-A-LU"><a href="#4-2-A-LU" class="headerlink" title="4.2 A=LU"></a>4.2 A=LU</h3><p>我们先通过消元矩阵将矩阵 <code>A</code> 转换为上三角矩阵 <code>U</code> 的形式:</p>
+<p><img src="https://i.loli.net/2020/08/08/rXlMbtQ6zB7pJhk.png" alt="image-20200808130047836" style="zoom:10%;" /></p>
+<p>根据之前所学的逆矩阵知识我们可知, 消元矩阵 $E_{21}$是可逆的(<strong>且不需要行的置换</strong>), 所以就有:</p>
+<p><img src="https://i.loli.net/2020/08/08/xcTsiV3NX5nB2k9.png" alt="image-20200808130221621" style="zoom:20%;" /></p>
+<p>那么我们为什么一定要消元矩阵做一次逆矩阵运算呢? 其实这主要是更加直观的反应消元所涉及的步骤:</p>
+<p><img src="https://i.loli.net/2020/08/08/jWZU3oQLRfY7hxg.png" alt="image-20200808130622700" style="zoom:25%;" /></p>
+<h2 id="Lec-5-Transpose-Permutation-and-Vector-Space"><a href="#Lec-5-Transpose-Permutation-and-Vector-Space" class="headerlink" title="Lec 5 Transpose, Permutation and Vector Space"></a>Lec 5 Transpose, Permutation and Vector Space</h2><h3 id="5-1-Overview"><a href="#5-1-Overview" class="headerlink" title="5.1 Overview"></a>5.1 Overview</h3><p>本节主要是关于我们之前已经有所涉及的置换矩阵, 矩阵的转置和对称矩阵并介绍一点向量空间.</p>
+<h3 id="5-2-Permutation"><a href="#5-2-Permutation" class="headerlink" title="5.2 Permutation"></a>5.2 Permutation</h3><p>Permutation matrix is the identity matrix with reordered rows.</p>
+<p>我们来看一个 3x3 的矩阵有多少个置换矩阵:</p>
+<p><img src="https://i.loli.net/2020/08/08/p8MjkRL15gvXw6S.png" alt="image-20200808134204865" style="zoom:15%;" /></p>
+<p>一共有 6 = 3! 个置换矩阵, 而且 if multiply any 2 of them together, the result is still in the group, and if inverse, the result is also still in the group.</p>
+<p><img src="https://i.loli.net/2020/08/08/m53vwSoQBDsdir6.png" alt="image-20200808134355068" style="zoom:6%;" /></p>
+<p>So, how about 4 x 4 Matrix? ==&gt; <strong>4! = 24 permutation matrices</strong></p>
+<p>那么在进行矩阵分解的时候, 我们如果需要行的置换则可以表示为: </p>
+<p>$PA=LU \ \ ==&gt; \ A=P^{-1}LU$</p>
+<h3 id="5-3-Transpose"><a href="#5-3-Transpose" class="headerlink" title="5.3 Transpose"></a>5.3 Transpose</h3><p>转置比较简单 (需要一点几何想象能力)</p>
+<p>$(A_{ij})^{T}=A_{ji}$</p>
+<p>我们在这里主要是讲如何利用矩阵的转置来创建一个对称矩阵, 对称矩阵的含义是: $A^{T}=A$. 最简单的创建对称矩阵的办法就是: 原矩阵和其转置矩阵相乘.</p>
+<p>$(RR^{T})^{T}=RR^{T}$</p>
+<p><img src="https://i.loli.net/2020/08/08/ICcDBOS2JnfFogA.png" alt="image-20200808135336399" style="zoom:15%;" /></p>
+<h3 id="5-4-Vector-Space"><a href="#5-4-Vector-Space" class="headerlink" title="5.4 Vector Space"></a>5.4 Vector Space</h3><p>This is only breif introduction of vector space. So what is vector space?</p>
+<p><strong>Vector space</strong> is just a bunch of vectors!</p>
+<p>For example:</p>
+<p>​    $R^{2}$= All 2-D real vectors</p>
+<p>​    $R^{3}$= All real vectors with 3 components</p>
+<h3 id="5-5-Subspace"><a href="#5-5-Subspace" class="headerlink" title="5.5 Subspace"></a>5.5 Subspace</h3><p>So what is the subspace of a vector space?</p>
+<p>subspace 的定义是, 该 subspace 里的任何向量在进行 <strong>Addition</strong> 和 <strong>Multiplication (by a scalar)</strong> 之后仍然在该 subspace 中. 数学表示为: <strong>cv + dw</strong>.</p>
+<p>举两个例子:</p>
+<ul>
+<li><p>Subspaces of $R^{2}$</p>
+<p>1) All of $R^{2}$, 也就是其本身</p>
+<p>2) Any line through $\left|\begin{matrix}0\\0\end{matrix}\right|$</p>
+<p>3) Zero vector only</p>
+</li>
+<li><p>Subspaces of $R^{3}$</p>
+<p>1) All of $R^{3}$</p>
+<p>2) Any line through the origin</p>
+<p>3) Any plane through the origin</p>
+<p>4) Zero vector only</p>
+</li>
+</ul>
+<p>Ok, 在了解了 Subspace 的相关概念之后, 我们需要思考 How to create subspaces out of Matrix. 这里有两种方式:</p>
+<ul>
+<li><p><strong>From Columns</strong></p>
+<p>Column space = C(A) = All the linear combinations of columns of  A</p>
+</li>
+<li><p><strong>From Rows</strong></p>
+<p>Row space = All the linear combinations of rows of a matrix = C($A^{T}$) = Column space of $A^{T}$</p>
+</li>
+</ul>
+<h2 id="Lec-6-Column-Space-and-Nullspacce"><a href="#Lec-6-Column-Space-and-Nullspacce" class="headerlink" title="Lec 6 Column Space and Nullspacce"></a>Lec 6 Column Space and Nullspacce</h2><h3 id="6-1-Overview"><a href="#6-1-Overview" class="headerlink" title="6.1 Overview"></a>6.1 Overview</h3><p>本节从之前学习的子空间开始, 介绍了子空间的部分性质. 并重点介绍了列空间与方程 Ax = b 之间的联系. 并由此引出了零空间, 根据 Ax = b 这个方程给出了两种构建子空间的方法.</p>
+<h3 id="6-2-Union-and-Intersection-of-Subspaces"><a href="#6-2-Union-and-Intersection-of-Subspaces" class="headerlink" title="6.2 Union and Intersection of Subspaces"></a>6.2 Union and Intersection of Subspaces</h3><p>我们假设 <code>P</code> 和 <code>L</code> 是$R^{3}$的两个 subspaces, 那么 $P\cup L$ = All vectors in P or L or both.</p>
+<p>那么问题来了:</p>
+<p>1) Is $P\cup L$ a subspace? ==&gt; <strong>No!</strong></p>
+<p>2) Is $P \cap L$ a subspace? ==&gt; <strong>Yes!</strong></p>
+<p>This conclusion will be used in lec 10.</p>
+<h3 id="6-3-Column-Space-of-A"><a href="#6-3-Column-Space-of-A" class="headerlink" title="6.3 Column Space of A"></a>6.3 Column Space of A</h3><p>我们用一个例子来回顾一下上一节所讲述的列空间知识.</p>
+<p>现有矩阵 A = $\left|\begin{matrix}1&amp;1&amp;2\\2&amp;1&amp;3\\3&amp;1&amp;4\\4&amp;1&amp;5\end{matrix}\right|$, 矩阵的列向量$\left|\begin{matrix}1\\2\\3\\4\end{matrix}\right|$,$\left|\begin{matrix}1\\1\\1\\1\end{matrix}\right|$,$\left|\begin{matrix}2\\3\\4\\5\end{matrix}\right|$均是$R^{4}$中的四维向量, 所以 A 的列空间是 $R^{4}$的子空间. 除了包含以上三个列向量, 该矩阵的列空间还包括这个三个列向量的各种线性组合.</p>
+<p>那么这个列空间有多大呢? 这就需要 <code>Ax = b</code> 方程来解释了. </p>
+<p>还是取上面那个 A, 且 Ax = $\left|\begin{matrix}1&amp;1&amp;2\\2&amp;1&amp;3\\3&amp;1&amp;4\\4&amp;1&amp;5\end{matrix}\right|$$\left|\begin{matrix}x_1\\x_2\\x_3\end{matrix}\right|$=$\left|\begin{matrix}b_1\\b_2\\b_3\\b_4\end{matrix}\right|$=b. </p>
+<p><strong>Question 1:</strong> Does Ax = b has a solution for every b? </p>
+<p>The answer is no! 我们换一种问法, 问同样的问题, Do the linear combinations of columns of Matrix A fill up 4-D space? 很明显答案是 No, 因为三个四维向量的线性组合是无法铺满整个四维空间的, 就如同两个三维向量无法张开一个三维空间一样.</p>
+<p><strong>Question 2:</strong> Which b allow us to solve Ax = b?</p>
+<p>Ax 就表示着 A 列向量的所有线性组合, 也就是 A 的列空间. 上面提到空 C(A)就是$R^{4}$的一个子空间, 所谓对于一个四维向量 b, 只要 b 在”A 的列空间”这个 $R^{4}$的子空间中, 那么就可以找到一种矩阵 A 的列向量的线性组合来构成 b. 也就是使得 <code>Ax = b</code> 有解.</p>
+<p><strong>Question 3:</strong> If we remove one column from Matrix A, will the C(A) be affected?</p>
+<p>观测三个列向量, 我们不难发现第三列是前两节的和, 也就是说第三列对线性组合没有贡献. 所以我们仅仅依靠前两列的线性组合就可以构成 A 的列空间. 我们称$\left|\begin{matrix}1\\2\\3\\4\end{matrix}\right|$,$\left|\begin{matrix}1\\1\\1\\1\end{matrix}\right|$这样的列为主列.</p>
+<h3 id="6-4-Nullspace"><a href="#6-4-Nullspace" class="headerlink" title="6.4 Nullspace"></a>6.4 Nullspace</h3><p>所谓的零空间, 就是 <code>Ax = 0</code> 的所有解所构成的一个空间.</p>
+<p>还是以上面的矩阵 A 为例, 其零空间就是下面这个方程的解所构成的空间:</p>
+<p>Ax = $\left|\begin{matrix}1&amp;1&amp;2\\2&amp;1&amp;3\\3&amp;1&amp;4\\4&amp;1&amp;5\end{matrix}\right|$$\left|\begin{matrix}x_1\\x_2\\x_3\end{matrix}\right|$=$\left|\begin{matrix}0\\0\\0\\0\end{matrix}\right|$, 也就是 x = $\left|\begin{matrix}x_1\\x_2\\x_3\end{matrix}\right|$, 可以看到 x 有 3 个 components, 所以其零空间是 $R^{3}$ 的子空间. 所以对于 m*n 的矩阵而言, 列空间是$R^{m}$的子空间, 零空间是$R^{n}$的子空间.</p>
+<p><img src="https://i.loli.net/2020/08/08/bQL95cO43IPypum.png" alt="image-20200808152414709" style="zoom:20%;" /></p>
+<h2 id="Lec-7-Solving-Ax-0-Pivot-Variables-and-Special-Solutions"><a href="#Lec-7-Solving-Ax-0-Pivot-Variables-and-Special-Solutions" class="headerlink" title="Lec 7 Solving Ax = 0: Pivot Variables and Special Solutions"></a>Lec 7 Solving Ax = 0: Pivot Variables and Special Solutions</h2><h3 id="7-1-Overview"><a href="#7-1-Overview" class="headerlink" title="7.1 Overview"></a>7.1 Overview</h3><p>上一个 lecture 中, 我们讨论了零空间的相关问题, 这一节我们主要是从定义过渡到 <code>Nullspace</code> 的计算, 即如何求解这些空间的一般形式. 给出一种可以解出 <code>Ax = 0</code> 中的 x 构成的零空间的算法.</p>
+<h3 id="7-2-Algorithm"><a href="#7-2-Algorithm" class="headerlink" title="7.2 Algorithm"></a>7.2 Algorithm</h3><p><strong>Step 1:</strong> Do elimination</p>
+<p><strong>Step 2:</strong> Find pivot and free columns</p>
+<p><strong>Step 3:</strong> Assign value to free variables (1 or 0)</p>
+<p><strong>Step 4:</strong> Back substitution</p>
+<p><img src="https://i.loli.net/2020/08/08/GZBiv87OADC4nbV.png" alt="image-20200808153614099" style="zoom:40%;" /></p>
+<h3 id="7-3-RREF"><a href="#7-3-RREF" class="headerlink" title="7.3 RREF"></a>7.3 RREF</h3><p><strong>简化行阶梯形式 (Reduced Row Echelon Form)</strong></p>
+<p><img src="https://i.loli.net/2020/08/08/98XJgxjfRCbn3PO.png" alt="image-20200808153842841" style="zoom:10%;" /></p>
+<h2 id="Lec-8-Solving-Ax-b"><a href="#Lec-8-Solving-Ax-b" class="headerlink" title="Lec 8 Solving Ax = b"></a>Lec 8 Solving Ax = b</h2><h3 id="8-1-Overview"><a href="#8-1-Overview" class="headerlink" title="8.1 Overview"></a>8.1 Overview</h3><p>这一节我们主要研究 <code>Ax = b</code> 的一般求解方法以及有解条件. 并总结出 rank (秩) 对不同形式方程的解的影响.</p>
+<h3 id="8-2-Ax-b"><a href="#8-2-Ax-b" class="headerlink" title="8.2 Ax = b"></a>8.2 Ax = b</h3><p>我们先通过一个例子来研究 <code>Ax = b</code> 的可接条件:</p>
+<p><img src="https://i.loli.net/2020/08/08/oGFiI5ks3WXt6On.png" alt="image-20200808155914163" style="zoom:18%;" /></p>
+<p>很明显, 要保证该方程组有解, 必须满足 $b_3-b_2-b_1=0$. 再看这个条件, 它反映了一种线性组合特点, 即 b 向量的第三个分量是前两个分量之和. 反过来看 A 矩阵本身的特点, 发现 A 矩阵第三行也是前两行的和. 我们之前说过, <code>Ax = b</code> 有解的条件是 b 在 A 的列空间中. 这个例子再一次印证了这个条件.</p>
+<p>所以我们可以归纳出, <code>Ax = b</code> 的条件:</p>
+<ul>
+<li>b is in the column space of A</li>
+<li>If a combination of rows of A give a zero row, then the same combination of entries of b must give 0</li>
+</ul>
+<h3 id="8-3-Algorithm"><a href="#8-3-Algorithm" class="headerlink" title="8.3 Algorithm"></a>8.3 Algorithm</h3><p>现在给出求解 Ax = b 的一般算法:</p>
+<p><strong>Step 1:</strong> Find one particular solution ($x_p$), we can do this by setting all free variables to 0, then solve Ax = b for pivot variables</p>
+<p><strong>Step 2:</strong> Find the nullspace ($x_n$)</p>
+<p><strong>Step 3:</strong> x = $x_p + x_n$</p>
+<p>我们来验证一下:</p>
+<p>$A(x_p+x_n)=Ax_p+Ax_n=b+0=b$</p>
+<h3 id="8-4-Rank-and-Solution"><a href="#8-4-Rank-and-Solution" class="headerlink" title="8.4 Rank and Solution"></a>8.4 Rank and Solution</h3><p>这个非常重要!!!</p>
+<p>前提: $A_{m\times n}$, rank = r, and r &lt;= m, r &lt;= n</p>
+<p><strong>1) Full Column Rank</strong></p>
+<p>因为列满秩, 即 r = n 且 m &gt;= n, 所以该矩阵没有 free variables. 这意味着:</p>
+<ul>
+<li>该矩阵的零空间 <strong>N(A) = zero vector</strong></li>
+<li>Solution to Ax = b 如果存在那么只有一个解, 即 Ax = b 有 <strong>0 or 1</strong> 个解</li>
+</ul>
+<p><strong>2) Full Row Rank</strong></p>
+<p>因为行满秩, 即 r = m 且 n &gt;= m, 那么在进行消元之后, 矩阵一定没有 zero row, 这意味对 b 没有要求, 所以 <strong>Ax = b has solution for every b</strong>, 即 Ax = n 有 1 or $\infty$ 个解.</p>
+<p><strong>3) r = m = n</strong></p>
+<p>由前面两个情况可知, r = m = n 意味着, Ax = b 有且只有一个解, 且一定可逆.</p>
+<p><strong>4) r &lt; m, r &lt; n</strong></p>
+<p>此时, Row Reduced Form 是 $R = \left|\begin{matrix}I&amp;F\\0&amp;0\end{matrix}\right|$, 很明显此时要么无解, 要么有无穷多解.</p>
+<h2 id="Lec-9-Independence-Basis-and-Dimension"><a href="#Lec-9-Independence-Basis-and-Dimension" class="headerlink" title="Lec 9 Independence, Basis and Dimension"></a>Lec 9 Independence, Basis and Dimension</h2><h3 id="9-1-Overview"><a href="#9-1-Overview" class="headerlink" title="9.1 Overview"></a>9.1 Overview</h3><p>之前通过消元法处理矩阵的时候, 我们有时会发现矩阵中的某一列是其他几列的线性组合的情况. 这一节就主要关于介绍线性相关或不相关性, 并引入向量空间的两个重要概念: 基 (Basis) 和 维数 (Dimension).</p>
+<h3 id="9-2-Independence"><a href="#9-2-Independence" class="headerlink" title="9.2 Independence"></a>9.2 Independence</h3><p>Vectors $x_1,x_2,…,x_n$ are linear independent if:</p>
+<ul>
+<li>No linear combination gives zero vector (except zero comb)</li>
+<li>Rank = n, which means there’s no free varible. ==&gt; N(A) = zero vector</li>
+</ul>
+<p>其余情况都是线性相关.</p>
+<p>噢对了, <strong>扁平型</strong>的矩阵即对于$A_{m \times n}$而言, m &lt; n. 那么Columns of A 一定是线性相关的. 为什么? 因为 There are non-zero solutions to Ax = 0 since there will be free variables.</p>
+<h3 id="9-3-Span"><a href="#9-3-Span" class="headerlink" title="9.3 Span"></a>9.3 Span</h3><p>Vectors $x_1,x_2,…,x_n$ span a space means: the space consists of all linear combinations of those vectors.</p>
+<h3 id="9-4-Basis"><a href="#9-4-Basis" class="headerlink" title="9.4 Basis"></a>9.4 Basis</h3><p>Basis for a space is a sequence of vectors $x_1,x_2,…,x_n$ with two properties:</p>
+<ul>
+<li>They are linear independent</li>
+<li>They span the space</li>
+</ul>
+<p>我们来看一个例子:</p>
+<p>​    Space is $R^{3}$.</p>
+<p>​    So one basis is $\left|\begin{matrix}1\\0\\0\end{matrix}\right|$,$\left|\begin{matrix}0\\1\\0\end{matrix}\right|$,$\left|\begin{matrix}0\\0\\1\end{matrix}\right|$; Another basis is $\left|\begin{matrix}1\\1\\2\end{matrix}\right|$,$\left|\begin{matrix}2\\2\\5\end{matrix}\right|$,$\left|\begin{matrix}3\\1\\4\end{matrix}\right|$.</p>
+<p><strong>一个重要结论:</strong></p>
+<p>For $R^{n}$, n vectors give basis if the nxn matrix with those columns being invertible. 我们可以这样理解: 从线性变换的角度来看, 逆矩阵可理解为原矩阵的反向变换, 比如一个向量被顺时针旋转 90 度, 那么逆矩阵就可以将其逆时针还原 90 度. 然而对于没有满秩的矩阵进行线性变换会导致降维, 试想一下3 维空间被拍平成 2 维矩阵能被还原吗?</p>
+<h3 id="9-5-Dimension"><a href="#9-5-Dimension" class="headerlink" title="9.5 Dimension"></a>9.5 Dimension</h3><p>Given a space, every basis for the space has the same number of vectors. The number is the <strong>dimension</strong> of the space.</p>
+<h2 id="Lec-10-The-Four-Fundamental-Subspaces"><a href="#Lec-10-The-Four-Fundamental-Subspaces" class="headerlink" title="Lec 10 The Four Fundamental Subspaces"></a>Lec 10 The Four Fundamental Subspaces</h2><h3 id="10-1-Overview"><a href="#10-1-Overview" class="headerlink" title="10.1 Overview"></a>10.1 Overview</h3><p>这一节我们介绍四个基本子空间, 这是线性代数的核心部分, 非常重要!!!</p>
+<p>Suppose A is a m by n matrix, the four fundamental subspaces are:</p>
+<ul>
+<li>Column Space <strong>C(A)</strong> $⇒$ subspace in $R^{m}$</li>
+<li>Nullspace <strong>N(A)</strong> $\Rightarrow$ subspace in $R^{n}$</li>
+<li>Row Space <strong>C($A^T$)</strong> $⇒$ subspace in $R^n$</li>
+<li>Nullsapce of $A^T$ <strong>N($A^T$)</strong> $⇒$ subspace in $R^{m}$</li>
+</ul>
+<p><img src="https://i.loli.net/2020/08/08/pHxiA1RS6gqmuBN.png" alt="image-20200808181618634"></p>
+<h3 id="10-2-Column-Space"><a href="#10-2-Column-Space" class="headerlink" title="10.2 Column Space"></a>10.2 Column Space</h3><p>列空间是矩阵 A 的列向量线性组合所构成的空间. 对于$A_{m \times n}$而言, 每个列有 m 个分向量, 因此列空间是$R^{m}$的子空间.</p>
+<p>设矩阵的秩为 r, 则 A 有 r 个主列, 这 r 个主列就是列空间 C(A) 的一组基, 一组基里面有 r 个向量, 所以列空间维数为 r.</p>
+<ul>
+<li>rank(A) = r</li>
+<li>basis = pivot columns</li>
+<li>dim(C(A)) = r</li>
+</ul>
+<h3 id="10-3-Nullspace"><a href="#10-3-Nullspace" class="headerlink" title="10.3 Nullspace"></a>10.3 Nullspace</h3><p>零空间即 <code>Ax = 0</code> 的解所构成的空间. 由于 x 本质是对矩阵 A 进行线性组合, A 一共有 n 个列向量, 所以 Nullspace 是$R^{n}$的子空间.</p>
+<p>当矩阵 A 的秩为 r 时, 矩阵 A 有 n-r 个free columns, 即 x 中有 n-r 个 free variables. 这意味着 <code>Ax = 0</code> 有 n-r 个特殊解.所以:</p>
+<ul>
+<li>rank(A) = r</li>
+<li>basis = special solutions for Ax = 0</li>
+<li>dimension(N(A)) = n - r</li>
+</ul>
+<h3 id="10-4-Row-Space"><a href="#10-4-Row-Space" class="headerlink" title="10.4 Row Space"></a>10.4 Row Space</h3><p>类似列空间, 行空间就是矩阵 A 各行的线性组合所组成的子空间, 也可以理解为 A 的转置矩阵的列空间, 即 C($A^T$). A 的每个行向量都有 n 个分量, 所以行空间是$R^n$的子空间.</p>
+<p>A 的行空间可以转化为 $A^T$ 的列空间. 但我们这里还是直接对 A 的行向量进行线性变换来研究行空间的 basis 和 dimension.</p>
+<p><img src="https://i.loli.net/2020/08/08/siHydwEuKj3vDcx.png" alt="image-20200808181808928" style="zoom:15%;" /></p>
+<p>从这个例子我们知道:</p>
+<ul>
+<li>rank(A) = r</li>
+<li>basis = first r rows of R</li>
+<li>dim(C($A^T$) = r</li>
+</ul>
+<h3 id="10-5-Left-Nullspace"><a href="#10-5-Left-Nullspace" class="headerlink" title="10.5 Left Nullspace"></a>10.5 Left Nullspace</h3><p>左零空间即矩阵 A 的转置矩阵的零空间: N($A^T$)</p>
+<p>So 为什么它被称为左零空间?</p>
+<p><img src="https://i.loli.net/2020/08/08/8nXPd34V2uQ5s9e.png" alt="image-20200808182406994" style="zoom:10%;" /></p>
+<p>那么 basis 和 dimension 呢? 我们看下面这个图:</p>
+<p><img src="https://i.loli.net/2020/08/08/BFuMecEPJRXmybD.png" alt="image-20200808183123112" style="zoom:20%;" /></p>
+<p>我们不难发现, 在 A 变化到 R 之后, 有一行全是 0, 即说明经过A 的行经过某种线性组合之后, 得到了zero vector, 而造成这种变化的向量即是 Left Nullspace, 也就是 上图中 E 矩阵的第三行. 那么如何得到 E 矩阵呢? 我们就要用到之前介绍过的 Gauss-Jordan Idea, 这里我就不再赘述了.</p>
+<h3 id="10-6-Extension-of-Thoughts"><a href="#10-6-Extension-of-Thoughts" class="headerlink" title="10.6 Extension of Thoughts"></a>10.6 Extension of Thoughts</h3><blockquote>
+<p>  From Vectors to Matrices</p>
+</blockquote>
+<p>Let’s suppose all 3x3 matrices form a new “vector” space M.</p>
+<p>Some subspaces of M:</p>
+<ul>
+<li>Upper Triangular Matrix</li>
+<li>Symmetric Matrix</li>
+<li>Diagonal Matrix</li>
+</ul>
+<p>So what’s the dimension of these subspace?</p>
+<p><img src="https://i.loli.net/2020/08/08/zPhNSdoKk3UvBYZ.png" alt="image-20200808185010765" style="zoom:10%;" /></p>
+<h2 id="Lec-11-Matrix-Space-Rank-1-Small-World-Graph"><a href="#Lec-11-Matrix-Space-Rank-1-Small-World-Graph" class="headerlink" title="Lec  11 Matrix Space: Rank 1, Small World Graph"></a>Lec  11 Matrix Space: Rank 1, Small World Graph</h2><h3 id="11-1-Overview"><a href="#11-1-Overview" class="headerlink" title="11.1 Overview"></a>11.1 Overview</h3><p>本节我们将承接上文所讲的矩阵空间, 研究矩阵空间的维数和基数等问题. 本节也会介绍秩为 1 的矩阵特点. 并引入图论.</p>
+<h3 id="11-2-Matrix-Space"><a href="#11-2-Matrix-Space" class="headerlink" title="11.2 Matrix Space"></a>11.2 Matrix Space</h3><p>我们将所有 3x3 的矩阵都看作”向量空间”中的元素. 很明显, 由所有 3x3 矩阵构成的集合中, 矩阵之间的 Addition 和 Multiplication 都是封闭的, 所以所有 3x3 矩阵构成的集合 M 可以被称为空间.</p>
+<p>上文也介绍过, M有三个基本子空间:</p>
+<ul>
+<li>Upper Triangular Matrix</li>
+<li>Symmetric Matrix</li>
+<li>Diagonal Matrix</li>
+</ul>
+<p>很明显矩阵空间 M 的维度为 9, basis 如下所示:</p>
+<p><img src="https://i.loli.net/2020/08/09/RlYZfi71ITs86WV.png" alt="image-20200809095011923" style="zoom:10%;" /></p>
+<p>那么问题来了: 上面的基本子空间的维数是什么呢?</p>
+<ul>
+<li><p><strong>Upper Triangular Matrix:</strong> 6</p>
+<p><img src="https://i.loli.net/2020/08/09/tpyhugG1J38X7Qi.png" alt="image-20200809095306456"></p>
+</li>
+<li><p><strong>Symmetric Matrix:</strong> 6</p>
+<p><img src="https://i.loli.net/2020/08/09/KqDQ1z5bBw7d8Te.png" alt="image-20200809095337705"></p>
+</li>
+<li><p><strong>Diagonal Matrix:</strong> 3</p>
+<p><img src="https://i.loli.net/2020/08/09/WlYsAcwD3JXqv9i.png" alt="image-20200809095426052"></p>
+</li>
+</ul>
+<p>我们之前讨论过两个 subspace 的交集也是 subspace, 正如这里的 Diagonal Matrix 就是 U 和 S 的交集. 那么并集呢? 我们说过并集并不是 subspace. 但是有一个概念不是并集但总容易搞混那就是 <strong>Sum of Two Subspaces</strong>. 很明显 S + U = M!!! 所以:</p>
+<ul>
+<li><p>$dim(S+U)=9$ </p>
+</li>
+<li><p>$dim(S)+dim(U)=dim(S+U)+dim(S\cap U)$</p>
+</li>
+</ul>
+<h3 id="11-3-Rank-1-Matrix"><a href="#11-3-Rank-1-Matrix" class="headerlink" title="11.3 Rank 1 Matrix"></a>11.3 Rank 1 Matrix</h3><p>研究秩 1 矩阵的原因</p>
+<ul>
+<li>它易于分解.</li>
+</ul>
+<p><img src="https://i.loli.net/2020/08/09/6wKlWmCbVLx4fJh.png" alt="image-20200809100313788" style="zoom:25%;" /></p>
+<ul>
+<li><p>用于搭建其他矩阵</p>
+<p>比如秩为 4 的矩阵可以通过四个秩一矩阵就能搭建出来. 具体过程类似于矩阵乘法中的”列乘行”形式, 通过一列一行搭出一个矩阵.</p>
+</li>
+</ul>
+<p><strong>我们来思考一个问题:</strong> </p>
+<p>所有秩为 4 的矩阵构成的集合 M, 能被称之为空间吗? 答案是 No! 比较简单的原因是其不包括零向量, 此外还因为: $R(A+B)\leq R(A)+R(B)$.</p>
+<p><strong>我们再思考另外一个问题来加深对子空间的理解:</strong> </p>
+<p>在四维空间中的每个向量都有四个分量 v = $\left|\begin{matrix}v_1\\v_2\\v_3\\v_4\end{matrix}\right|$, 设 S 为一个集合, 其中的向量都满足: $v_1+v_2+v_3+v_4=0$. 那么请思考 S 是不是一个子空间? 若是, 其维度是多少?</p>
+<p>很明显 S 是一个子空间, $v_1+v_2+v_3+v_4=0$ 这个条件对 Addition 和 Multiplication 都封闭. 而且 S 中肯定有零向量. 我们也可以用另一种方式来理解: 不难发现 S 是线性方程组 <code>Ax = 0</code> 的零空间, where <code>A = [1, 1, 1, 1]</code>. 所以dim = 3 = n - r, 其基为 Ax = 0 的三个特解 (free variables). 至于左零空间 N($A^T$): A的左零空间即是线性组合各行得到零向量的方式. 很显然, 这个 A 得左零空间只有零向量.</p>
+<h3 id="11-4-Small-World-Graph"><a href="#11-4-Small-World-Graph" class="headerlink" title="11.4 Small World Graph"></a>11.4 Small World Graph</h3><p><img src="https://i.loli.net/2020/08/09/PYEB8dWSrQCFolM.png" alt="image-20200809102742261" style="zoom:15%;" /></p>
+<h2 id="Lec-12-Graphs-Networks-and-Incidence-Matrices"><a href="#Lec-12-Graphs-Networks-and-Incidence-Matrices" class="headerlink" title="Lec 12 Graphs, Networks and Incidence Matrices"></a>Lec 12 Graphs, Networks and Incidence Matrices</h2><h3 id="12-1-Overview"><a href="#12-1-Overview" class="headerlink" title="12.1 Overview"></a>12.1 Overview</h3><p>本节主要介绍图和矩阵之间的关联, 并利用矩阵说明图的特点. 这一节与之前几节的区别主要在于, 前面例子中的矩阵中的元素大都是为了说明性质编造出来的, 而本节中矩阵中的元素都是来源于实际问题, 更能体现出我们之前介绍的性质在实际问题中有什么作用.</p>
+<h3 id="12-2-Graphs-and-Incidence-Matrices"><a href="#12-2-Graphs-and-Incidence-Matrices" class="headerlink" title="12.2 Graphs and Incidence Matrices"></a>12.2 Graphs and Incidence Matrices</h3><p>我们先给出一个 Graph 和其关联矩阵 (Incidence Matrix):</p>
+<p><img src="https://i.loli.net/2020/08/09/sLlSM9dvz7p6DB2.png" alt="image-20200809104215371" style="zoom:25%;" /></p>
+<p>先简单介绍一下上面的 5x4 的关联矩阵:</p>
+<ul>
+<li>每一列代表一个node</li>
+<li>每一行代表一条edge 的走势, 该 edge 以哪一个node 为起点, 对于的矩阵中该元素为 -1, 而以哪个 node 为终点, 对应矩阵中该元素为 1.</li>
+</ul>
+<p>Ok, 在有些基本了解之后, 我们来研究一下图和矩阵所代表的实际意义. 我们假设 x 为每个 Node 上的电势, 研究 <code>Ax = b</code> 形式下, 我们能得到什么定律!</p>
+<p><img src="https://i.loli.net/2020/08/09/sH6jiy3t5CpOAx1.png" alt="image-20200809114441365"></p>
+<p>1) 首先我们研究 b 是零向量, 也就是Ax 构成的 Nullspace 的情况, 这时我们要求 <code>Ax = 0</code>. 基于我们之前所学的知识, 我们不难得到, 当 b = 0 时, 图上各点的电势必须相等. 我们知道, 电势差和电流的形成有直接关系, b = 0 说明我们求解的情况是各个边上都没有电流, 而我们最后解得, 各点电势相等时, 各边电流为 0, 这符合我们初中学的物理学常识.</p>
+<p>2) 那么如果 b 不等于 0 呢? 我们可以通过 $X_p+X_n$ 的情况求出不同 b 的情况下方程所对应的解, 代表着不同电势差下, 各点电势的大小.</p>
+<p>各边的电流为 $y_1,y_2,y_3,y_4,y_4$, 接下来我们来看一下左零空间 $A^Ty=0$有什么特点. 注意上面我们得到的结果:</p>
+<ul>
+<li>$-y_1-y_3-y_4=0$</li>
+<li>$y_1-y_2=0$</li>
+<li>$y_2+y_3-y_5=0$</li>
+<li>$y_4+y_5=0$</li>
+</ul>
+<p>这个结果阐述了一个定律 ===&gt; Kirchoff’s Current Law (基尔霍夫定律), 即每个 Node 流入流出电流相同. 然后引入一个电阻系数矩阵, 我们就可以得到教授最后引入外加电源的影响的公式:</p>
+<p><img src="https://i.loli.net/2020/08/09/XczIEsNPwL9k7xr.png" alt="image-20200809120134440" style="zoom:6%;" /></p>
+<h3 id="12-3-Tree"><a href="#12-3-Tree" class="headerlink" title="12.3 Tree"></a>12.3 Tree</h3><p>Tree 就是 Graph with no loops.</p>
+<h2 id="Lec-13-Orthogonal-Vectors-and-Subspaces"><a href="#Lec-13-Orthogonal-Vectors-and-Subspaces" class="headerlink" title="Lec 13 Orthogonal Vectors and Subspaces"></a>Lec 13 Orthogonal Vectors and Subspaces</h2><h3 id="13-1-Overview"><a href="#13-1-Overview" class="headerlink" title="13.1 Overview"></a>13.1 Overview</h3><p>这一节我们还是研究四个基本子空间, 但是我们本节主要从正交的角度来探讨这些空间具有的性质和正交向量的特点等.</p>
+<h3 id="13-2-Orthogonal-Vectors"><a href="#13-2-Orthogonal-Vectors" class="headerlink" title="13.2 Orthogonal Vectors"></a>13.2 Orthogonal Vectors</h3><p>我们首先了解一下正交的概念, 在线性代数中, 正交即垂直:</p>
+<p><img src="https://i.loli.net/2020/08/09/73GJVI59jSAMPuz.png" alt="image-20200809121228627" style="zoom:20%;" /></p>
+<h3 id="13-3-Orthogonal-Subspaces"><a href="#13-3-Orthogonal-Subspaces" class="headerlink" title="13.3 Orthogonal Subspaces"></a>13.3 Orthogonal Subspaces</h3><p><img src="https://i.loli.net/2020/08/09/IQPe5VLgwWx79ik.png" alt="image-20200809120920895" style="zoom:25%;" /></p>
+<p>ok 在介绍完向量正交之后, 我们来了解一下空间正交. <code>Orthogonal Spaces</code> 则是指: <strong>Every vector in S is orthogonal to every vector in T.</strong> 这里有一个问题要注意一下, 这个例子特别容易搞混淆, <strong>黑板与地面的两个平面的子空间并不正交</strong>, 因为这两个平面有交线, 而这个交线无法满足空间正交的定义. 这也提醒了我们: 两个平面在某一非零向量处相相交, 那么这两个平面一定不正交. </p>
+<p>说了这么多们来看一下子空间正交的简单例子:</p>
+<p>以 $R^2$ 的子空间为例, 两个相交的子空间为两条 L 在原点处互相垂直.</p>
+<p><strong>Row Space is orthogonal to Nullspace</strong>, <strong>Why?</strong></p>
+<p>我们看一下 <code>Ax = 0</code>, 这里的解是 Nullspace, 而 x 与 A 的每一行点乘均为 0. 我们再引入一个概念: <strong>Nullspace 和 Row Space 的关系类似于将一个空间一分为二的两个子空间.</strong> 从上图可以发现行空间和列空间的维数之和正好为 n. 我们来看个例子:</p>
+<p><img src="https://i.loli.net/2020/08/09/7iz2wemBlqGh6oj.png" alt="image-20200809123132921"></p>
+<p>在这个例子中, A 的行空间是 1 维的, 而对应零空间是(3-1=2)二维的, 可以理解为垂直于向量(1,2,5) 的一个平面. </p>
+<p><strong>注: 这里做一个更正, 矩阵相乘的结果是 $\left|\begin{matrix}0\\0\end{matrix}\right|$</strong></p>
+<h3 id="13-4-Solve-Ax-b-When-There-is-No-Solution"><a href="#13-4-Solve-Ax-b-When-There-is-No-Solution" class="headerlink" title="13.4 Solve Ax = b When There is No Solution"></a>13.4 Solve Ax = b When There is No Solution</h3><p>在上一节电流电势的应用分析中, 我们了解到矩阵的数据多来源于实际测量, 那么就势必会有测量不准确的情况. 例如有时候我们求解 <code>Ax = b</code> 方程时, 如果 A 的行数太多, 那么其中就很有可能混进去一些不准确的数据. 这时我们以往的手段求解方程并不会求出准确的解, 这就引出了我们这部分内容.</p>
+<p>既然无法求出解, 那么我们就用一些手段求出方程的<strong>最优解 (Best Solution)</strong>, 类似于一种拟合. 大致如下:</p>
+<p><img src="https://i.loli.net/2020/08/09/vZcroI7DPx6peky.png" alt="image-20200809131037994" style="zoom:12%;" /></p>
+<p>这部分我们利用了 $A^TA$ 矩阵的特殊性质:</p>
+<p><img src="https://i.loli.net/2020/08/09/QUsNJ4cdBRm5bzC.png" alt="image-20200809131137750" style="zoom:8%;" /></p>
+<p>这样我们就能构造出一个新矩阵: $A^TA$, 并利用该矩阵求出最优解. 但我们需要注意新矩阵 $A^TA$ 并不总是可逆的, 所以在在求解时需要注意 A 的特点. 很明显当矩阵 A 列向量线性相关的时候, $A^TA$ 就不可逆了.</p>
+<p><img src="https://i.loli.net/2020/08/09/dKyCsrpamnY8B59.png" alt="image-20200809131410599"></p>
+<p>那么 $A^TA$ 的可逆的判断依据是什么呢?</p>
+<p><img src="https://i.loli.net/2020/08/09/xdeRVU1CmLjXc8n.png" alt="image-20200809131510872" style="zoom:15%;" /></p>
+<p>具体的证明会在下一节详解. 这里我们得出一个结论, 在求最优解的时候要首先判断 A 的列向量之间是否线性无关, 再进行求解.</p>
+<h2 id="Lec-14-Projections-on-Subspaces"><a href="#Lec-14-Projections-on-Subspaces" class="headerlink" title="Lec 14 Projections on Subspaces"></a>Lec 14 Projections on Subspaces</h2><h3 id="14-1-Overview"><a href="#14-1-Overview" class="headerlink" title="14.1 Overview"></a>14.1 Overview</h3><p>这一节主要是关于投影 (Projection), 从向量的投影入手, 并延伸到高维投影. 至于为什么用投影!!! 我们在上节内容有讲存在矩阵的行过多无法求解的情况, 这个时候我们需要求最优解. 我们就需要将 <code>b</code> 投影到矩阵 <code>A</code> 的Column Space 上来求一个最优解.</p>
+<h3 id="14-2-Vector-Projection"><a href="#14-2-Vector-Projection" class="headerlink" title="14.2 Vector Projection"></a>14.2 Vector Projection</h3><p>如图所示, 向量 p 是向量 b 在 a 上的投影, 我们注意到向量 p 是向量 a 的倍数, 即 <code>p = xa</code>. 而投影得到的向量 p 和原向量 b 之间的误差是 <code>e = b - p</code>. 同时投影得到的向量 p 也可以直接通过一个投影矩阵 <strong>(Projection Matrix)</strong>, 从 b 变换为 p, 即 <code>p = Pb</code>.</p>
+<p><img src="https://i.loli.net/2020/08/10/XAjogfneCxcbpG6.png" alt="image-20200810122505319" style="zoom:20%;" /></p>
+<p>从上图可知, 误差向量 e 是垂直于向量 a 的, 因此 $a^T(b-xa)=0$, 经过一定代数变化之后, 我们不难得到 $x=\frac{a^Tb}{a^Ta}$. 那么 $p=xa=\frac{a^Tb}{a^Ta}a=Pb$, 因此投影矩阵为 $P=\frac{aa^T}{a^Ta}$. 如图所示:</p>
+<p><img src="https://i.loli.net/2020/08/10/EVi34hZb1D2w8eA.png" alt="image-20200810123019329" style="zoom:20%;" /></p>
+<p>我们再来看看投影矩阵 P 的几个性质:</p>
+<ul>
+<li>基于 <strong>Lec 11</strong> 中的知识点, 我们知道在上图的情况下, 投影矩阵的秩为 1, 而且其列空间为 Line through vector a</li>
+<li>$P^T=P$, since $aa^t$ 是对称矩阵</li>
+<li>$P^2=P$, since 二次投影的结果就是一次投影的结果.</li>
+</ul>
+<h3 id="14-3-General-Projection"><a href="#14-3-General-Projection" class="headerlink" title="14.3 General Projection"></a>14.3 General Projection</h3><p>我们还是从一个例子入手, 下图中$a_1,a_2$是构成平面的一组基, 向量 p 是向量 b 在平面上的投影.  如图所示</p>
+<p><img src="https://i.loli.net/2020/08/10/x1RXVnrhwDE8JlW.png" alt="image-20200810124820990" style="zoom:25%;" /></p>
+<p>现在 $Ax = b$ 的问题已经转换为求解 $A\hat{x}=p$ 的问题.</p>
+<p><img src="https://i.loli.net/2020/08/10/oShptvk7e5ZJX8j.png" alt="image-20200810125544175"></p>
+<p>我们得到了 $A^T(b-A\hat{x})=0$, 而且也验证了误差向量 <code>e</code> 是在矩阵 A 的左零空间里, 而且垂直于矩阵 A 的列空间, 也就是我们的平面. 我们做进一步推导:</p>
+<p><img src="https://i.loli.net/2020/08/10/kAMvJ8UyFRcuDhs.png" alt="image-20200810130008561" style="zoom:20%;" /></p>
+<p>值得一提的是最后我们得到的投影矩阵是 $P=A(A^TA)^{-1}A^T$, 注意这里不可消!!! 因为矩阵 A 并不是一个方阵, 其没有逆矩阵. 加入矩阵 A 是方阵, 那么投影矩阵就是单位矩阵, 等于自身投影到自身. 而且这里的投影矩阵也有着相同的两个性质:</p>
+<ul>
+<li>$P^T=(A(A^TA)^{-1}A^T)^T=A(A^TA)^{-1}A^T=P$</li>
+<li>$P^2=P$</li>
+</ul>
+<h3 id="14-4-Introduction-to-Least-Squares"><a href="#14-4-Introduction-to-Least-Squares" class="headerlink" title="14.4 Introduction to Least Squares"></a>14.4 Introduction to Least Squares</h3><p><img src="https://i.loli.net/2020/08/10/qIk76gxjPulnS12.png" alt="image-20200810130925681" style="zoom:20%;" /></p>
+<h2 id="Lec-15-Projection-Matrices-and-Least-Squares"><a href="#Lec-15-Projection-Matrices-and-Least-Squares" class="headerlink" title="Lec 15 Projection Matrices and Least Squares"></a>Lec 15 Projection Matrices and Least Squares</h2><h3 id="15-1-Overview"><a href="#15-1-Overview" class="headerlink" title="15.1 Overview"></a>15.1 Overview</h3><p>这一节主要是讲最小二乘法, 并对上一节中的投影进行更叫深入的研究. 在上一节的最后一部分我们可以知道, 其实最小二乘法就是一种投影, 保证了误差最小 (最优解). 另外, 投影也与列空间和矩阵的左零空间有关.</p>
+<h3 id="15-2-Review-on-Projection-Matrices"><a href="#15-2-Review-on-Projection-Matrices" class="headerlink" title="15.2 Review on Projection Matrices"></a>15.2 Review on Projection Matrices</h3><p><strong>对了, 我们在上一节和这一节的假设都是 $A^TA$ 是可逆的.</strong> </p>
+<p><strong>我们已经知道投影矩阵 $P=A(A^TA)^{-1}A^T$. 投影矩阵 P 是将 vector b 投影到矩阵 A 的列空间上!!!</strong></p>
+<ul>
+<li><p><strong>If b in column space of A, Pb = b</strong></p>
+<p>如果向量 b 在矩阵 A 的列空间里面, 那么一定存在一个 x 使得 <code>Ax = b</code>, 将之带入 <code>Pb</code> 我们可以得到, $Pb=A(A^TA)^{-1}A^TAx=Ax=b$</p>
+</li>
+<li><p><strong>If b is perpendicular to column space of A, Pb = 0 ==&gt; 一个点. 这里的 b 将会在矩阵 A 的左零空间, 即 $A^Tb=0$</strong></p>
+<p><img src="https://i.loli.net/2020/08/10/HjQ14NlncXRaS5r.png" alt="image-20200810143944664" style="zoom:20%;" /></p>
+</li>
+</ul>
+<p>这里的 <strong>(I-P)</strong> 也可以看做一个投影矩阵, 作用是将 b 向量投影到左零空间中.</p>
+<h3 id="15-3-Least-Squares"><a href="#15-3-Least-Squares" class="headerlink" title="15.3 Least Squares"></a>15.3 Least Squares</h3><p>书接上文!</p>
+<p><img src="https://i.loli.net/2020/08/10/qIk76gxjPulnS12.png" alt="image-20200810130925681" style="zoom:20%;" /></p>
+<p>很明显, 这个方程无解, 因为这三点不共线. 这是典型的矩阵行比列多, 也就是说方程多于未知数. 既然无法共线那么我们就来找 $Ax$ 和 $b$ 之间的误差, 并将其最小化:</p>
+<p><img src="https://i.loli.net/2020/08/10/ueLGjzhaRsnfgQV.png" alt="image-20200810201843421" style="zoom:20%;" /></p>
+<p>我们可以将这些误差也就是偏移量反应到图上去, 以点 (1, 1) 为例:</p>
+<p><img src="https://i.loli.net/2020/08/10/tGLdrUkp2x1J5aR.png" alt="image-20200810202111405" style="zoom:50%;" /></p>
+<p>其中 <code>b</code> 表示该点的真实位置, <code>e</code> 代表着偏移量也就是误差, <code>p</code> 代表着拟合后的位置, 反映到列空间和左零空间的涂上就是:</p>
+<p><img src="https://i.loli.net/2020/08/10/m5LXNFOMQ6JVyqe.jpg" alt="img" style="zoom:50%;" /></p>
+<p>本质就是将 b 投影到矩阵 A 的列空间中. 现在我们来研究如何拟合, 将矩阵 <code>A</code> 和向量 <code>b</code> 代入 $A^TA\hat{x}=A^Tb$, 我们解一下方程.</p>
+<p><img src="https://i.loli.net/2020/08/10/BiMcNIXh7GL3bOS.png" alt="image-20200810205552877" style="zoom:25%;" /></p>
+<blockquote>
+<p>  <strong>但值得注意的一点是: 我们在这里并没有考虑 outliers!!!</strong></p>
+</blockquote>
+<p>对了, 我们在这一节和上一节都用了一个前提假设, 就是 $A^TA$ 是可逆的. 但是什么情况下是可逆的呢? 在上一节我们提出了, <strong>如果矩阵 A 各列线性无关, 则矩阵 $A^TA$ 可逆</strong>. 我们接下来证明一下这个结论.</p>
+<blockquote>
+<p>   Let’s suppose $A^TAx=0$, 那么如果矩阵 $A^TA$ 要可逆, 那么其对应的 Nullspace 就必须仅含零向量. 那么我们就来证明一下这个 $x$ 只能是零向量.</p>
+<p>   我们在等式两边同时乘以一个 $x^T$, 得到 $x^TA^TAx=0$, 也就是 $(Ax)^T(Ax)=0$, 这意味着 $Ax=0$. 而我们知道当矩阵 A 各列线性无关的时候, 要使 $Ax=0$, 只能是 $x$ 为零向量.</p>
+<p>   因此我们证明了: <strong>如果矩阵 A 各列线性无关, 则矩阵 $A^TA$ 可逆</strong>.</p>
+</blockquote>
+<h3 id="15-4-Orthonormal-vector"><a href="#15-4-Orthonormal-vector" class="headerlink" title="15.4 Orthonormal vector"></a>15.4 Orthonormal vector</h3><p>这部分是为了下文做出基本介绍.</p>
+<p>之前我们见过$\left|\begin{matrix}1\\0\\0\end{matrix}\right|$,$\left|\begin{matrix}0\\1\\0\end{matrix}\right|$,$\left|\begin{matrix}0\\0\\1\end{matrix}\right|$这组基, 它们是互相正交的, 但是它们还有更特殊的性质, 即它们都是单位向量, 长度为 1. 所以我们引入一个新名词: <strong>标准正交向量 (Orthonormal vectors)</strong>. 同样的标准正交向量还有: $\left|\begin{matrix}cos\theta\\sin\theta\end{matrix}\right|$,$\left|\begin{matrix}-sin\theta\\cos\theta\end{matrix}\right|$</p>
+<p><strong>Columns are definitely independent if they are perpendicular vectors.</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/08/15/MIT-Linear-Algebra-Part-1/">https://www.facequant.com/2020/08/15/MIT-Linear-Algebra-Part-1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linear-Algebra/">Linear Algebra</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2020/08/15/MIT-Linear-Algebra-Part-2/"><img class="prev-cover" src="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">MIT Linear Algebra Part 2</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/08/15/MIT-Linear-Algebra-Part-2/" title="MIT Linear Algebra Part 2"><img class="cover" src="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-08-15</div><div class="title">MIT Linear Algebra Part 2</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-1-The-Gemetry-of-Linear-Algebra"><span class="toc-text">Lec 1 The Gemetry of Linear Algebra</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-Overview"><span class="toc-text">1.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-Row-Figure"><span class="toc-text">1.2 Row Figure</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-Column-Figure"><span class="toc-text">1.3 Column Figure</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-Question"><span class="toc-text">1.4 Question</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-2-Elimination-with-Matrices"><span class="toc-text">Lec 2 Elimination with Matrices</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-Overview"><span class="toc-text">2.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Intro-Example"><span class="toc-text">2.2 Intro Example</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Advanced-Example"><span class="toc-text">2.3 Advanced Example</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Extension"><span class="toc-text">2.4 Extension</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-3-Multiplication-and-Inverse-Matrices"><span class="toc-text">Lec 3 Multiplication and Inverse Matrices</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Overview"><span class="toc-text">3.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-Multiplication"><span class="toc-text">3.2 Multiplication</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-Inverse-Matrices"><span class="toc-text">3.3 Inverse Matrices</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-4-Factorization-into-A-LU"><span class="toc-text">Lec 4 Factorization into A&#x3D;LU</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Overview"><span class="toc-text">4.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-A-LU"><span class="toc-text">4.2 A&#x3D;LU</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-5-Transpose-Permutation-and-Vector-Space"><span class="toc-text">Lec 5 Transpose, Permutation and Vector Space</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-Overview"><span class="toc-text">5.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-Permutation"><span class="toc-text">5.2 Permutation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-Transpose"><span class="toc-text">5.3 Transpose</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-Vector-Space"><span class="toc-text">5.4 Vector Space</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-Subspace"><span class="toc-text">5.5 Subspace</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-6-Column-Space-and-Nullspacce"><span class="toc-text">Lec 6 Column Space and Nullspacce</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-Overview"><span class="toc-text">6.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-Union-and-Intersection-of-Subspaces"><span class="toc-text">6.2 Union and Intersection of Subspaces</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-Column-Space-of-A"><span class="toc-text">6.3 Column Space of A</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-4-Nullspace"><span class="toc-text">6.4 Nullspace</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-7-Solving-Ax-0-Pivot-Variables-and-Special-Solutions"><span class="toc-text">Lec 7 Solving Ax &#x3D; 0: Pivot Variables and Special Solutions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-Overview"><span class="toc-text">7.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-Algorithm"><span class="toc-text">7.2 Algorithm</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-RREF"><span class="toc-text">7.3 RREF</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-8-Solving-Ax-b"><span class="toc-text">Lec 8 Solving Ax &#x3D; b</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-Overview"><span class="toc-text">8.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-Ax-b"><span class="toc-text">8.2 Ax &#x3D; b</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3-Algorithm"><span class="toc-text">8.3 Algorithm</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-4-Rank-and-Solution"><span class="toc-text">8.4 Rank and Solution</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-9-Independence-Basis-and-Dimension"><span class="toc-text">Lec 9 Independence, Basis and Dimension</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#9-1-Overview"><span class="toc-text">9.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-2-Independence"><span class="toc-text">9.2 Independence</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-3-Span"><span class="toc-text">9.3 Span</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-4-Basis"><span class="toc-text">9.4 Basis</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-5-Dimension"><span class="toc-text">9.5 Dimension</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-10-The-Four-Fundamental-Subspaces"><span class="toc-text">Lec 10 The Four Fundamental Subspaces</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#10-1-Overview"><span class="toc-text">10.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-2-Column-Space"><span class="toc-text">10.2 Column Space</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-3-Nullspace"><span class="toc-text">10.3 Nullspace</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-4-Row-Space"><span class="toc-text">10.4 Row Space</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-5-Left-Nullspace"><span class="toc-text">10.5 Left Nullspace</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-6-Extension-of-Thoughts"><span class="toc-text">10.6 Extension of Thoughts</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-11-Matrix-Space-Rank-1-Small-World-Graph"><span class="toc-text">Lec  11 Matrix Space: Rank 1, Small World Graph</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-1-Overview"><span class="toc-text">11.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-2-Matrix-Space"><span class="toc-text">11.2 Matrix Space</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-3-Rank-1-Matrix"><span class="toc-text">11.3 Rank 1 Matrix</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-4-Small-World-Graph"><span class="toc-text">11.4 Small World Graph</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-12-Graphs-Networks-and-Incidence-Matrices"><span class="toc-text">Lec 12 Graphs, Networks and Incidence Matrices</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#12-1-Overview"><span class="toc-text">12.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-2-Graphs-and-Incidence-Matrices"><span class="toc-text">12.2 Graphs and Incidence Matrices</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-3-Tree"><span class="toc-text">12.3 Tree</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-13-Orthogonal-Vectors-and-Subspaces"><span class="toc-text">Lec 13 Orthogonal Vectors and Subspaces</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#13-1-Overview"><span class="toc-text">13.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-2-Orthogonal-Vectors"><span class="toc-text">13.2 Orthogonal Vectors</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-3-Orthogonal-Subspaces"><span class="toc-text">13.3 Orthogonal Subspaces</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-4-Solve-Ax-b-When-There-is-No-Solution"><span class="toc-text">13.4 Solve Ax &#x3D; b When There is No Solution</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-14-Projections-on-Subspaces"><span class="toc-text">Lec 14 Projections on Subspaces</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#14-1-Overview"><span class="toc-text">14.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-2-Vector-Projection"><span class="toc-text">14.2 Vector Projection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-3-General-Projection"><span class="toc-text">14.3 General Projection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-4-Introduction-to-Least-Squares"><span class="toc-text">14.4 Introduction to Least Squares</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-15-Projection-Matrices-and-Least-Squares"><span class="toc-text">Lec 15 Projection Matrices and Least Squares</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#15-1-Overview"><span class="toc-text">15.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15-2-Review-on-Projection-Matrices"><span class="toc-text">15.2 Review on Projection Matrices</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15-3-Least-Squares"><span class="toc-text">15.3 Least Squares</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15-4-Orthonormal-vector"><span class="toc-text">15.4 Orthonormal vector</span></a></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

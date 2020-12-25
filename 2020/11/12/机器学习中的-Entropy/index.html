@@ -1,0 +1,321 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>机器学习中的 Entropy | 阿平的自我修养</title><meta name="keywords" content="Others"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1. Information Entropy信息熵通常用来描述整个随机分布所带来的信息量平均值, 更具统计特性. 信息熵也叫香农熵, 在机器学习中, 由于熵的计算是依据样本数据而来, 故也叫经验熵. 其公式定义如下:  H(X)&#x3D;-E_{x\sim p}[\log P(x)]&#x3D;-\sum_{i&#x3D;1}^nP(x_i)\log P(x_i)从公式可以看出, 信息熵 $H(x)$ 是各项自信息的累加值,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习中的 Entropy">
+<meta property="og:url" content="https://www.facequant.com/2020/11/12/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84-Entropy/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="1. Information Entropy信息熵通常用来描述整个随机分布所带来的信息量平均值, 更具统计特性. 信息熵也叫香农熵, 在机器学习中, 由于熵的计算是依据样本数据而来, 故也叫经验熵. 其公式定义如下:  H(X)&#x3D;-E_{x\sim p}[\log P(x)]&#x3D;-\sum_{i&#x3D;1}^nP(x_i)\log P(x_i)从公式可以看出, 信息熵 $H(x)$ 是各项自信息的累加值,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1429149470.jpg">
+<meta property="article:published_time" content="2020-11-12T02:44:30.000Z">
+<meta property="article:modified_time" content="2020-12-25T18:30:57.812Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Others">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1429149470.jpg"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/11/12/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84-Entropy/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-26 02:30:57'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="no-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">机器学习中的 Entropy</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-12T02:44:30.000Z" title="发表于 2020-11-12 10:44:30">2020-11-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-25T18:30:57.812Z" title="更新于 2020-12-26 02:30:57">2020-12-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Machine-Learning/">Machine Learning</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><h3 id="1-Information-Entropy"><a href="#1-Information-Entropy" class="headerlink" title="1. Information Entropy"></a>1. Information Entropy</h3><p>信息熵通常用来描述整个随机分布所带来的<strong>信息量平均值</strong>, 更具统计特性. 信息熵也叫香农熵, 在机器学习中, 由于熵的计算是依据样本数据而来, 故也叫经验熵. 其公式定义如下:</p>
+<script type="math/tex; mode=display">
+H(X)=-E_{x\sim p}[\log P(x)]=-\sum_{i=1}^nP(x_i)\log P(x_i)</script><p>从公式可以看出, 信息熵 $H(x)$ 是各项自信息的累加值, 由于每一项都是整正数, 故而<strong>随机变量取值个数越多, 状态数也就越多, 累加次数就越多, 信息熵就越大, 混乱程度就越大, 纯度越小</strong>. 越宽广的分布, 熵就越大. 可以通过数学证明, 当随机变量分布为均匀分布时即状态数最多时, 熵最大. <strong>熵代表了随机分布的混乱程度, 这一特性是所有基于熵的机器学习算法的核心思想</strong>.</p>
+<p>推广到多维随机变量的联合分布, 其联合信息熵为:</p>
+<script type="math/tex; mode=display">
+H(X,Y)=-\sum_{i=1}^n\sum_{j=1}^mP(x_i,y_i)\log P(x_i,y_i)</script><p><strong>注意事项:</strong></p>
+<ul>
+<li>熵只依赖于随机变量的分布, 与随机变量取值无关.</li>
+<li>定义 $0\log0=0$ (因为可能出现某个取值概率为0的情况).</li>
+<li>熵越大, 随机变量的不确定性就越大, 分布越混乱, 随机变量状态数越多.</li>
+</ul>
+<h3 id="2-Conditional-Entropy"><a href="#2-Conditional-Entropy" class="headerlink" title="2. Conditional Entropy"></a>2. Conditional Entropy</h3><p>条件熵 $H(Y|X)$ 表示在已知随机变量 $X$ 的条件下随机变量 $Y$ 的不确定性.</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{aligned}
+H(Y|X)=&\sum_{x}P(x)H(Y|X=x) \\
+=&\sum_{x}P(x)\sum_{y}P(y|x)\log P(y|x) \\
+=&\sum_{x,y}P(x,y)\log P(y|x)
+\end{aligned}
+\end{equation}</script><p>条件熵 $H(Y|X)$ 相当于联合熵 $H(X,Y)$ 减去单独的熵 $H(X)$, 即 $H(Y|X)=H(X,Y)-H(X)$. 举个例子, 比如环境温度是低还是高, 和我穿短袖还是外套这两个事件可以组成联合概率分布 $H(X,Y)$, 因为两个事件加起来的信息量肯定是大于单一事件的信息量的. 假设 $H(X)$ 对应着今天环境温度的信息量, 由于今天环境温度和今天我穿什么衣服这两个事件并不是独立分布的, 所以在已知今天环境温度的情况下, 我穿什么衣服的信息量或者说不确定性是被减少了. 当已知 $H(X)$这个信息量的时候, $H(X,Y)$ 剩下的信息量就是条件熵: $H(Y|X)=H(X,Y)-H(X)$</p>
+<h3 id="3-Relative-Entropy"><a href="#3-Relative-Entropy" class="headerlink" title="3. Relative Entropy"></a>3. Relative Entropy</h3><blockquote>
+<p>  相对熵也被称为 KL 散度.</p>
+</blockquote>
+<p>在我们介绍相对熵之前, 我们先试着思考一个问题, 我们为什么需要相对熵这么一个概念呢?</p>
+<p>原因很简单, 因为我们希望测量我们训练出来的模型和实际数据的差别, 相对熵的目的就是为了评估和验证模型学习的效果. 也就是说相对熵是用来衡量两个概率分布的差值的, 我们用这个差值来衡量模型预测结果与真实数据的差距. 明白了这点之后, 我们来看相对熵的定义:</p>
+<script type="math/tex; mode=display">
+D_{KL}(P||Q)=\sum_{i=1}^nP(x_i)\log\frac{P(x_i)}{Q(x_i)}</script><p>如果把 $\sum_{i=1}^nx_i$ 看成是一个事件的所有结果, 那么所有的 $P(x_i)$ 和 $Q(x_i)$ 就可以看成是两个关于事件 $X$ 的概率分布. 其中: $P(x_i)$ 是样本真实的分布, 而 $Q(x_i)$ 是我们模型产出的分布. KL 散度越小, 表示这两个分布越接近, 说明模型的效果越好.</p>
+<p>光看上面的<strong>KL 散度</strong>公式可能会云里雾里, 不明白为什么能反应P和Q两个分布的相似度. 因为这个公式少了两个限制条件:</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^nP(x_i)=1,\sum_{i=1}^nQ(x_i)=1</script><p>我们假设 $x_i$ 只有 0 和 1 两个取值, 也就是一个事件只有发生或者不发生. 我们再假设 $P(x=0)=P(x=1)=0.5$, 我们画一下 $P(x_i)\log(\frac{P(x_i)}{Q(x_i)})$ 的图像:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201112125109350.png" alt="image-20201112125109350" style="zoom:50%;" /></p>
+<p>代码如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">kl_function</span>(<span class="params">p_x,q_x</span>):</span></span><br><span class="line">    <span class="keyword">return</span> p_x*np.log(p_x/q_x)</span><br><span class="line"></span><br><span class="line">p_x = <span class="number">0.5</span></span><br><span class="line">q_x = np.linspace(<span class="number">0</span>,<span class="number">1</span>,<span class="number">100</span>)</span><br><span class="line">kl_value = [kl_function(<span class="number">0.5</span>,i) <span class="keyword">for</span> i <span class="keyword">in</span> q_x]</span><br><span class="line"></span><br><span class="line">plt.plot(q_x,kl_value)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Q(x)&quot;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;Value of P(x)*log(P(x)/Q(x))&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>我们可以看到, 函数随着 $Q(x_i)$ 的递增而递减. 但是这只是一个 $x$ 的取值, 别忘了, 我们相对熵计算的是整个分布，那我们加上另一个x的取值会发生什么呢？</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201112125702135.png" alt="image-20201112125702135" style="zoom:50%;" /></p>
+<p>代码如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">kl_function</span>(<span class="params">p_x,q_x</span>):</span></span><br><span class="line">    <span class="keyword">return</span> p_x*np.log(p_x/q_x)</span><br><span class="line"></span><br><span class="line">p_x = <span class="number">0.5</span></span><br><span class="line">q_x = np.linspace(<span class="number">0</span>,<span class="number">1</span>,<span class="number">100</span>)</span><br><span class="line">kl_value = [kl_function(p_x,i)+kl_function(<span class="number">1</span>-p_x,<span class="number">1</span>-i) <span class="keyword">for</span> i <span class="keyword">in</span> q_x]</span><br><span class="line"></span><br><span class="line">plt.plot(q_x,kl_value)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Q(x)&quot;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;KL&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>从函数图像上, 我们很容易看出, 当 $Q(x)=0.5=P(x)$ 的时候, KL散度取最小值, 最小值为0. 我们对相对熵的计算公式做一个变形:</p>
+<script type="math/tex; mode=display">
+D_{KL}(P||Q)=\sum_{i=1}^nP(x_i)\log\frac{P(x_i)}{Q(x_i)}=\sum_{i=1}^nP(x_i)\log P(x_i)-\sum_{i=1}^nP(x_i)\log Q(x_i)</script><p>这个式子的左边 $\sum_{i=1}^nP(x_i)\log(P(x_i))$ 其实就是 $-H(X)$, 对应于一个确定事件 $X$ 来说, 它的信息熵是确定的, 也就是说 $H(X)$ 是一个常数, $P(x_i)$ 也是常数, $\log$ 函数是一个凹函数, $-log$ 则是凸函数. 因此相对熵的计算公式是一个凸函数. </p>
+<p>对于任何凸函数, 有 <strong>Jensen 不等式</strong>:</p>
+<script type="math/tex; mode=display">
+f(E(x))\le E(f(x))</script><blockquote>
+<p>  我们简单介绍一下凸凹函数</p>
+<p>  <img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102032450850.png" alt="image-20201102032450850" style="zoom:67%;" /></p>
+<p>  左为凹函数: 满足 $f(\frac{x_1+x_2}{2})\gt\frac{f(x_1)+f(x_2)}{2}$;</p>
+<p>  右为凸函数: 满足 $f(\frac{x_1+x_2}{2})\lt\frac{f(x_1)+f(x_2)}{2}$;</p>
+</blockquote>
+<p>我们可以利用 Jensen 不等式来证明: $D_{KL}\ge0$</p>
+<p>首先我们对 KL 计算公式进行变形:</p>
+<script type="math/tex; mode=display">
+D_{KL}=\sum_{i=1}^nP(x_i)\log\frac{P(x_i)}{Q(x_i)}=E(\log\frac{P(x_i)}{Q(x_i)})=E[-\log\frac{Q(x_i)}{P(x_i)}]</script><p>然后我们利用不等式:</p>
+<script type="math/tex; mode=display">
+E[-\log\frac{Q(x_i)}{P(x_i)}]\ge-\log E[\frac{Q(x_i)}{P(x_i)}]=-\log\sum_{i=1}^nP(x_i)\frac{Q(x_i)}{P(x_i)}=-\log\sum_{i=1}^nQ(x_i)=0</script><p>所以KL散度是一个非负值, 但是为什么当P和Q相等时 (也就是真实模型和预测模型相等时), 能取到最小值呢? </p>
+<p>我们令: </p>
+<script type="math/tex; mode=display">C(P,P)=-\sum_{i=1}^nP(x_i)\log(P(x_i))</script><script type="math/tex; mode=display">C(P,Q)=-\sum_{i=1}^nP(x_i)\log(Q(x_i))</script><script type="math/tex; mode=display">C(P,P)-C(P,Q)=\sum_{i=1}^nP(x_i)\log(\frac{Q(x_i)}{P(x_i)})</script><p>我们探索 $C(P,P)-C(P,Q)$ 的正负性来判断 $P,Q$ 的关系. 因为 $\log(x)$ 是凹函数, 所以我们根据 Jensen 不等式, 可以得到:</p>
+<script type="math/tex; mode=display">
+a_1\log(x_1)+a_2\log(x_2)+...+a_n\log(x_n)\le\log(a_1x_1+a_2x_2+...+a_nx_n),\quad(\sum_{i=1}^na_i=1)</script><p>我们将之代入 $\sum_{i=1}^nP(x_i)\log(\frac{Q(x_i)}{P(x_i)})$</p>
+<p>$P(x_1)\log(\frac{Q(x_1)}{P(x_1)})+P(x_2)\log(\frac{Q(x_2)}{P(x_2)})+…+P(x_n)\log(\frac{Q(x_n)}{P(x_n)})\le\log(P(x_1)\frac{Q(x_1)}{P(x_1)}+P(x_2)\frac{Q(x_2)}{P(x_2)}+…+P(x_n)\frac{Q(x_n)}{P(x_n)})\le\log(Q(x_1)+Q(x_2)+…+Q(x_n))$</p>
+<p>因此 $C(P,P)-C(P,Q)\le0$, 当且仅当 $P=Q$ 时等号成立.</p>
+<h3 id="4-Cross-Entropy"><a href="#4-Cross-Entropy" class="headerlink" title="4. Cross Entropy"></a>4. Cross Entropy</h3><p>我们已经知道相对熵 (KL 散度)可以反映两个概率分布的距离情况. 由于P是样本已知的分布, 所以我们可以用KL散度反映Q这个模型产出的结果与P的距离. 距离越近, 往往说明模型的拟合效果越好, 能力越强.</p>
+<p><strong>而 Cross Entropy 则只是KL散度去除掉了一个固定的定值的结果.</strong> </p>
+<p>即 $C(P,Q)=-\sum_{i=1}^nP(x_i)\log(Q(x_i))$. KL散度能够反映P和Q分布的相似程度, 同样交叉熵也可以, 而且交叉熵的计算相比KL散度来说要更为精简一些.</p>
+<p>比如我们只考虑二分类的场景, 那么 $C(P,Q)=-P(x=0)\log(Q(x=0))-P(x=1)\log(Q(x=1))$. 我们令 $P(x=0)=y,Q(x=0)=\hat{y}$.</p>
+<p>所以上式可以变形为:</p>
+<script type="math/tex; mode=display">
+C(P,Q)=-y\log(\hat{y})-(1-y)\log(1-\hat{y})</script><h3 id="5-Analysis"><a href="#5-Analysis" class="headerlink" title="5. Analysis"></a>5. Analysis</h3><p>当然, 到这里其实还没有结束. 仍然存在一个问题, 可以反映模型与真实分布距离的公式很多, 为什么我们训练模型的时候单单选择了交叉熵呢, 其他的公式不行吗? 为什么呢?</p>
+<p>假设我们对模型: $\hat{y}=\sigma(\theta X)$ 选择 MSE(均方误差) 作为损失函数. </p>
+<p>此时 $MSE=\frac{(\sigma(\theta X)-y)^2}{2}$</p>
+<p>我们对它就关于 $\theta$ 的偏导:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{aligned}
+MSE'=&(\sigma(\theta X)-y)\cdot\sigma'(\theta X)\cdot X \\
+=&0.98*2*\sigma(\theta X)\cdot(1-\sigma(\theta X)) \\
+=&0.04
+\end{aligned}
+\end{equation}</script><p>所以如果我们通过梯度下降来学习的话, $\theta_{next}=\theta-\alpha<em>0.04</em>\theta$.</p>
+<p>这个式子看起来很正常, 但是隐藏了一个问题, 就是我们这样计算出来的梯度实在是太小了. 通过梯度下降去训练模型需要消耗大量的时间才能收敛.</p>
+<p>如果我们将损失函数换成交叉熵呢?</p>
+<p>我们回顾一下交叉熵求梯度之后的公式：</p>
+<script type="math/tex; mode=display">
+\frac{\delta}{\delta\theta}J(\theta)=-(\hat{Y}-Y)\cdot X</script><p>我们带入上面具体的值, 可以算出来如果使用交叉上来训练, 我们算出来的梯度为1.96, 要比上面算出来的0.04大了太多了. 显然这样训练模型的收敛速度会快很多, 这也是为什么我们训练分类模型采用交叉熵作为损失函数的原因.</p>
+<p>究其原因是因为如果我们使用MSE来训练模型的话, 在求梯度的过程当中免不了对sigmoid函数求导. 而正是因为sigmoid的导数值非常小, 才导致了我们梯度下降的速度如此缓慢. 那么为什么sigmoid函数的导数这么小呢? 我们来看下它的图像就知道了:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201112140643548.png" alt="image-20201112140643548" style="zoom:50%;" /></p>
+<p>观察一下上面这个图像, 可以发现当x的绝对值大于4的时候, 也就是图像当中距离原点距离大于4的两侧, 函数图像就变得非常平缓. 而导数反应函数图像的切线的斜率, 显然这些区域的斜率都非常小, 而一开始参数稍微设置不合理, 很容易落到这些区间里. 那么通过梯度下降来迭代自然就会变得非常缓慢. 所以无论是机器学习还是深度学习, 我们一般都会少会对sigmoid函数进行梯度下降.</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/11/12/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84-Entropy/">https://www.facequant.com/2020/11/12/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84-Entropy/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Others/">Others</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1429149470.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/11/12/%E5%86%B3%E7%AD%96%E6%A0%91-Decision-Tree/"><img class="prev-cover" src="https://i.pinimg.com/originals/68/f8/e8/68f8e8dd71485c0f0c4acd9ada4123fe.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">决策树(Decision Tree)</div></div></a></div><div class="next-post pull-right"><a href="/2020/11/12/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E5%B8%B8%E7%94%A8%E7%9A%84-Notation/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">机器学习中常用的 Notation</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/11/13/偏差和方差是什么东西/" title="偏差和方差是什么东西?"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201113182320747.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">偏差和方差是什么东西?</div></div></a></div><div><a href="/2020/11/12/机器学习中常用的-Notation/" title="机器学习中常用的 Notation"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">机器学习中常用的 Notation</div></div></a></div><div><a href="/2020/11/12/模型选择与评估/" title="模型选择与评估"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/ROC.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">模型选择与评估</div></div></a></div><div><a href="/2020/11/13/深入理解-PAC-学习理论/" title="深入理解 PAC 学习理论"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">深入理解 PAC 学习理论</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Information-Entropy"><span class="toc-text">1. Information Entropy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Conditional-Entropy"><span class="toc-text">2. Conditional Entropy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Relative-Entropy"><span class="toc-text">3. Relative Entropy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Cross-Entropy"><span class="toc-text">4. Cross Entropy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-Analysis"><span class="toc-text">5. Analysis</span></a></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

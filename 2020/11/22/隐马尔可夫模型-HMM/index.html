@@ -1,0 +1,420 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>隐马尔可夫模型(HMM) | 阿平的自我修养</title><meta name="keywords" content="Supervised Learning"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="HMM 是可以用于标注问题的统计数学模型, 描述由隐藏的马尔科夫链随机生成观测序列的过程, 属于生成模型. HMM模型在语音识别、自然语言处理、生物信息、模式识别等领域有广泛的应用. 使用HMM模型来解决的问题一般有两个特征:  问题是基于序列的, 比如时间序列、状态序列. 问题中有两类数据, 一类序列数据是可以观测到的, 即观测序列; 而另一类数据是不能观察到的, 即隐藏状态序列, 简称状态序列">
+<meta property="og:type" content="article">
+<meta property="og:title" content="隐马尔可夫模型(HMM)">
+<meta property="og:url" content="https://www.facequant.com/2020/11/22/%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B-HMM/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="HMM 是可以用于标注问题的统计数学模型, 描述由隐藏的马尔科夫链随机生成观测序列的过程, 属于生成模型. HMM模型在语音识别、自然语言处理、生物信息、模式识别等领域有广泛的应用. 使用HMM模型来解决的问题一般有两个特征:  问题是基于序列的, 比如时间序列、状态序列. 问题中有两类数据, 一类序列数据是可以观测到的, 即观测序列; 而另一类数据是不能观察到的, 即隐藏状态序列, 简称状态序列">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/markov-chains.png">
+<meta property="article:published_time" content="2020-11-21T21:42:29.000Z">
+<meta property="article:modified_time" content="2020-12-25T18:32:13.806Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Supervised Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/markov-chains.png"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/11/22/%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B-HMM/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-26 02:32:13'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="no-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">隐马尔可夫模型(HMM)</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-21T21:42:29.000Z" title="发表于 2020-11-22 05:42:29">2020-11-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-25T18:32:13.806Z" title="更新于 2020-12-26 02:32:13">2020-12-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Machine-Learning/">Machine Learning</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>11分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><p>HMM 是可以用于标注问题的统计数学模型, 描述由隐藏的<strong>马尔科夫链</strong>随机生成观测序列的过程, 属于<strong>生成模型</strong>. HMM模型在语音识别、自然语言处理、生物信息、模式识别等领域有广泛的应用.</p>
+<p>使用HMM模型来解决的问题一般有两个特征:</p>
+<ol>
+<li>问题是基于序列的, 比如时间序列、状态序列.</li>
+<li>问题中有两类数据, 一类序列数据是可以观测到的, 即<strong>观测序列</strong>; 而另一类数据是不能观察到的, 即<strong>隐藏状态序列</strong>, 简称<strong>状态序列</strong>.</li>
+</ol>
+<p>如果问题有了这两个特征, 那么这个问题一般可以使用HMM模型尝试解决, 这样的问题在生活中是很多的. 例如, 说一句话, 发出的声音是观测序列, 想表达的意思是隐藏状态序列.</p>
+<h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><p>隐马尔科夫模型是关于时序的概率模型, 描述由一个隐藏的<strong>马尔科夫链</strong>随机生成不可观测的状态随机序列, 再由各个状态生成一个观测而产生观测随机序列的过程. 隐藏的马尔科夫链随机生成的状态的序列, 称为<strong>状态序列 (state sequence)</strong>; 每个状态生成一个观测, 而由此产生的观测的随机序列, 称为<strong>观测序列 (observation sequence)</strong>.</p>
+<p>隐马尔可夫模型由初始概率分布 ($\pi$), 状态转移概率分布 (A) 以及观测概率分布 (B) 确定. 隐马尔可夫模型的形式定义如下:</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>数学表达</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$Q=\{q_1,q_2,…,q_N\}$</td>
+<td>所有可能的<strong>状态集合</strong>, 状态总数为 $N$</td>
+</tr>
+<tr>
+<td>$V=\{v_1,v_2,…,v_M\}$</td>
+<td>所有可能的<strong>观测集合</strong>, 观测总数为 $M$</td>
+</tr>
+<tr>
+<td>$I=(i_1,i_2,…,i_T)$</td>
+<td>长度为 $T$ 的<strong>状态序列</strong></td>
+</tr>
+<tr>
+<td>$O=(o_1,o_2,…,o_T)$</td>
+<td>长度为 $T$ 的<strong>观测序列</strong></td>
+</tr>
+<tr>
+<td>$A=[a_{ij}]_{N\times N}$</td>
+<td><strong>状态转移概率矩阵</strong> (Transition  Probability Matrix)</td>
+</tr>
+<tr>
+<td>$B=[b_j(k)]_{N\times M}$</td>
+<td><strong>发射概率矩阵</strong> (Emission Probability Matrix)</td>
+</tr>
+<tr>
+<td>$\pi=(\pi_i)$</td>
+<td><strong>初始状态概率向量</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>隐马尔可夫模型由 $\pi,A,B$ 共同决定. 其中 $\pi,A$ 决定状态序列, $B$ 决定观测序列. 因此马尔可夫模型 $\lambda$ 可以用三元符号表示, 即</p>
+<script type="math/tex; mode=display">
+\lambda=(\pi,A,B)</script><p>HMM 模型有两个假设:</p>
+<ul>
+<li><p><strong>齐次马尔科夫假设</strong></p>
+<p>将马尔科夫假设作用于状态序列, 假设当前状态 $i_t$ 仅仅依赖于前一个状态 $i_{t-1}$, 连续多个状态构成隐马尔科夫链, 数学表达式为:</p>
+<script type="math/tex; mode=display">
+P(i_t|i_{t-1},o_{t-1},i_{t-2},o_{t-2},i_{t-3},...,i_2,o_2,i_1,o_1)=P(i_t|i_{t-1})</script></li>
+<li><p><strong>输出独立性假设</strong></p>
+<p>任意时刻的观测 $o_t$ 只依赖于该时刻的状态 $i_t$, 与其他时刻的状态或观测独立无关, 数学表达式为:</p>
+<script type="math/tex; mode=display">
+P(o_t|o_1,...,o_t,...,o_T,i_1,...,i_t,...,i_T)=P(o_t|i_t)</script></li>
+</ul>
+<p><strong>再看一个 HMM 的例子:</strong></p>
+<p>假定你是一个在2799年研究地球暖化历史的气象学家, 你找不到在 2007 年夏天任何关于巴尔的摩, 马里兰州的天气的记录资料, 但是你发现了 Jason Eisner 的日记, 其中列出了在这个夏天的每一天他吃冰淇淋的数量. 我们的目的是利用这些关于冰淇淋的数量来估计每一天的气温. 为了简单起见, 我们假定每一天的天气只有两种状态: 冷或热 (C or H). 这样一来, Eisner 的问题可以描述如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">给定一个观察序列 O, 每一个观察是一个整数, 它对应于在某一给定的日子所吃冰淇淋的数量, 引起 Jason Eisner 吃冰淇淋的天气的状态序列是隐藏的, 这个隐藏的状态序列用 Q 表示, 它的值为 H 或 C.</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201120010009781.png" alt="image-20201120010009781" style="zoom:50%;" /></p>
+<p>天气对应状态, 状态的集合是:</p>
+<script type="math/tex; mode=display">
+Q=\{HOT,COLD\},N=2</script><p>所吃冰淇淋的数量对应观测, 观测的集合是:</p>
+<script type="math/tex; mode=display">
+V=\{1,2,3\},M=2</script><p>初始概率分布为:</p>
+<script type="math/tex; mode=display">
+\pi=(0.8,0.2)^T</script><p>状态转移概率分布为:</p>
+<script type="math/tex; mode=display">
+A=\left[\begin{matrix}0.7,0.3\\0.4,0.6\end{matrix}\right]</script><p>发射概率分布为:</p>
+<script type="math/tex; mode=display">
+B=\left[\begin{matrix}0.2,0.4,0.4\\0.5,0.4,0.1\end{matrix}\right]</script><h3 id="2-Inference-Problems"><a href="#2-Inference-Problems" class="headerlink" title="2. Inference Problems"></a>2. Inference Problems</h3><p>HMM 主要被用于解决以下几个问题:</p>
+<ol>
+<li><p><strong>Filtering Problem - Infering the present</strong></p>
+<p>已知模型参数和一个观测序列 $O$, 求最后时刻各个隐含状态的概率分布, 即 $P(i_t|o_{1:t})$.</p>
+<p><u>代表模型: Kalman Filter (卡尔曼滤波器)</u></p>
+</li>
+<li><p><strong>Smoothing Problem - Infering the past</strong></p>
+<p>已知模型参数和一个观测序列 $O$, 求中间某时刻各个隐含状态的概率分布, 即 $P(i_t|o_{1:T}),t&lt;T$. </p>
+</li>
+<li><p><strong>Prediction Problem - Infering the future</strong></p>
+<p>已知模型参数和一个观测序列 $O$, 求未来某时刻各个隐含状态的概率分布, 即 $P(i_t|o_{1:T}),t&gt;T$.</p>
+</li>
+<li><p><strong>Learning Problem</strong></p>
+<p>已知观测序列 $O=(o_1,o_2,…,o_T)$, 估计模型 $\lambda=(A,B,\pi)$ 参数, 使得在该模型下观测序列概率 $P(O|\lambda)$ 最大, 即用极大似然估计的方法估计参数.</p>
+</li>
+<li><p><strong>Likelihood Problem</strong></p>
+<p>给定模型参数和一个观测序列 $O$, 求观测序列出现的概率, 即 $P(o_{1:T})$.</p>
+</li>
+<li><p><strong>Decoding Problem</strong></p>
+<p>已知模型参数和一个观测序列 $O$, 求对给定观测序列条件概率 $P(I|O)$ 最大的状态序列 $I$. </p>
+</li>
+</ol>
+<h4 id="2-1-Filtering-Problem"><a href="#2-1-Filtering-Problem" class="headerlink" title="2.1 Filtering Problem"></a>2.1 Filtering Problem</h4><p>我们的目的是求 $P(i_t|o_{1:t})$, 很明显有:</p>
+<script type="math/tex; mode=display">
+P(i_t|o_{1:t})=\frac{P(i_t,o_{1:t})}{P(o_{1:t})}</script><p>且有:</p>
+<script type="math/tex; mode=display">
+\begin{equation}\begin{aligned}P(i_t|o_{1:t})=&P(i_t|o_t,o_{1:t-1})\\=&\alpha P(i_t,o_t|o_{1:t-1})\\=&\alpha\sum_{i_{t-1}}P(i_{t-1},i_t,o_t|o_{1:t-1})\\=&\alpha\sum_{i_{t-1}}P(i_{t-1}|o_{1:t-1})P(i_t|i_{t-1})P(o_t|i_t)\\=&\alpha P(o_t|i_t)\sum_{i_{t-1}}P(i_t|i_{t-1})P(i_{t-1}|o_{1:t-1})\end{aligned}\end{equation}</script><p>因此我们可以得到:</p>
+<script type="math/tex; mode=display">
+P(i_t,o_{1:t})=P(o_t|i_t)\sum_{i_{t-1}}P(i_t|i_{t-1})P(i_{t-1},o_{1:t-1})</script><p>因此我们可以先想办法求得, $P(i_t,o_{1:t})$, 也就是 un-nomarlized filtered posterior distribution. 我们可以利用 Forward Algorithm 来求解该项.</p>
+<p>我们记, $\alpha_t(i)=P(o_1,…,o_t,i_t=q_i|\lambda)$, 这个公式表示的是在之前所有的观测变量的前提下求出当前时刻的隐含状态的概率, 图示如下:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201122022424140.png" alt="image-20201122022424140" style="zoom:50%;" /></p>
+<p>因此我们的思路就是递推求得前向概率 $\alpha_t(i)$, 最后求得 $P(O|\lambda)$.</p>
+<p>其中, 不难得到:</p>
+<script type="math/tex; mode=display">
+\begin{equation}\begin{aligned}P(O|\lambda)=&P(o_{1:T})\\=&\sum_{i=1}^N\frac{P(i_T=q_i,o_{1:T})}{P(i_T=q_i|o_{1:T})}\\=&\sum_{i=1}^NP(i_T=q_i,o_{1:T})\\=&\sum_{i=1}^N\alpha_T(i)&\end{aligned}\end{equation}</script><blockquote>
+<p>  <strong>Forward Algorithm</strong></p>
+<p>  输入: $\lambda=(\pi,A,B)$, 观测序列 $O$</p>
+<p>  输出: 观测序列概率 $P(O|\lambda)$</p>
+<p>  (1) 初值</p>
+<script type="math/tex; mode=display">
+  \alpha_1(i)=\pi_ib_i(o_1),\quad i=1,2,...,N</script><p>  (2) 递推    对 $t=1,2,…,T-1$</p>
+<script type="math/tex; mode=display">
+  \alpha_{t+1}(i)=[\sum_{j=1}^N\alpha_t(j)a_{ji}]b_i(o_{t+1}),\quad i=1,2,...,N</script><p>  (3) 终止</p>
+<script type="math/tex; mode=display">
+  P(O|\lambda)=\sum_{i=1}^N\alpha_T(i)</script></blockquote>
+<p>我们可以用一个图来进行表示:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201122030918321.png" alt="image-20201122030918321" style="zoom:50%;" /></p>
+<h4 id="2-2-Smoothing-Problem"><a href="#2-2-Smoothing-Problem" class="headerlink" title="2.2 Smoothing Problem"></a>2.2 Smoothing Problem</h4><p>为了解决 Smoothing Problem, 我们要引入另外一种算法: Backward Algorithm.</p>
+<p>我们首先定义一个后向概率:</p>
+<script type="math/tex; mode=display">
+\beta_t(i)=P(o_{t+1},o_{t+2},...,o_T|i_t=q_i,\lambda)</script><p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201122035338327.png" alt="image-20201122035338327" style="zoom:50%;" /></p>
+<p>因此, 我们有 $\beta_1(i)=P(o_{2:T}|i_1=q_i,\lambda)$. 那么我们可以推导:</p>
+<script type="math/tex; mode=display">
+\begin{equation}\begin{aligned}P(O|\lambda)=&P(o_{1:T}|\lambda)\\=&\sum_{i=1}^NP(o_{1:T},i_1=q_i|\lambda)\\=&\sum_{i=1}^NP(o_{1:T}|i_1=q_i,\lambda)P(i_1=q_i|\lambda)\\=&\sum_{i=1}^NP(o_1|o_{2:T},i_1=q_i,\lambda)P(o_{2:T},i_1=q_i|\lambda)\pi_i\\=&\sum_{i=1}^NP(o_1|i_1=q_i,\lambda)\beta_1(i)\pi_i\\=&\sum_{i=1}^Nb_i(o_1)\pi_i\beta_1(i)\end{aligned}\end{equation}</script><p>因此, 我们有算法</p>
+<blockquote>
+<p>  <strong>Backward Algorithm</strong></p>
+<p>  输入: $\lambda=(\pi,A,B)$, 观测序列 $O$</p>
+<p>  输出: 观测序列概率 $P(O|\lambda)$</p>
+<p>  (1) 初值</p>
+<script type="math/tex; mode=display">
+  \beta_T(i)=1,\quad i=1,2,...,N</script><p>  (2) 递推</p>
+<p>  对 $t=T-1,T-2,…,1$</p>
+<script type="math/tex; mode=display">
+  \beta_t(i)=\sum_{j=1}^Na_{ij}b_j(o_{t+1})\beta_{t+1}(j),\quad i=1,2,...,N</script><p>  (3) 终止</p>
+<script type="math/tex; mode=display">
+  P(O|\lambda)=\sum_{i=1}^Nb_i(o_1)\pi_i\beta_1(i)</script></blockquote>
+<p>因此, 针对 smoothing problem, 即 $P(i_t|o_{1:T}),t&lt;T$, 我们可以推导:</p>
+<script type="math/tex; mode=display">
+\begin{equation}\begin{aligned}P(i_t,o_{1:T})=&P(i_t,o_{1:t})P(o_{t+1:T}|i_t,o_{1:t})\\=&P(i_t,o_{1:t})P(o_{t+1:T}|i_t)\\=&\alpha_t(i)\beta_t(i)\end{aligned}\end{equation}</script><p>进而</p>
+<script type="math/tex; mode=display">
+P(i_t|o_{1:T})=\frac{\alpha_t(i)\beta_t(i)}{\sum_{j=1}^N\alpha_t(j)\beta_t(j)}</script><p>我们还可以进一步延展: 给定模型 $\lambda$ 和观测序列 $O$, 我们要求在时刻 $t$ 处于状态 $q_i$ 且在时刻 $t+1$ 处于状态 $q_j$ 的概率, 即 $P(i_t=q_i,i_{t+1}=q_j|o_{1:T})$, 我们可以推导得到:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{aligned}
+P(i_t=q_i,i_{t+1}=q_j|o_{1:T})=\frac{\alpha_t(i)a_{ij}b_j(o_{t+1})\beta_{t+1}(j)}{\sum_{i=1}^N\sum_{j=1}^N\alpha_t(i)a_{ij}b_j(o_{t+1})\beta_{t+1}(j)}
+\end{aligned}
+\end{equation}</script><h4 id="2-3-Prediction-Problem"><a href="#2-3-Prediction-Problem" class="headerlink" title="2.3 Prediction Problem"></a>2.3 Prediction Problem</h4><p>我们这里只给出 one-step ahed predictive distribution:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{aligned}
+P(o_{t+1}|o_{1:t})=&\sum_{i_t,i_{t+1}}P(i_t,i_{t+1},o_{t+1}|o_{1:t}) \\
+=&\sum_{i_t,i_{t+1}}P(o_{t+1}|i_{t},i_{t+1},o_{1:t})P(i_{t+1}|i_{t},o_{1:t})P(i_t|o_{1:t}) \\
+=&\sum_{i_t,i_{t+1}}P(o_{t+1}|i_{t+1})P(i_{t+1}|i_t)P(i_t|o_{1:t})
+\end{aligned}
+\end{equation}</script><h4 id="2-4-Learning-Problem"><a href="#2-4-Learning-Problem" class="headerlink" title="2.4 Learning Problem"></a>2.4 Learning Problem</h4><p>因为目前我还没有系统的学习过 EM 算法, 所以在这里先给出监督学习方法, 即用极大似然估计来估计隐马尔可夫的参数, 具体方法如下:</p>
+<ol>
+<li><p>初始状态概率 $\pi_i$</p>
+<script type="math/tex; mode=display">
+\hat{\pi}_i=P(i_1=q_i)=\frac{N_{i_1=q_i}+1}{\sum_{j=1}^N(N_{i_1=q_j}+1)}</script></li>
+<li><p>转移状态概率分布 $a_{ij}$</p>
+<script type="math/tex; mode=display">
+\hat{a}_{ij}=P(i_t=q_j|i_{t-1}=q_i)=\frac{N_{i_t=q_j,i_{t-1}=q_i}+1}{\sum_{p=1}^N(N_{i_t=q_p,i_{t-1}=q_i}+1)}</script></li>
+<li><p>发射概率分布 $b_j(k)$</p>
+<script type="math/tex; mode=display">
+\hat{b}_j(k)=P(o_t=v_k|i_t=q_j)=\frac{N_{o_t=v_k,i_t=q_j}+1}{\sum_{p=1}^M(N_{o_t=v_p,i_t=q_j}+1)}</script></li>
+</ol>
+<h4 id="2-5-Likelihood-Problem"><a href="#2-5-Likelihood-Problem" class="headerlink" title="2.5 Likelihood Problem"></a>2.5 Likelihood Problem</h4><p>我们在之前的推导中已经给出了公式:</p>
+<script type="math/tex; mode=display">
+P(O|\lambda)= \sum_{i=1}^N\alpha_T(i)\\
+P(O|\lambda) = \sum_{i=1}^Nb_i(o_1)\pi_i\beta_1(i)\\
+P(O|\lambda) = \sum_{i=1}^N\sum_{j=1}^N\alpha_t(i)a_{ij}b_j(o_{t+1})\beta_{t+1}(j), \quad t=1,2,...,T-1</script><h4 id="2-6-Decoding-Problem"><a href="#2-6-Decoding-Problem" class="headerlink" title="2.6 Decoding Problem"></a>2.6 Decoding Problem</h4><p>HMM 的解码算法有两种: <strong>近似算法 (Approximation Algorithm)</strong>和<strong>维特比算法 (Viterbi Algorithm)</strong>.</p>
+<h5 id="2-6-1-Approximation-Algorithm"><a href="#2-6-1-Approximation-Algorithm" class="headerlink" title="2.6.1 Approximation Algorithm"></a>2.6.1 Approximation Algorithm</h5><p>近似算法其实是采取了我们在 Smoothing Problem 中所介绍的公式, 即 $P(i_t|o_{1:T}),t&lt;T$.</p>
+<p>其想法是: 在每个时刻 $t$ 选择在该时刻最有可能出现的状态 $i_t^{*}$, 从而得到一个状态序列 $I^<em>=(i_1^{\</em>},i_2^{*},…,i_T^{*})$, 并将其作为预测的结果.</p>
+<p>给定隐马尔可夫模型 $\lambda$ 和观测序列 $O$, 在时刻 $t$ 处于状态 $q_i$ 的概率 $\gamma_t(i)$ 是:</p>
+<script type="math/tex; mode=display">
+\gamma_t(i)=P(i_t|o_{1:T})=\frac{\alpha_t(i)\beta_t(i)}{\sum_{j=1}^N\alpha_t(j)\beta_t(j)}</script><p>根据最小化贝叶斯风险准则, 在每一时刻最可能的状态 $i_t^*$ 是:</p>
+<script type="math/tex; mode=display">
+i_t^*=\mathop{\arg\max}\limits_{1\le i\le N}[\gamma_t(i)],\quad t=1,2,...,T</script><p>备注: 这也是我在项目 <a target="_blank" rel="noopener" href="https://github.com/alvisdeng/NLP-NER-Recognizer-with-HMMs">https://github.com/alvisdeng/NLP-NER-Recognizer-with-HMMs</a> 中使用的方法. 有很多math tricks 比如说在 log space 来进行计算, 具体可以参见 description.pdf 中的说明.</p>
+<h5 id="2-6-2-Viterbi-Algorithm"><a href="#2-6-2-Viterbi-Algorithm" class="headerlink" title="2.6.2 Viterbi Algorithm"></a>2.6.2 Viterbi Algorithm</h5><p>[To be done] </p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/11/22/%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B-HMM/">https://www.facequant.com/2020/11/22/%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E6%A8%A1%E5%9E%8B-HMM/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Supervised-Learning/">Supervised Learning</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/markov-chains.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/12/25/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92-%E8%82%A1%E7%A5%A8%E4%B9%B0%E5%8D%96%E9%97%AE%E9%A2%98/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/0*zuhXdNAIUoxEem4-.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">动态规划-股票买卖问题</div></div></a></div><div class="next-post pull-right"><a href="/2020/11/19/%E8%B4%9D%E5%8F%B6%E6%96%AF%E7%BB%9F%E8%AE%A1%E4%B9%8B%E7%BE%8E/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/Bayes_Theorem.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">贝叶斯统计之美</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/11/13/深度学习基础-神经网络模型/" title="深度学习基础-神经网络模型"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/NN_network.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">深度学习基础-神经网络模型</div></div></a></div><div><a href="/2020/11/12/详解逻辑回归-Logistic-Regression/" title="详解逻辑回归(Logistic Regression)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/sigmoid.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">详解逻辑回归(Logistic Regression)</div></div></a></div><div><a href="/2020/11/13/防止过拟合-正则化-Regularization/" title="防止过拟合-正则化(Regularization)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_o6H_R3Do1zpch-3MZk_fjQ.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">防止过拟合-正则化(Regularization)</div></div></a></div><div><a href="/2020/11/12/决策树-Decision-Tree/" title="决策树(Decision Tree)"><img class="cover" src="https://i.pinimg.com/originals/68/f8/e8/68f8e8dd71485c0f0c4acd9ada4123fe.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">决策树(Decision Tree)</div></div></a></div><div><a href="/2020/11/12/详解线性回归-Linear-Regression/" title="详解线性回归(Linear Regression)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_QiU6DcP_r9qWLznMw0-M_Q.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">详解线性回归(Linear Regression)</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Introduction"><span class="toc-text">1. Introduction</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Inference-Problems"><span class="toc-text">2. Inference Problems</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Filtering-Problem"><span class="toc-text">2.1 Filtering Problem</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-Smoothing-Problem"><span class="toc-text">2.2 Smoothing Problem</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-Prediction-Problem"><span class="toc-text">2.3 Prediction Problem</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-Learning-Problem"><span class="toc-text">2.4 Learning Problem</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-Likelihood-Problem"><span class="toc-text">2.5 Likelihood Problem</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-6-Decoding-Problem"><span class="toc-text">2.6 Decoding Problem</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-6-1-Approximation-Algorithm"><span class="toc-text">2.6.1 Approximation Algorithm</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-6-2-Viterbi-Algorithm"><span class="toc-text">2.6.2 Viterbi Algorithm</span></a></li></ol></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

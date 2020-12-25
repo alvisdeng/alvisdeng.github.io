@@ -1,0 +1,572 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MIT Linear Algebra Part 2 | 阿平的自我修养</title><meta name="keywords" content="Linear Algebra"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="This is a basic subject on matrix theory and linear algebra. Emphasis is given to topics that will be useful in other disciplines, including systems of equations, vector spaces, determinants, eigenval">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MIT Linear Algebra Part 2">
+<meta property="og:url" content="https://www.facequant.com/2020/08/15/MIT-Linear-Algebra-Part-2/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="This is a basic subject on matrix theory and linear algebra. Emphasis is given to topics that will be useful in other disciplines, including systems of equations, vector spaces, determinants, eigenval">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png">
+<meta property="article:published_time" content="2020-08-15T14:11:49.000Z">
+<meta property="article:modified_time" content="2020-12-25T18:33:03.876Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Linear Algebra">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/08/15/MIT-Linear-Algebra-Part-2/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-26 02:33:03'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="no-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">MIT Linear Algebra Part 2</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-08-15T14:11:49.000Z" title="发表于 2020-08-15 22:11:49">2020-08-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-25T18:33:03.876Z" title="更新于 2020-12-26 02:33:03">2020-12-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Mathematics/">Mathematics</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">7.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>27分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><p>This is a basic subject on matrix theory and linear algebra. Emphasis is given to topics that will be useful in other disciplines, including systems of equations, vector spaces, determinants, eigenvalues, similarity, and positive definite matrices.</p>
+<h2 id="Lec-16-Orthogonal-Matrices-and-Gram-Schmidt"><a href="#Lec-16-Orthogonal-Matrices-and-Gram-Schmidt" class="headerlink" title="Lec 16 Orthogonal Matrices and Gram-Schmidt"></a>Lec 16 Orthogonal Matrices and Gram-Schmidt</h2><h3 id="16-1-Overview"><a href="#16-1-Overview" class="headerlink" title="16.1 Overview"></a>16.1 Overview</h3><p>这一节主要是承接上节末尾的标准正交向量, 主要关于标准正交向量的性质与优点, 以及将一组普通向量转化为标准正交向量的方法: Gram-Schmidt 正交化.</p>
+<h3 id="16-2-Review-on-Orthonormal-Vectors"><a href="#16-2-Review-on-Orthonormal-Vectors" class="headerlink" title="16.2 Review on Orthonormal Vectors"></a>16.2 Review on Orthonormal Vectors</h3><p>假设 <code>q</code> 是标准正交向量组中的任意向量, 则向量之间相互垂直, 且长度为 1, 这也是为什么叫标准 (normal).</p>
+<p><img src="https://i.loli.net/2020/08/12/XSjm6y2eb3nZp5v.png" alt="image-20200812162243543" style="zoom:15%;" /></p>
+<h3 id="16-3-Orthogonal-Matrix-Q"><a href="#16-3-Orthogonal-Matrix-Q" class="headerlink" title="16.3 Orthogonal Matrix (Q)"></a>16.3 Orthogonal Matrix (Q)</h3><p>我们现在引入一个新的概念: 正交矩阵 Q. Q 是由标准正交向量组中的 $q_1,q_2,…,q_n$ 所组成. 而且正交矩阵还有一个很好的性质.</p>
+<p><img src="https://i.loli.net/2020/08/12/lxwAfnOVU2q13ZS.png" alt="image-20200812162623229" style="zoom:15%;" /></p>
+<p>注意这里的 Q 可以不是方阵, 而当 Q 是方阵时, 其有如下两个性质:</p>
+<ul>
+<li>$Q^TQ=I$</li>
+<li>$Q^T=Q^{-1}$</li>
+</ul>
+<p>我们可以看几个例子, 注意我们一定不要忘了单位化 (标准化) 向量. 即将每个基的单位变成 1.</p>
+<p><img src="https://i.loli.net/2020/08/12/M7X5LSvDKih3CYQ.png" alt="image-20200812162933566" style="zoom:15%;" /></p>
+<p>那么正交矩阵有什么作用呢? 其主要的应用就是<strong>投影矩阵.</strong></p>
+<p>我们在前两节的学习中已经知道投影矩阵的一般形式是: $P=A(A^TA)^{-1}A^T$. 那么当 A 是正交矩阵 Q 时, 投影矩阵很明显等于: $P=QQ^T$. 特别当 Q 为方阵时, 投影矩阵为 $I$.</p>
+<p><img src="https://i.loli.net/2020/08/12/cQ5vnhOeopjfrUE.png" alt="image-20200812163547618" style="zoom:12%;" /></p>
+<p>至于我们之前用的拟合方程, 如果 A = Q 时就可以得以简化!</p>
+<blockquote>
+<p>   $A^TA\hat{x}=A^Tb$</p>
+<p>   $Q^TQ\hat{x}=Q^Tb$</p>
+<p>   $I\hat{x}=Q^Tb$</p>
+<p>   $\hat{x}=Q^Tb$</p>
+</blockquote>
+<p>这样简化之后, 很明显 $\hat{x}$ 中的每个分向量都是 Q 中对应列向量与 b 的点乘结果, 即:</p>
+<blockquote>
+<p>  $\hat{x}_{i}=q^{T}_{i}b$</p>
+</blockquote>
+<p>这个式子的意义就是, 我们已知标准正交基, 那么 b 在第 i 个基上的投影就是 $q^{T}_{i}b$. 很明显, 当我们选择标准正交向量作为基时, 投影矩阵相关公式中的 A 都可以被 Q 替换, 这样很多公式都可以被化简.</p>
+<h3 id="16-4-Gram-Schmidt"><a href="#16-4-Gram-Schmidt" class="headerlink" title="16.4 Gram-Schmidt"></a>16.4 Gram-Schmidt</h3><p>我们还是按照老样子, 从线性无关向量组入手, 将其标准正交化.</p>
+<blockquote>
+<p>  有两个线性无关向量 a, b. 我们试图通过某种过程得到标准正交向量 $q_1,q_2$.</p>
+</blockquote>
+<p><img src="https://i.loli.net/2020/08/12/DU63QfPvzl5hL8Y.png" alt="image-20200812165638078" style="zoom:25%;" /></p>
+<blockquote>
+<p>  我们也可以推广到三维</p>
+</blockquote>
+<p><img src="https://i.loli.net/2020/08/12/AiaMVvDRh9oJmHr.png" alt="image-20200812165713457" style="zoom:15%;" /></p>
+<p>我们通过一个简单的例子去熟悉这个方法. $a=\left|\begin{matrix}1\\1\\1\end{matrix}\right|$, $b=\left|\begin{matrix}1\\0\\2\end{matrix}\right|$, 我们需要求正交矩阵 Q.</p>
+<p><img src="https://i.loli.net/2020/08/12/Rl3YHK16gdzZaE2.png" alt="image-20200812165835745" style="zoom:15%;" /></p>
+<p><strong>而且我们不难发现!!! $\left|\begin{matrix}1\ 1\\1\ 0\\1\ 2\end{matrix}\right|$是和 Q 的列空间是一样的! 因为我们在计算 B 的过程中, 所用到的就是 a 和 b, 所以列空间并没有发生改变!</strong></p>
+<p><strong>注意! Gram-Schmidt 正交化十分类似矩阵 A 的 LU 分解. 在正交化的过程中, A 可以分解为 Q 和 R. 其中 R 是上三角矩阵:</strong></p>
+<p> <img src="https://i.loli.net/2020/08/12/3Nk5p4CmheOtMwu.png" alt="image-20200812174035684" style="zoom:15%;" /></p>
+<p>具体证明过程可查阅 &lt;线性代数及其应用(第五版)&gt;P353.</p>
+<h2 id="Lec-17-Properties-of-Determinants"><a href="#Lec-17-Properties-of-Determinants" class="headerlink" title="Lec 17 Properties of Determinants"></a>Lec 17 Properties of Determinants</h2><h3 id="17-1-Overview"><a href="#17-1-Overview" class="headerlink" title="17.1 Overview"></a>17.1 Overview</h3><p> 本节主要是关于行列式的一些性质, 这些性质能够帮助理解后续问题.</p>
+<h3 id="17-2-Properties"><a href="#17-2-Properties" class="headerlink" title="17.2 Properties"></a>17.2 Properties</h3><p>行列式是跟每个方阵都有关的一个数字. 这个数字包括了这个矩阵的很多性质, 例如方阵是否可逆可以根据行列式的值来进行判断, 行列式为 0, 则方阵不可逆. 行列式记法: $\left|A\right|$ 或 $det(A)$</p>
+<blockquote>
+<p>  性质一</p>
+</blockquote>
+<p>对于单位矩阵 $I$, 有 $det(A)=1$.</p>
+<blockquote>
+<p>  性质二</p>
+</blockquote>
+<p>交换两行之后, 行列式的值相反.由<strong>性质一</strong>和<strong>性质二</strong>, 我们可知置换矩阵的行列式值为 1 或-1.</p>
+<blockquote>
+<p>  性质三</p>
+</blockquote>
+<ul>
+<li><p><strong>3.a</strong> 行列式按行提取系数, 即$\left|\begin{matrix}ta&amp;tb\\c&amp;d\end{matrix}\right|=t\left|\begin{matrix}a&amp;b\\c&amp;d\end{matrix}\right|$</p>
+</li>
+<li><p><strong>3.b</strong> 行列式是一个线性函数, 但这个线性单独反映在每一行上. 即 $\left|\begin{matrix}a+a’&amp;b+b’\\c&amp;d\end{matrix}\right|=\left|\begin{matrix}a&amp;b\\c&amp;d\end{matrix}\right|+\left|\begin{matrix}a’&amp;b’\\c&amp;d\end{matrix}\right|$</p>
+</li>
+</ul>
+<p>注意, 这里并不是 $det(A+B)=det(A)+det(B)$, 这里的线性运算并不作用于整个矩阵上, 而是只反映在每一行上.</p>
+<blockquote>
+<p>  性质四</p>
+</blockquote>
+<p>如果两行相等, 那么行列式等于 0. 这条可以用性质 2 证明, 即 $det(A)=-det(A),\ det(A)=0$</p>
+<blockquote>
+<p>  性质五</p>
+</blockquote>
+<p>从矩阵的行 k 减去行 i 的 $l$ 倍, 矩阵的行列式值不变. 你们发现没有? 这个步骤就是我们常做的矩阵的消元.</p>
+<p><img src="https://i.loli.net/2020/08/12/RD1tMZVjkfSdPQu.png" alt="image-20200812230428166" style="zoom:15%;" /></p>
+<blockquote>
+<p>  性质六</p>
+</blockquote>
+<p>如果矩阵有一行全为零, 那么矩阵的行列式为 0. 这条可以用性质三证明.</p>
+<blockquote>
+<p>  性质七</p>
+</blockquote>
+<p>上三角矩阵和对角矩阵的行列式等于其对角线上元素的乘积. 我们可以利用性质五进行消元得到矩阵 U 或 D, 也就是使主元 (pivot) 上下的元素为零.</p>
+<p><img src="https://i.loli.net/2020/08/13/rNwzxRmdvoLCUOp.png" alt="image-20200813170038312" style="zoom:15%;" /></p>
+<blockquote>
+<p>  性质八</p>
+</blockquote>
+<p>若矩阵 A 可逆, 那么|A|不为零. 因为不可逆矩阵在进行消元之后会得到全零行, 其行列式一定为 0.</p>
+<blockquote>
+<p>  性质九</p>
+</blockquote>
+<p>$det(AB)=detA\times detB$</p>
+<p>借此, 我们通过 $AA^{-1}=I$ 可以得到: </p>
+<ul>
+<li><p>$detA^{-1}=\frac{1}{detA}$</p>
+</li>
+<li><p>$detA^{2}=(detA)^{2}$</p>
+</li>
+<li>$det(kA)=k^ndetA$</li>
+</ul>
+<blockquote>
+<p>  性质十</p>
+</blockquote>
+<p>$|A^T|=|A|$, 这个性质也并不难理解, 过程如下:</p>
+<ul>
+<li>将矩阵进行 LU 分解: $|U^TL^T|=|LU|$</li>
+<li>由性质九, 我们可知: $|U^T||L^T|=|U||L|$</li>
+<li>从 Lec 4 我们可知, L 是一个主对角线全是 1 的小三角矩阵, 而 U 是一个上三角矩阵. 像 U, L 这样的上/下三角矩阵, 不论转置与否, 其行列式都为对角线上各元素的乘积. </li>
+</ul>
+<h2 id="Lec-18-Determinant-Formulas-and-Cofactors"><a href="#Lec-18-Determinant-Formulas-and-Cofactors" class="headerlink" title="Lec 18 Determinant Formulas and Cofactors"></a>Lec 18 Determinant Formulas and Cofactors</h2><h3 id="18-1-Overview"><a href="#18-1-Overview" class="headerlink" title="18.1 Overview"></a>18.1 Overview</h3><p>本节主要是关于行列式公式和代数余子式 (Cofactors)</p>
+<h3 id="18-2-Determinant-Formulas"><a href="#18-2-Determinant-Formulas" class="headerlink" title="18.2 Determinant Formulas"></a>18.2 Determinant Formulas</h3><p>上一节我们介绍了行列式的基本性质, 理解和掌握这些性质我们并不需要了解行列式如何求解, 但是我们可以根据这些性质推出来行列式的一般求解过程. 我们从二阶行列式讲起.</p>
+<p>根据<strong>性质三</strong>, 我们可以得到:</p>
+<p>$\left|\begin{matrix}a&amp;b\\c&amp;d\end{matrix}\right|=\left|\begin{matrix}a&amp;0\\c&amp;d\end{matrix}\right|+\left|\begin{matrix}0&amp;b\\c&amp;d\end{matrix}\right|=\left|\begin{matrix}a&amp;0\\c&amp;0\end{matrix}\right|+\left|\begin{matrix}a&amp;0\\0&amp;d\end{matrix}\right|+\left|\begin{matrix}0&amp;b\\c&amp;0\end{matrix}\right|+\left|\begin{matrix}0&amp;b\\0&amp;d\end{matrix}\right|=0+ad+(-bc)+0$</p>
+<p>因此, $\left|\begin{matrix}a&amp;b\\c&amp;d\end{matrix}\right|=ab-cd$</p>
+<p>观察上面的求解过程, 我们不难发现, 行列式其实取决于那些分解后非零的行列式的和, 这些非零行列式有这样一个特点: <strong>各行各列均有元素.</strong></p>
+<p>接下来我们将问题扩展到三阶:</p>
+<p><img src="https://i.loli.net/2020/08/14/89AJqHTcPuOUNGp.png" alt="image-20200814142313671" style="zoom:40%;" /></p>
+<p>观察这个拆分过程, 很明显, 如果是 n 阶矩阵的话, 得到的非零行列式一共有 <code>n!</code> 种. 因为第一行有 n 个选择, 第二行就只有  n-1 个矩阵, 以此类推. 其实整个拆分过程就是每次从一行中选择剩余行不同列的元素相乘. 下面给出行列式计算的公式, 注意符号的正负: $|A|=\sum \pm a_{1\alpha}a_{2\beta}a_{3\gamma}\cdots a_{n\omega}$, 其中$\alpha,\beta,\gamma\cdots \omega$, 是集合 1~n 的某一种排列. n 个列标符号每个均只能用一次.</p>
+<blockquote>
+<p>  我们接下来用一个例子来理解这个式子, 求行列式: $\left|\begin{matrix}0&amp;0&amp;1&amp;1\\0&amp;1&amp;1&amp;0\\1&amp;1&amp;0&amp;0\\1&amp;0&amp;0&amp;1\end{matrix}\right|$</p>
+<p>  我们从第一行开始, 只能从 $a_{13}$和 $a_{14}$开始分解, 我们可以得到行列式:</p>
+<p>  $\left|\begin{matrix}0&amp;0&amp;1&amp;0\\0&amp;1&amp;0&amp;0\\1&amp;0&amp;0&amp;0\\0&amp;0&amp;0&amp;1\end{matrix}\right|+\left|\begin{matrix}0&amp;0&amp;0&amp;1\\0&amp;0&amp;1&amp;0\\0&amp;1&amp;0&amp;0\\1&amp;0&amp;0&amp;0\end{matrix}\right|$</p>
+<p>  为了将其调整到标准的对角线位置, 前者需要调整一次,故为-1. 后者需要调整两次, 故为+1. 因此该行列式的值为 0.</p>
+</blockquote>
+<h3 id="18-3-Cofactors"><a href="#18-3-Cofactors" class="headerlink" title="18.3 Cofactors"></a>18.3 Cofactors</h3><p>利用代数余子式, 我们可以更方便地求解行列式, 其作用是将 n 阶行列式化成 n-1 阶. </p>
+<p>根据前面所讲的公式, 我们不难发现, 在选取元素进行累乘时, 例如从第一行选取第一个元素之后, 剩余的因子是在剩余的 <code>n-1</code> 行和<code>n-1</code> 列中选取. 这剩余的因子组成了一个 <code>n-1</code> 阶的行列式, 这就是所谓的代数余子式. 如图所示:</p>
+<p><img src="https://i.loli.net/2020/08/14/7FCWTPGeNLXxncA.png" alt="image-20200814151607987" style="zoom:50%;" /></p>
+<p>下面, 我们给出代数余子式的一般公式:</p>
+<p>$a_{ij}$ 位置对应的代数余子式 (记为 $C_{ij}$), 等于去掉原行列式中第 <code>i</code> 行, 第 <code>j</code> 列后剩余元素组成的行列式的值. 且当 <code>i+j</code> 为偶数时取正, 奇数时为负, 可以理解为 $(-1)^{i+j} \times$剩余元素组成的行列式. </p>
+<p><img src="https://i.loli.net/2020/08/14/1cYfjeT3xlrmOKb.png" alt="image-20200814152106916" style="zoom:15%;" /></p>
+<p>$a_{ij}$ <strong>对应的余子式: 去掉代数余子式的正负符号就是对应的余子式.</strong></p>
+<p>根据之前的介绍, 我们知道计算代数余子式就是一个提取公因式的过程, 那么对应地, 使用<strong>代数余子式来展开一个行列式</strong>, 就能得到对应行列式的值:</p>
+<p>$|A|=a_{i1}C_{i1}+a_{i2}C_{i2}+\cdots\cdots+a_{in}C_{in}$, <code>i</code> 为行数, 代表沿第 <code>i</code> 行展开.</p>
+<p>现在我们有三种方法计算行列式:</p>
+<ul>
+<li>将矩阵 A 化成上三角或对角线矩阵 (最简单, 也是 Matlab 使用的策略)</li>
+<li>使用行列式公式完全展开计算 (很复杂)</li>
+<li>使用代数余子式按一行展开进行计算 (稍复杂)</li>
+</ul>
+<blockquote>
+<p>  接下来我们通过一种特殊的矩阵熟悉一下按行展开行列式的计算方法:</p>
+<p>  $A_1=1,\ A_2=\left|\begin{matrix}1&amp;1\\1&amp;1\end{matrix}\right|,\ A_3=\left|\begin{matrix}1&amp;1&amp;0\\1&amp;1&amp;1\\0&amp;1&amp;1\end{matrix}\right|,\ A_4=\left|\begin{matrix}1&amp;1&amp;0&amp;0\\1&amp;1&amp;1&amp;0\\0&amp;1&amp;1&amp;1\\0&amp;0&amp;1&amp;1\end{matrix}\right|$ 我们来寻找一下这几个行列式的规律.</p>
+<p>  解:</p>
+<p>  我们先看一下 1, 2, 3 阶对应情况, 我们很容易得到: $A_1=1,A_2=0,A_3=-1$</p>
+<p>  那么 $A_4$ 展开的行列式有什么规律呢? 我们看一下</p>
+<p>  <img src="https://i.loli.net/2020/08/14/VcAbXKBau7m9f1I.png" alt="image-20200814154556953" style="zoom:45%;" /></p>
+<p>  由于这个矩阵的特殊性, 我们可以得到规律:</p>
+<p>  $A_n=A_{n-1}-A_{n-2}$, 所以这个结构的一组行列式对应的值就是一个数列: 1, 0, -1, -1, 0, 1 这样的循环. 也就是其对应行列式的值以 6 为周期进行变换.</p>
+</blockquote>
+<h2 id="Lec-19-Cramer’s-Rule-Inverse-Matrix-and-Volume"><a href="#Lec-19-Cramer’s-Rule-Inverse-Matrix-and-Volume" class="headerlink" title="Lec 19 Cramer’s Rule, Inverse Matrix and Volume"></a>Lec 19 Cramer’s Rule, Inverse Matrix and Volume</h2><h3 id="19-1-Overview"><a href="#19-1-Overview" class="headerlink" title="19.1 Overview"></a>19.1 Overview</h3><p>这一节主要是关于行列式的应用, 包含三个主题: 克莱姆法则, 逆矩阵和体积.</p>
+<h3 id="19-2-Inverse-Matrix-Formula"><a href="#19-2-Inverse-Matrix-Formula" class="headerlink" title="19.2 Inverse Matrix Formula"></a>19.2 Inverse Matrix Formula</h3><p>我们先给出逆矩阵公式: $A^{-1}=\frac{1}{detA}C^T$. 这里的矩阵 C 代表代数余子式矩阵, 即其中各个元素为矩阵 A 各元素对应的代数余子式. 逆矩阵公式里面用的是矩阵 $C$ 的转置 $C^T$, 我们称之为伴随矩阵.</p>
+<p>我们来看个简单的例子: $\left|\begin{matrix}a&amp;b\\c&amp;d\end{matrix}\right|^{-1}=\frac{1}{ad-bc}\left|\begin{matrix}d&amp;-b\-c&amp;a\end{matrix}\right|$</p>
+<p>我们看看这个公式的结构:</p>
+<p><img src="https://i.loli.net/2020/08/15/V6GelzDgjBwtLa7.png" alt="image-20200815204503301" style="zoom:45%;" /></p>
+<blockquote>
+<p>  <strong>我们再来研究一下公式的正确性</strong></p>
+<p>  因为: $AA^{-1}=I$</p>
+<p>  所以在逆矩阵公式两边同时乘A, 我们可以得到: $I=\frac{1}{detA}AC^T$</p>
+<p>  <strong>因此, 我们需要验证:</strong> $AC^T=(detA)I$</p>
+<p>  我们将其展开观察:</p>
+<p>  $AC^T=\left|\begin{matrix}a_{11}&amp;\cdots&amp;a_{1n}\\\cdots&amp;\cdots&amp;\cdots\\a_{n1}&amp;\cdots&amp;a_{nn}\end{matrix}\right|\left|\begin{matrix}C_{11}&amp;\cdots&amp;C_{n1}\\\cdots&amp;\cdots&amp;\cdots\\C_{1n}&amp;\cdots&amp;C_{nn}\end{matrix}\right|=\left|\begin{matrix}detA&amp;0&amp;0\\0&amp;\cdots&amp;0\\0&amp;0&amp;detA\end{matrix}\right|=(detA)I$</p>
+<p>  这里有一个问题, 我们以第一行为例, 为什么 $[a_{11}\quad a_{12}\quad \cdots\quad a_{1n}]$ 这个行向量在和不属于这行元素的代数余子式构成的列向量相乘时, 得到的结果为零呢? <strong>很简单, 就以 A 的第一行和 $C^T$ 的第二列为例:</strong></p>
+<p>  $\left|\begin{matrix}a_{11}&amp;a_{12}&amp;\cdots&amp;a_{1n}\end{matrix}\right|\left|\begin{matrix}C_{21}\\C_{22}\\\cdots\\C_{2n}\end{matrix}\right|=a_{11}C_{21}+a_{12}C_{22}+\cdots+a_{1n}C_{2n}$</p>
+<p>  我们构造一个新矩阵来看看这是个什么玩意:</p>
+<p>  <img src="https://i.loli.net/2020/08/15/yRl3rGxvH2PcJfe.png" alt="image-20200815210722364" style="zoom:50%;" /></p>
+<p>  这个矩阵前两行相同, 将这个矩阵按照第二行用行列式展开, 即是:</p>
+<p>  <img src="https://i.loli.net/2020/08/15/rWuLgf5ByIOVN2c.png" alt="image-20200815210827385" style="zoom:50%;" /></p>
+<p>  同时, 由于这个矩阵的前两行相同, 故其行列式为 0.</p>
+</blockquote>
+<p>我们再回过头来看一下逆矩阵公式: $A^{-1}=\frac{1}{detA}C^T$</p>
+<p>这个公式能够帮助我们理解原矩阵和逆矩阵之间的关系, 理解原矩阵变化对逆矩阵的影响.</p>
+<h3 id="19-3-Cramer’s-Rule"><a href="#19-3-Cramer’s-Rule" class="headerlink" title="19.3 Cramer’s Rule"></a>19.3 Cramer’s Rule</h3><p>基于上面的逆矩阵公式, 我们可以找到另一种解 <code>Ax=b</code> 的方式:</p>
+<blockquote>
+<p>  $Ax = b$</p>
+<p>  $x=A^{-1}b=\frac{1}{detA}C^Tb$</p>
+</blockquote>
+<p>我们注意 $C^Tb$ 这个形式, 展开就是每一个代数余子式乘以 b 的各个分量. 余子式乘数字, 这让我们想到了行列式, 那么这个行列式是什么样的呢?</p>
+<p>$x_{1}=\frac{1}{detA}(b_1C_{11}+b_2C_{21}+\cdots+b_nC_{n1})$</p>
+<p>我们还是用构造法, 所以:</p>
+<p>$x_{1}=\frac{detB_1}{detA}$, $x_{2}=\frac{detB_2}{detA}$, … , $x_{n}=\frac{detB_n}{detA}$</p>
+<p>而且 $B_1=\left|\begin{matrix}b_1&amp;a_{12}&amp;\cdots&amp;a_{1n}\\b_1&amp;a_{22}&amp;\cdots&amp;a_{2n}\\\cdots&amp;\cdots&amp;\cdots&amp;\cdots\\b_1&amp;a_{n2}&amp;\cdots&amp;a_{nn}\end{matrix}\right|$, $|B_2|,|B_3|…$以此类推.</p>
+<p>Cramer’s Rule 将计算 <code>Ax=b</code> 的过程给公式化了, 但是其实这公式没卵用, 成本太高, 不如用消元法.</p>
+<h3 id="19-4-Volume"><a href="#19-4-Volume" class="headerlink" title="19.4 Volume"></a>19.4 Volume</h3><p>我们可以用 $3\times3$ 矩阵的行列式来求一个六面体的体积.</p>
+<p>例如 $A=\left|\begin{matrix}a_{11}&amp;a_{12}&amp;a_{13}\\a_{21}&amp;a_{22}&amp;a_{23}\\a_{31}&amp;a_{32}&amp;a_{33}\end{matrix}\right|$, 对应的六面体如下:</p>
+<p><img src="https://i.loli.net/2020/08/15/amdjGFYWA8NXVS9.png" alt="image-20200815214406477" style="zoom:20%;" /></p>
+<p>行列式的值有正负, 所以该六面体的体积即为行列式的绝对值. 而正负号的作用是告诉我们这个六面体是左手系还是右手系的. 因为当我们调换这个六面体的两边之后, 我们得到的是不同系下的立体, 其体积不会改变, 只是旋转顺序变了.</p>
+<p>我们研究几个特别的矩阵:</p>
+<ul>
+<li><p>单位矩阵 $I$</p>
+<p>很明显, 单位矩阵对应的是长宽高均为 1 的立方体, 朝向即是各坐标轴的正方向.</p>
+</li>
+<li><p>正交矩阵 $Q$</p>
+<p>你应该还记得正交矩阵有这个特性 $QQ^T=I$, 两面同时取行列式我们可以得到 $detQ=1$. 所以 Q 对应的也是长宽高均为 1 的立方体, 只是在坐标轴里面发生了旋转.</p>
+</li>
+</ul>
+<p>我们在 Lec 17 中讲了行列式的性质, 其中性质一,二,三(a)都很好证明, 我们在这里主要讲一下性质三(b): $\left|\begin{matrix}a+a’&amp;b+b’\\c&amp;d\end{matrix}\right|=\left|\begin{matrix}a&amp;b\\c&amp;d\end{matrix}\right|+\left|\begin{matrix}a’&amp;b’\\c&amp;d\end{matrix}\right|$</p>
+<p>我们以二维为例:</p>
+<p><img src="https://i.loli.net/2020/08/15/9jFiuWwIgyEbl2f.png" alt="image-20200815215406790" style="zoom:40%;" /></p>
+<p>有上面的启发, 求过原点的三角形面积就可以用行列式求解: $S=\frac{1}{2}det(\left|\begin{matrix}a&amp;b\\c&amp;d\end{matrix}\right|)$</p>
+<p>而对于不过原点的三角形, 我们就需要构造新的矩阵, 并求其行列式, 比如:</p>
+<p><img src="https://i.loli.net/2020/08/15/xHgD4KP9RtWjdba.png" alt="image-20200815215840496" style="zoom:15%;" /></p>
+<p>需要新构建的矩阵就是: $A=\left|\begin{matrix}x_1&amp;y_1&amp;1\\x_2&amp;y_2&amp;1\\x_3&amp;y_3&amp;1\end{matrix}\right|$, 此三角形面积即为: $\frac{1}{2}det(A)$, 我们计算这个矩阵的行列式的时候会做一系列的消元, 这一系列消元相当于将三角形移到了原点位置.</p>
+<h2 id="Lec-20-Eigenvalues-and-Eigenvectors"><a href="#Lec-20-Eigenvalues-and-Eigenvectors" class="headerlink" title="Lec 20 Eigenvalues and Eigenvectors"></a>Lec 20 Eigenvalues and Eigenvectors</h2><h3 id="20-1-Overview"><a href="#20-1-Overview" class="headerlink" title="20.1 Overview"></a>20.1 Overview</h3><p>本节主要介绍特征值与特征向量. 主要目的是掌握求特征值的一般步骤.</p>
+<h3 id="20-2-Concept-of-Eigenvalues-and-Eigenvectors"><a href="#20-2-Concept-of-Eigenvalues-and-Eigenvectors" class="headerlink" title="20.2 Concept of Eigenvalues and Eigenvectors"></a>20.2 Concept of Eigenvalues and Eigenvectors</h3><p>我们首先给出特征值和特征向量的定义:</p>
+<p>对于一个矩阵 $A$, 如果有 $Ax=\lambda x$, 那么我们则称 $x$ 为特征向量, $\lambda$ 为特征值. 那么如何理解特征值与特征向量所代表的意义呢？我们来看 $Ax$ 这个式子, 对于不同的向量 $x$, $Ax$ 这个式子像是一个函数, 输入是一个向量 $x$, 输出是另外一个向量 $Ax$. 而在我们输入的众多向量 $x$ 生成的 $Ax$ 中, 会有这样的向量 $Ax$, 它们平行于 $x$，我们即用上面这个式子: $Ax=\lambda x$ 来表示这个关系.</p>
+<p>如果特征值为 0 呢? 此时会有 $Ax=0$. 我们可以发现如果矩阵 $A$ 是不可逆的时候, 就可以找到特征向量不为零的情况.</p>
+<p>我们再来研究一下之前提到过的投影矩阵, 如果投影矩阵是 P 的话, 那么其对应的特征值是多少呢?</p>
+<ul>
+<li>如果对任意平面上的 $x_1$ 来说, 投影矩阵根本不会影响它的大小所以就有: $Ax_1=\lambda x_1$ 恒成立, 此时 $\lambda=1$.</li>
+<li>如果对任意垂直平面的 $x_2$ 来说, 投影矩阵的会使: $Ax_2=0$ 恒成立, 此时 $\lambda=0$.</li>
+</ul>
+<p><img src="https://i.loli.net/2020/08/16/OwNvYztf9iK8ASD.png" alt="image-20200816162319159" style="zoom:50%;"/></p>
+<h3 id="20-3-Solution"><a href="#20-3-Solution" class="headerlink" title="20.3 Solution"></a>20.3 Solution</h3><p>我们现在来介绍特征值和特征向量的一般求解方法, 我们需要对方程进行一些处理:</p>
+<p>$Ax=\lambda x$ → $(A-\lambda I)x=0$ → $A-\lambda I$ 是不可逆矩阵 → $A-\lambda I$ 行列式为 0</p>
+<p>由此我们可以求出特征值, n 阶矩阵有 n 个特征值. 在求解特征向量是, 我们只需要带入一个特征值之后, 求对应线性方程组的 Nullspace.</p>
+<blockquote>
+<p>  <strong>[例 1]</strong></p>
+<p>  我们来看一个例子: 求解 $\left|\begin{matrix}3&amp;1\\1&amp;3\end{matrix}\right|$ 的特征向量和特征值</p>
+<p>  我们只需要构造矩阵 $\left|\begin{matrix}3-\lambda&amp;1\\1&amp;3-\lambda\end{matrix}\right|$ 并求解其行列式等于 0. 我们可以得到方程式: $\lambda^2-6\lambda+8=0$, 解得两个特征值: $\lambda_1=2, \lambda_2=4$. 我们代入特征值可以得到相应的特征向量: $x_1=\left|\begin{matrix}-1\\1\end{matrix}\right|,x_2=\left|\begin{matrix}1\\1\end{matrix}\right|$.</p>
+<p>  <strong>注:</strong> </p>
+<ul>
+<li>我们不难发现 $\lambda_1+\lambda_2=6$, 正好是矩阵对角线上元素的和, 我们称之为<strong>迹 (trace)</strong>. <strong>也就是矩阵的特征值之和和迹相等.</strong></li>
+<li><p>同时我们发现 $\lambda_1\lambda_2=8$, 正好是矩阵的行列式. <strong>也就是矩阵的特征值之积和矩阵的行列式相等.</strong></p>
+<p><strong>[例 2]</strong></p>
+<p>我们在前一个例子的基础上, 如果矩阵 $A=\left|\begin{matrix}3&amp;1\\1&amp;3\end{matrix}\right|-3I$, 那么它的特征值和特征向量将如何变化?</p>
+<p>原矩阵的特征值为: $\lambda_1=2,\lambda_2=4$.</p>
+<p>新矩阵的特征值为: $\lambda_1=-1,\lambda_2=1$</p>
+<p>我们不难发现, 新的特征值变为 $\lambda-3$, 且对应的特征向量不会改变. 即 $(A-3I)x=\lambda x-3x=(\lambda -3)x$</p>
+<p><strong>[例 3]</strong></p>
+<p>矩阵 A 有特征值 $\lambda$, 即 $Ax=\lambda x$. 矩阵 B 有特征值, 即 $Ax=\alpha x$. 那么 $(A+B)x=(\lambda+\alpha)x$ 是否成立?</p>
+<p><strong>答案是不成立的, 这里的 x 是不一样的.</strong></p>
+</li>
+</ul>
+</blockquote>
+<h3 id="20-4-Special-Case"><a href="#20-4-Special-Case" class="headerlink" title="20.4 Special Case"></a>20.4 Special Case</h3><p>接下来, 我么通过两个例子来说明求解特征向量和特征值的过程很重可能遇到的特殊情况.</p>
+<blockquote>
+<p>  <strong>[例 4]</strong></p>
+<p>  旋转矩阵 Q 使得每个向量旋转 $90^\circ$, 记为 $Q=\left|\begin{matrix}cos90^\circ&amp;-sin90^\circ\\sin90^\circ&amp;cos90^\circ\end{matrix}\right|=\left|\begin{matrix}0&amp;-1\\1&amp;0\end{matrix}\right|$ , 求特征值和特征向量.</p>
+<p>  根据上面例 1 的结论, 我们可以知道</p>
+<ul>
+<li>$\lambda_1+\lambda_2=0$</li>
+<li><p>$\lambda_1\lambda_2=1$</p>
+<p>求解我们可以得到, $\lambda_1=i,\lambda_2=-i$</p>
+<p><strong>启示:</strong> 我们发现 $Q$ 是反对称矩阵, 即 $A^T=-A$, 而我们之前求的都是对称矩阵的特征值, 也就是说, 对称矩阵的特征值为实数, 而反对称矩阵的特征值为虚数, 这是两个极端.</p>
+<p><strong>[例 5]</strong></p>
+<p>求矩阵 $A = \left|\begin{matrix}3&amp;1\\0&amp;3\end{matrix}\right|$ 的特征值和特征向量</p>
+<p>这是个上三角矩阵, 求解 A-λI 行列式时会发现: $\lambda_1=\lambda_2=3$, 这时的 特征向量只会有一个, 也就是说, 三角矩阵的结构的特殊性导致了其行列式为对角线上元素, 而如果对角线上两个元素相等, 那么就会造成特征向量短缺情况.</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="Lec-21-Diagonalization-and-Powers-of-A"><a href="#Lec-21-Diagonalization-and-Powers-of-A" class="headerlink" title="Lec 21 Diagonalization and Powers of A"></a>Lec 21 Diagonalization and Powers of A</h2><h3 id="20-1-Overview-1"><a href="#20-1-Overview-1" class="headerlink" title="20.1 Overview"></a>20.1 Overview</h3><p>本节课主要是关于矩阵的对角化, 并利用了矩阵的对角化简化了矩阵的幂运算. 最后也会提一嘴差分方程的应用.</p>
+<h3 id="20-2-Diagonalization"><a href="#20-2-Diagonalization" class="headerlink" title="20.2 Diagonalization"></a>20.2 Diagonalization</h3><p>所谓矩阵的对角化, 其实就是矩阵的一种分解方式. 我们之前已经学习过两种分解方式:</p>
+<ul>
+<li>LU 分解</li>
+<li>QR 分解</li>
+</ul>
+<p>但根据我们上一节学习的特征值和特征向量, 我们能引入一种新的分解方式, 即矩阵的对角化. 若矩阵 A 有 n 个线性无关的特征向量, 那么可以将它们组成一个可逆方阵, 进而将矩阵进行分析:</p>
+<blockquote>
+<p>  假设 A 的 n 个线性无关的特征向量组成矩阵 S, 有:</p>
+<p>  $S=[x_1,\quad x_2,\quad \cdots \quad,x_n]$</p>
+<p>  构造 $AS=A[x_1,\quad x_2,\quad \cdots \quad,x_n]$</p>
+<p>  由特征值得定义我们可以知道: $AS=A[x_1,\quad x_2,\quad \cdots \quad,x_n]=[\lambda_1x_1,\quad \lambda_2x_2,\quad \cdots \quad,\lambda_nx_n]$</p>
+<p>  写成矩阵乘法形式: $AS=[\lambda_1x_1,\quad \lambda_2x_2,\quad \cdots \quad,\lambda_nx_n]=[x_1,\quad x_2,\quad \cdots \quad,x_n]\left|\begin{matrix}\lambda_1&amp;0&amp;0&amp;0\\0&amp;\lambda_2&amp;0&amp;0\\0&amp;0&amp;\cdots&amp;0\\0&amp;0&amp;0&amp;\lambda_n\end{matrix}\right|$</p>
+<p>  我们将由特征值组成的对角矩阵称为 $\Lambda$, 即 $AS=S\Lambda$</p>
+<p>  由于矩阵 S 是由线性无关的特征向量组成的, 所以矩阵 S 是可逆的, 因此我们可以得到:</p>
+<ul>
+<li>$\Lambda=S^{-1}AS$</li>
+<li>$A=S\Lambda S^{-1}$</li>
+</ul>
+</blockquote>
+<p><strong>如上, 我们得到了一种新的矩阵分解方式, 利用矩阵 $A$ 的 $n$ 个线性无关的特征向量构造矩阵 $S$, 再利用矩阵 $A$ 的 $n$ 个特征值 $\lambda$ 构造对角矩阵 $\Lambda$, 将 $A$ 分解为: $A=S\Lambda S^{-1}$</strong></p>
+<p>所以这中矩阵分解方式有什么用呢? 其实主要是用于理解矩阵的幂运算. 比如:</p>
+<p>$A=S\Lambda S^{-1}$</p>
+<p>$A^2=S\Lambda^2 S^{-1}$</p>
+<p>$A^k=S\Lambda^k S^{-1}$</p>
+<p>我们使用特征向量和特征值也可以很明显看出这个性质:</p>
+<p>$Ax=\lambda x$</p>
+<p>$A^2x=\lambda Ax=\lambda^2x$</p>
+<p>$A^kx=\lambda^kx$</p>
+<p>这说明, 矩阵的 k 次幂 $A^k$ 的特征值是 $\lambda^k$, 而特征向量 $x$ 不受次幂的影响, 即 $A^k=S\Lambda^k S^{-1}$.</p>
+<blockquote>
+<p>  我们来思考一个问题, 若矩阵 $A$ 存在 $n$ 个线性无关的特征向量, 那么什么条件下能使矩阵的幂 $A^k$ 趋近于零?</p>
+<p>  <strong>解:</strong></p>
+<p>  由 $A^k=S\Lambda^k S^{-1}$ 可知, 当所有特征值都满足: $|\lambda_i|&lt;1$ 时, 当 $k$ 趋近于无穷大时, 矩阵 $A^k$ 趋近于零.</p>
+</blockquote>
+<p>另外, 注意矩阵是否能够成功对角化取决于该矩阵是否有 n 个线性无关的特征向量, 而特征向量与特征值之间有着紧密的联系:</p>
+<ul>
+<li>如果矩阵 $A$ 没有重复的特征值, 矩阵就一定有 $n$ 个线性无关的特征向量 (这也就意味着, 不同特征值对应特征向量线性无关)</li>
+<li>但是如果有重复的特征值, 结论不是完全否定的, 也就是说这时也可能存在 $n$ 个线性无关的特征向量. 例如: 10x10 的单位矩阵, 其特征值只有 1, 但是事实 上我们可以取得 10 个线性无关的特征向量.</li>
+</ul>
+<blockquote>
+<p>  <strong>[例 1]</strong></p>
+<p>  看一个例子, 判定矩阵 $A=\left|\begin{matrix}2&amp;1\\0&amp;2\end{matrix}\right|$ 是否可以对角化?</p>
+<p>  <strong>解:</strong></p>
+<p>  上述矩阵的特征值只有一个即: $\lambda_1=\lambda_2=2$, 再看矩阵 $A-2I$ 的零空间, 只有一个特征向量 $\left|\begin{matrix}1\\0\end{matrix}\right|$, 零空间只是一维的, 所以矩阵 $A$ 不可以对角化.</p>
+</blockquote>
+<h3 id="20-3-Differential-Equations"><a href="#20-3-Differential-Equations" class="headerlink" title="20.3 Differential Equations"></a>20.3 Differential Equations</h3><p>有了对角化知识的储备, 我们可以开始着手解决矩阵的次幂问题了. 我们还是看几个例子:</p>
+<blockquote>
+<p>  <strong>[例 2]</strong></p>
+<p>  有这样一种递推关系: 给定向量 $u_0$, 有 $u_{k+1}=Au_k$</p>
+<p>  <strong>解:</strong></p>
+<p>  根据这个递推关系, 我们不难得到: $u_k=A^ku_0$</p>
+<p>  但是这种解并不具体, 根据上面学习到的知识, 由于 $u_0$ 是 $n$ 维的, 而 $A$ 又有 $n$ 个线性无关的特征向量, 所以 $u_0$ 可以写为一个由矩阵 $A$ 的 $n$ 个特征向量组成的线性组合, 类似于基:</p>
+<p>  ​                                                    $u_0=c_1x_1+c_2x_2+\cdots+c_nx_n$</p>
+<p>  再将 A 化为特征值形式:</p>
+<p>  ​                                                    $u_1= Au_0=c_1\lambda_1 x_1+c_2\lambda_2 x_2+\cdots+c_n\lambda_n x_n$</p>
+<p>  ​                                                    $u_2= A^2u_0=c_1\lambda_1^2 x_1+c_2\lambda_2^2 x_2+\cdots+c_n\lambda_n^2 x_n$</p>
+<p>  ​                                                    $\cdots\cdots$</p>
+<p>  ​                                                    $u_k= A^ku_0=c_1\lambda_1^k x_1+c_2\lambda_2^k x_2+\cdots+c_n\lambda_n^k x_n$</p>
+<p>  写成矩阵形式:</p>
+<p>  ​                                                    $u_k=S\Lambda^kC$</p>
+<p>  其中 $\Lambda$ 是特征值构成的对角矩阵, $S$ 是由特征向量构成的矩阵, $C$ 是由系数 $c_1,c_2,\cdots,c_n$ 构成.</p>
+<p>  <strong>[例 3]</strong></p>
+<p>  斐波那契数列 0, 1, 1, 2, 3, 5, 8, 13, … 试求第 100 项的值, 以及其增长速度.</p>
+<p>  <strong>解:</strong></p>
+<p>  同样, 由斐波那契数列的特征, 我们可以得到以下方程:</p>
+<p>  ​                                                    $F_{k+2}=F_{k+1}+F_k$</p>
+<p>  我们希望构造一阶差分, 但是仅仅这一个方程是无法构造矩阵形式的, 我们添加一个方程:</p>
+<p>  ​                                                    $F_{k+1}=F_{k+1}$</p>
+<p>  通过联立的方程组, 构造一个矩阵形式:</p>
+<p>  设 $u_k=\left|\begin{matrix}F_{k+1}\\F_{k}\end{matrix}\right|$, 则该方程组可以矩阵化为 $u_{k+1}=\left|\begin{matrix}1&amp;1\\1&amp;0\end{matrix}\right|u_k=\left|\begin{matrix}F_{k+1}+F_{k}\\F_{k+1}\end{matrix}\right|$</p>
+<p>  这样我们成功将一个二阶方程化为一个一阶方程组, 也就是我们在例 1中提到的 $u_{k+1}=Au_k$ 的形式.</p>
+<p>  对于矩阵 $A=\left|\begin{matrix}1&amp;1\\1&amp;0\end{matrix}\right|$, 我们知道其特征值为: </p>
+<p>  ​                                                    $\lambda_1=\frac{1}{2}(1+\sqrt{5})=1.618,\lambda_2=\frac{1}{2}(1-\sqrt{5})=-0.618$</p>
+<p>  根据上面的介绍, $u_k=A^ku_0=c_1\lambda_1^k x_1+c_2\lambda_2^k x_2+\cdots+c_n\lambda_n^k x_n$. 而对于斐波那契这个数列而言, n = 2, 有:</p>
+<p>  ​                                                    $u_k=c_1\lambda_1^k x_1+c_2\lambda_2^k x_2$</p>
+<p>  而 $\lambda_2=-0.618$, 其绝对值比 1 小, 所以 $u_k$ 后一项趋于 0, 所以影响数列变化只剩下了 $\lambda_1$. 这样根据上面公式, 可以初步估算第 100 项近似为: </p>
+<p>  ​                                                    $F_{100}\approx c_1\lambda_1^{100}=c_1(\frac{1+\sqrt{5}}{2})^{100}$</p>
+<p>  接下来我们求 C 的对应值, 这需要从 $u_0$ 的展开式入手, 所以我们需要先得到矩阵 A 的两个特征向量:</p>
+<p>  ​                                                    $x_1=\left|\begin{matrix}\lambda_1\\1\end{matrix}\right|,x_2=\left|\begin{matrix}\lambda_2\\1\end{matrix}\right|$</p>
+<p>  本例中的初始向量 $u_0$ 为: $u_0=\left|\begin{matrix}1\\0\end{matrix}\right|$</p>
+<p>  将之代入 $u_0$ 的式子: $u_0=c_1x_1+c_2x_2+\cdots+c_nx_n$, 即可求得 $c_1$ and $c_2$.</p>
+<p>  我们来回顾一下解题的思路:</p>
+<ul>
+<li>首先将方程组构造成动态增长的一阶方程组, 此时它的初始向量为 $u_0$.</li>
+<li>此后关键在于确定 $A$ 的特征值, 因为特征值决定了增长的趋势, 发散至无穷还是收敛至 0 全由特征值决定.</li>
+<li>接着需要找到对应的 $u_k$ 的展开式, 确定数列变化过程以及对应值.</li>
+<li>求 $A$ 的特征向量, 代入 $u_0$ 来确定 c 的值, 而且各个特征向量必须是独立的.</li>
+</ul>
+</blockquote>
+<h2 id="Lec-22-Differentiatial-Equations-and-exp-At"><a href="#Lec-22-Differentiatial-Equations-and-exp-At" class="headerlink" title="Lec 22 Differentiatial Equations and exp(At)"></a>Lec 22 Differentiatial Equations and exp(At)</h2><h2 id="Lec-23-Markov-Matrices-Fourier-Series"><a href="#Lec-23-Markov-Matrices-Fourier-Series" class="headerlink" title="Lec 23 Markov Matrices, Fourier Series"></a>Lec 23 Markov Matrices, Fourier Series</h2><h2 id="Lec-24-Symmetric-Matrices-and-Positive-Definiteness"><a href="#Lec-24-Symmetric-Matrices-and-Positive-Definiteness" class="headerlink" title="Lec 24 Symmetric Matrices and Positive Definiteness"></a>Lec 24 Symmetric Matrices and Positive Definiteness</h2><h2 id="Lec-25-Complex-Matrices-and-Fast-Fourier-Transform"><a href="#Lec-25-Complex-Matrices-and-Fast-Fourier-Transform" class="headerlink" title="Lec 25 Complex Matrices and Fast Fourier Transform"></a>Lec 25 Complex Matrices and Fast Fourier Transform</h2><h2 id="Lec-26-Positive-Definite-Matrices-and-Minima"><a href="#Lec-26-Positive-Definite-Matrices-and-Minima" class="headerlink" title="Lec 26 Positive Definite Matrices and Minima"></a>Lec 26 Positive Definite Matrices and Minima</h2><h2 id="Lec-27-Similar-Matrices-and-Jordan-Form"><a href="#Lec-27-Similar-Matrices-and-Jordan-Form" class="headerlink" title="Lec 27 Similar Matrices and Jordan Form"></a>Lec 27 Similar Matrices and Jordan Form</h2><h2 id="Lec-28-Singular-Value-Decomposition"><a href="#Lec-28-Singular-Value-Decomposition" class="headerlink" title="Lec 28 Singular Value Decomposition"></a>Lec 28 Singular Value Decomposition</h2><h2 id="Lec-29-Linear-Transformations-and-Their-Matrices"><a href="#Lec-29-Linear-Transformations-and-Their-Matrices" class="headerlink" title="Lec 29 Linear Transformations and Their Matrices"></a>Lec 29 Linear Transformations and Their Matrices</h2><h2 id="Lec-30-Change-of-Basis-and-Image-Compression"><a href="#Lec-30-Change-of-Basis-and-Image-Compression" class="headerlink" title="Lec 30 Change of Basis and Image Compression"></a>Lec 30 Change of Basis and Image Compression</h2><h2 id="Lec-31-Left-and-Right-Inverses-and-Pseudoinverse"><a href="#Lec-31-Left-and-Right-Inverses-and-Pseudoinverse" class="headerlink" title="Lec 31 Left and Right Inverses and Pseudoinverse"></a>Lec 31 Left and Right Inverses and Pseudoinverse</h2></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/08/15/MIT-Linear-Algebra-Part-2/">https://www.facequant.com/2020/08/15/MIT-Linear-Algebra-Part-2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linear-Algebra/">Linear Algebra</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/08/18/Introduction-to-Numpy/"><img class="prev-cover" src="https://i.loli.net/2020/08/09/2sYXwjC1ZRBKmpl.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Introduction to Numpy</div></div></a></div><div class="next-post pull-right"><a href="/2020/08/15/MIT-Linear-Algebra-Part-1/"><img class="next-cover" src="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">MIT Linear Algebra Part 1</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/08/15/MIT-Linear-Algebra-Part-1/" title="MIT Linear Algebra Part 1"><img class="cover" src="https://i.loli.net/2020/08/09/FfVbWqZYmp2xUvw.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-08-15</div><div class="title">MIT Linear Algebra Part 1</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-16-Orthogonal-Matrices-and-Gram-Schmidt"><span class="toc-text">Lec 16 Orthogonal Matrices and Gram-Schmidt</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#16-1-Overview"><span class="toc-text">16.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16-2-Review-on-Orthonormal-Vectors"><span class="toc-text">16.2 Review on Orthonormal Vectors</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16-3-Orthogonal-Matrix-Q"><span class="toc-text">16.3 Orthogonal Matrix (Q)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16-4-Gram-Schmidt"><span class="toc-text">16.4 Gram-Schmidt</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-17-Properties-of-Determinants"><span class="toc-text">Lec 17 Properties of Determinants</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#17-1-Overview"><span class="toc-text">17.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#17-2-Properties"><span class="toc-text">17.2 Properties</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-18-Determinant-Formulas-and-Cofactors"><span class="toc-text">Lec 18 Determinant Formulas and Cofactors</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#18-1-Overview"><span class="toc-text">18.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-2-Determinant-Formulas"><span class="toc-text">18.2 Determinant Formulas</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-3-Cofactors"><span class="toc-text">18.3 Cofactors</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-19-Cramer%E2%80%99s-Rule-Inverse-Matrix-and-Volume"><span class="toc-text">Lec 19 Cramer’s Rule, Inverse Matrix and Volume</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#19-1-Overview"><span class="toc-text">19.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-2-Inverse-Matrix-Formula"><span class="toc-text">19.2 Inverse Matrix Formula</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-3-Cramer%E2%80%99s-Rule"><span class="toc-text">19.3 Cramer’s Rule</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-4-Volume"><span class="toc-text">19.4 Volume</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-20-Eigenvalues-and-Eigenvectors"><span class="toc-text">Lec 20 Eigenvalues and Eigenvectors</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#20-1-Overview"><span class="toc-text">20.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-2-Concept-of-Eigenvalues-and-Eigenvectors"><span class="toc-text">20.2 Concept of Eigenvalues and Eigenvectors</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-3-Solution"><span class="toc-text">20.3 Solution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-4-Special-Case"><span class="toc-text">20.4 Special Case</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-21-Diagonalization-and-Powers-of-A"><span class="toc-text">Lec 21 Diagonalization and Powers of A</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#20-1-Overview-1"><span class="toc-text">20.1 Overview</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-2-Diagonalization"><span class="toc-text">20.2 Diagonalization</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-3-Differential-Equations"><span class="toc-text">20.3 Differential Equations</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-22-Differentiatial-Equations-and-exp-At"><span class="toc-text">Lec 22 Differentiatial Equations and exp(At)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-23-Markov-Matrices-Fourier-Series"><span class="toc-text">Lec 23 Markov Matrices, Fourier Series</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-24-Symmetric-Matrices-and-Positive-Definiteness"><span class="toc-text">Lec 24 Symmetric Matrices and Positive Definiteness</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-25-Complex-Matrices-and-Fast-Fourier-Transform"><span class="toc-text">Lec 25 Complex Matrices and Fast Fourier Transform</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-26-Positive-Definite-Matrices-and-Minima"><span class="toc-text">Lec 26 Positive Definite Matrices and Minima</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-27-Similar-Matrices-and-Jordan-Form"><span class="toc-text">Lec 27 Similar Matrices and Jordan Form</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-28-Singular-Value-Decomposition"><span class="toc-text">Lec 28 Singular Value Decomposition</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-29-Linear-Transformations-and-Their-Matrices"><span class="toc-text">Lec 29 Linear Transformations and Their Matrices</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-30-Change-of-Basis-and-Image-Compression"><span class="toc-text">Lec 30 Change of Basis and Image Compression</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lec-31-Left-and-Right-Inverses-and-Pseudoinverse"><span class="toc-text">Lec 31 Left and Right Inverses and Pseudoinverse</span></a></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

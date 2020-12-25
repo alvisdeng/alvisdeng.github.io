@@ -1,0 +1,427 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>模型选择与评估 | 阿平的自我修养</title><meta name="keywords" content="Others"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1. Basic Knowledge通常我们把分类错误的样本数占总数的比例称为 “错误率” (error rate), 即如果在 m 个样本中有 a 个样本分类错误, 则错误率 $E&#x3D;a&#x2F;m$. 相应的, $1-a&#x2F;m$ 称为 “精度” (accuracy). 训练误差 (training error) 或 经验误差 (empirical error): 学习器在训练集上的误差. 泛化误差 (ge">
+<meta property="og:type" content="article">
+<meta property="og:title" content="模型选择与评估">
+<meta property="og:url" content="https://www.facequant.com/2020/11/12/%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E4%B8%8E%E8%AF%84%E4%BC%B0/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="1. Basic Knowledge通常我们把分类错误的样本数占总数的比例称为 “错误率” (error rate), 即如果在 m 个样本中有 a 个样本分类错误, 则错误率 $E&#x3D;a&#x2F;m$. 相应的, $1-a&#x2F;m$ 称为 “精度” (accuracy). 训练误差 (training error) 或 经验误差 (empirical error): 学习器在训练集上的误差. 泛化误差 (ge">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/ROC.png">
+<meta property="article:published_time" content="2020-11-12T09:40:15.000Z">
+<meta property="article:modified_time" content="2020-12-25T18:31:17.931Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Others">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/ROC.png"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/11/12/%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E4%B8%8E%E8%AF%84%E4%BC%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-26 02:31:17'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="no-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">模型选择与评估</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-12T09:40:15.000Z" title="发表于 2020-11-12 17:40:15">2020-11-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-25T18:31:17.931Z" title="更新于 2020-12-26 02:31:17">2020-12-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Machine-Learning/">Machine Learning</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">7.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>25分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><h3 id="1-Basic-Knowledge"><a href="#1-Basic-Knowledge" class="headerlink" title="1. Basic Knowledge"></a>1. Basic Knowledge</h3><p>通常我们把分类错误的样本数占总数的比例称为 <strong>“错误率” (error rate</strong>), 即如果在 m 个样本中有 a 个样本分类错误, 则错误率 $E=a/m$. 相应的, $1-a/m$ 称为 <strong>“精度” (accuracy)</strong>.</p>
+<p><strong>训练误差 (training error)</strong> 或 <strong>经验误差 (empirical error):</strong> 学习器在训练集上的误差.</p>
+<p><strong>泛化误差 (generalizaiton error):</strong> 学习器在测试集上的误差.</p>
+<p><u>很显然, 我们希望得到泛化误差较小的学习器.</u> 但是我们提前是不知道新样本是什么样的, 实际我们能做的就是努力使经验误差最小化. 但是在训练集上做的好, 不代表其能在测试集上做的好. 这就引出了两种现象:</p>
+<ul>
+<li><p><strong>过拟合 (Overfitting)</strong></p>
+<p>学习器把训练样本学得”太好”, 已经把训练样本自身的一些特点当作了所有潜在样本都会具有的一般性质, 这样就会导致泛化性能下降.</p>
+</li>
+<li><p><strong>欠拟合 (Underfitting)</strong></p>
+<p>对训练样本的一般性质尚未学好</p>
+</li>
+</ul>
+<p>欠拟合比较好解决, 麻烦的是过拟合. 实际工作中大多数时候都是在处理过拟合. 各类学习算法都必然带有一些针对过拟合的措施, 然而我们必须认识到, 过拟合是无法避免的, 我们所能做的只是”缓解”. </p>
+<h3 id="2-Model-Evaluation"><a href="#2-Model-Evaluation" class="headerlink" title="2. Model Evaluation"></a>2. Model Evaluation</h3><p>通常, 我们可以通过<strong>测试集 (testing set)</strong> 来测试学习器对新样本的判别能力, 然后以测试集上的<strong>测试误差 (testing error)</strong> 作为泛化误差的近似. 通常我们假设测试样本也是从样本真实分布中<strong>独立同分布采样而得</strong>. 但需注意的是, 测试集应该尽可能与训练集互斥, 即测试样本尽量不在训练集中出现且未在训练过程中使用过.</p>
+<p>可是, 我们只有一个包含 m 个样例的数据集 $D$, 既要训练, 又要测试, 怎么才能做到呢? 答案是: 通过对 $D$ 进行适当的处理, 从中产生出训练集 $S$ 和测试集 $T$. 我们在这里介绍几种常见的做法:</p>
+<ul>
+<li><strong>留出法(hold-out):</strong> 数据量大</li>
+<li><strong>交叉验证法(cross validatation):</strong> 数据量大</li>
+<li><strong>自助法(bootstrapping):</strong> 数据量小</li>
+</ul>
+<h4 id="2-1-Hold-Out"><a href="#2-1-Hold-Out" class="headerlink" title="2.1 Hold-Out"></a>2.1 Hold-Out</h4><p><strong>留出法</strong>直接将数据集 $D$ 划分为两个互斥的集合, 其中一个集合作为训练集 $S$, 另外一个作为测试集 $T$, 即 $D=S\cup T,S\cap T=\emptyset$. 我们在 S 上训练出模型之后, 用 $T$ 来评估器测试误差, 作为对泛化误差的估计.</p>
+<p>对于留出法, 我们需要注意的是要尽量保证 $S$ 和 $T$ 的数据分布的一致性, 避免因数据划分过程中引入额外的偏差而对最终结果产生影响. </p>
+<blockquote>
+<p>  <strong>举个例子, 在分类任务中, 我们至少要保证样本的类别比例相似.</strong></p>
+<p>  如果从采样 (sampling) 的角度来看待数据的划分过程, 则保留类别比例的采样方式通常称为<strong>分层采样 (stratified sampling)</strong>. 我们现在通过对 $D$ 进行分层采样获得 70% 样本的训练集 $S$ 和含 30% 样本的测试集 $T$. 若 $D$ 包含 500 个正例, 500 个反例, 则我们的训练集 $S$ 应该包含 350 个正例和 350 个反例, 而测试集 $T$ 应该包含 150 个正例和 150 个反例.</p>
+<p>  若 $S,T$ 中的样本类别比例差别很大, 则误差估计将由于 $S,T$ 数据分布的差异而产生一定的偏差.</p>
+</blockquote>
+<p>在上面的例子中, 还有一个问题. 在构建 $S$ 或者 $T$ 的时候, 我们可以对 $D$ 进行排序, 然后将前 350 个正例或最后 350 个正例放到训练集中. 这些不同的划分将使我们得到不同的 $S$ 和 $T$, 进而模型评估的结果也会有差别, 因此单次留出法的结果往往不是很可靠. </p>
+<p>所以再实际操作留出法的时候, 我们可能需要进行 100 次随机划分, 每次产生一组 $S,T$ 用于评估, 而最后的结果是这 100 次评估的平均值. 通过这样做, 我们同样可以得到估计结果的标准差.</p>
+<p><strong>Another problem</strong></p>
+<p>尽管我们做了上面的范例操作, 但是同样还存在一个问题. 我们在划分训练集和测试集的时候, 需要指定比例. 试想: 若我们令训练集 $S$ 包含过多的样本, 那么我们训练得到模型可能更接近用 $D$ 训练出来的模型, 但由于 $T$ 比较小, 评估结果可能不够稳定和准确. 同理, 训练集比较小也会出现相应的问题. 但对于这个问题, 我们并没有完美的解决方案, 常见的做法是将大约 2/3 ~ 4/5 的样本用于训练, 剩余样本用于测试.</p>
+<h4 id="2-2-Cross-Validation"><a href="#2-2-Cross-Validation" class="headerlink" title="2.2 Cross Validation"></a>2.2 Cross Validation</h4><p><strong>交叉验证法</strong>先将数据集 $D$ 划分为 k 个大小相似的互斥子集, 即 $D=D_1\cup D_2\cup …\cup D_k,D_i\cap D_j=\emptyset(i\ne j).$ 其中每个子集 $D_i$ 都尽可能保持数据分布的一致性, 即从 $D$ 中通过分层采样得到</p>
+<p>然后, 我们每次使用 $k-1$ 个子集的并集作为训练集, 余下的那个子集作为测试集. 这样我们就能获得 $k$ 组训练/测试集, 从而可以进行 $k$ 次训练和测试, 最终返回的是这 $k$ 个测试结果的均值. $k$ 最常用的取值是 10, 此时称为 10 折交叉验证; 其他常用的 k 值有 5, 20 等.</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/b04c27c5-7e3f-428a-9aa6-bb3ebcd3584c.png" alt="K-fold cross-validation - Mastering Predictive Analytics with scikit-learn  and TensorFlow" style="zoom:50%;" /></p>
+<p>与留出法相似, 将数据集 $D$ 划分为 k 个子集同样存在多种划分方式. 为减小因样本划分不同而引入的差别, $k$ 折交叉验证通常要随机使用不同的划分重复 $p$ 次, 最终的评估结果是这 $p$ 次 $k$ 折交叉验证结果的均值, 例如常见的有 “10 次 10 折交叉验证”.</p>
+<p>假设数据集 $D$ 中包含 $m$ 个样本, 若令 $k=m$, 则得到交叉验证法的一个特例: 留一法 (Leave-One-Out, 简称 LOO). 显然, 留一法不受随机样本划分方式的影响, 因为 $m$ 个样本只有唯一的方式划分 $m$ 个子集 — 每个子集包含一个样本. 留一法使用的训练集与初始数据集相比只少了一个样本, 这就使得在绝大数情况下, 留一法中被实际评估的模型与期望评估的用 $D$ 训练出的模型很相似. 因此, 留一法的评估结果往往被认为比较准确. 然而, 留一法也有其缺陷: 在数据集比较大时, 训练 $m$ 个模型的计算开销可能是难以忍受的 (例如数据集包含 1 百万个样本, 则需训练 1 百万个模型), 而这还是在未考虑算法调参的情况下. </p>
+<h4 id="2-3-Bootstrapping"><a href="#2-3-Bootstrapping" class="headerlink" title="2.3 Bootstrapping"></a>2.3 Bootstrapping</h4><p>我们现在已经大概了解了<strong>留一法</strong>和<strong>交叉验证法</strong>的优缺点. 那么是否存在一个方法: 可以减少训练样本规模不同造成的影响, 同时还能比较高效地进行实验估计呢?</p>
+<p><strong>自助法 (boostrapping)</strong> 是一个比较好的解决方案, 它直接以自助采样法 (bootstrap sampling) 为基础. 给定包含 $m$ 个样本的数据集 $D$, 我们对它进行采样数据集 $D’$: 每次随机从 $D$ 中挑选一个样本, 将其拷贝放入 $D’$, 然后再将该样本放回初始数据集 $D$ 中, 使得该样本在下次采样时仍有可能被采到; 这个过程重复执行 $m$ 次后, 我们就得到了包含 $m$ 个样本的数据集 $D’$, 这就是自助采样的结果. 显然, $D$ 中的一部分样本会在 $D’$ 中多次出现, 而另外一部分样本不出现. 我们可以做一个简单的估计, 样本在 $m$ 次采样中始终不被采到的概率是 $(1-\frac{1}{m})^m$, 取极限得到:</p>
+<script type="math/tex; mode=display">
+\lim\limits_{m\rightarrow\inf}(1-\frac{1}{m})\approx\frac{1}{e}\approx0.368</script><p>通过自助采样, 初始数据集 $D$ 中约有 36.8% 的样本未出现在采样数据集 $D’$ 中. 于是我们可以将 $D’$ 用作训练集, $D\backslash D’$ 用作测试集.</p>
+<h3 id="3-Parameter-Tuning"><a href="#3-Parameter-Tuning" class="headerlink" title="3. Parameter Tuning"></a>3. Parameter Tuning</h3><p><strong>参数配置不同, 我们得到的模型的性能往往有显著的差别.</strong></p>
+<p>机器学习中很多算法的参数选择往往是在实数范围内取值, 因此, 对每种参数配置都训练出来模型是不可行的. 比较常见的做法, 是对每个参数选定一个范围和变化步长. 但是这样的参数选定往往得到的结果都不是最佳值, <strong>但是这是在计算开销和性能估计之间进行折中的结果</strong>.</p>
+<p>但其实, 在这种折中之后, 调参依然很困难. 举个例子, 我们的算法有 3 个参数, 每个参数仅考虑 5 个候选值, 这样对每一组训练/测试集就有 $5^3=125$ 个模型需要考察. 然而很多机器学习算法往往有很多参数需要设定, 这就意味着我们的调参工程量极大.</p>
+<p>需要注意的是, 我们通常把学得模型在实际使用中遇到的数据成为测试数据, 为了加以区分, 模型评估与选择中用于评估测试的数据集常称为 <strong>验证集 (validation set)</strong>. </p>
+<blockquote>
+<p>  在研究不同算法的泛化性能时, 我们用<strong>测试集</strong>上的判别效果来估计模型在实际使用时的泛化能力.</p>
+<p>  而把<strong>训练数据</strong>另外划分为训练集和验证集, 基于验证集上的性能来进行模型选择和调参.</p>
+</blockquote>
+<h3 id="4-Performance-Measure"><a href="#4-Performance-Measure" class="headerlink" title="4. Performance Measure"></a>4. Performance Measure</h3><p>性能度量反映了任务需求, 在对比不同的模型的能力时, 使用不同的性能度量往往会导致不同的评判结果; 这意味着模型的好坏是相对的, 什么样的模型是好的, 不仅取决于算法和数据, 还取决于任务需求. </p>
+<h4 id="4-1-Error-Rate-and-Accuracy"><a href="#4-1-Error-Rate-and-Accuracy" class="headerlink" title="4.1 Error Rate and Accuracy"></a>4.1 Error Rate and Accuracy</h4><p>本节开头, 在介绍基础知识的时候, 我们就谈到了<strong>错误率</strong>和<strong>精度</strong>. 这是分类任务中最常用的两种性能度量, 既适用于二分类任务, 也适用于多分类任务. </p>
+<p><strong>错误率</strong>是分类错误的样本数占样本总数的比例, <strong>精度</strong>则是分类正确的样本数占样本总数的比例. </p>
+<h4 id="4-2-Precision-Recall-and-F1"><a href="#4-2-Precision-Recall-and-F1" class="headerlink" title="4.2 Precision, Recall and F1"></a>4.2 Precision, Recall and F1</h4><p>错误率和精度虽然常用, 但并不能满足所有任务需求. 以西瓜问题为例, 假定瓜农拉来了一车西瓜, 我们用训练好的模型对这些西瓜进行判别, 显然, 错误率衡量了有多少比例的瓜被判别错误. 但是若我们关心的是<strong>挑出来的西瓜中有多少比例是好瓜</strong>或者<strong>所有好瓜中有多少比例被挑了出来</strong>. 那么错误率就不合适了, 这个时候我们就需要使用其他的性能度量.</p>
+<p>所以, 我们在这里就引入两个新的度量:</p>
+<ul>
+<li><strong>查准率 (precision)</strong></li>
+<li><strong>查全率 (recall)</strong></li>
+</ul>
+<p>对于二分类问题, 可将样例根据其真实类别与学习器预测类别的组合划分为<strong>真正例 (true positive)</strong>, <strong>假正例 (false positive)</strong>, <strong>真反例 (true negative)</strong>, <strong>假反例 (false negative)</strong> 四种情形. 令 <strong>TP, FP, TN, FN</strong> 分别表示其对应的样例数, 则显然有 <strong>TP+FP+TN+FN=样例总数</strong>. 分类结果的 <strong>混淆矩阵 (confusion matrix)</strong> 如下图所示.</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1*fxiTNIgOyvAombPJx5KGeA.png" alt="Confusion Matrix for Your Multi-Class Machine Learning Model | by Joydwip  Mohajon | Towards Data Science" style="zoom:50%;" /></p>
+<p>查准率 $Precision$ 和查全率 $Recall$ 分别定义为:</p>
+<script type="math/tex; mode=display">
+Precision=\frac{TP}{TP+FP},\\
+Recall=\frac{TP}{TP+FN}.</script><p>查准率和查全率是一对矛盾的度量. 一般来说, <strong>查准率高时, 查全率往往偏低</strong>. 例如, 若希望将好瓜尽可能多地选出来, 则可通过增加选瓜的数量来实现, 如果将所有西瓜都选上, 那么所有的好瓜也必然都被选上了, 但这样查准率就会降低. 若希望选出的好瓜中好瓜比例尽可能高, 则可只挑选最有把握的瓜, 但这样就难免会漏掉不少好瓜, 使得查全率较低. 通常只有在一些简单任务中, 才可能使查全率和查准率都很高.</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/7uHAtN2MbcLj7699f4JrD_yxgowXG2zA2cpdp-Tc8u9SHa3vzlykGaLu5Im4ELS_LgKcaa6r_eWxQddmSUDHPkFPs6l2DZQidoX_cgUfZcvh-vFt11pRhK9n.png" alt="img"  /></p>
+<p>$P-R$ 图直观地显示出学习器在样本总体上的查全率, 查准率. 在进行比较时, 若一个学习器的 $P-R$ 曲线被另一个学习器的曲线完全包住, 则可断言后者的性能优于前者. 例如, 上图中学习器 A 的性能优于学习器 C. </p>
+<p><strong>但如果曲线出现交叉的情况</strong>, 我们就需要使用其他方法来综合考虑查准率, 查全率的性能度量. <strong>平衡点 (Break-Even Point, BEP)</strong> 是其中一个方法, 即 $P=R$ 时的取值, 据此, 我们可以说学习器 A 是优于学习器 B 的.</p>
+<p>但 <strong>BEP</strong> 过于简化了, 我们更常用的是 $F1$ 度量. $F1$ 是基于查准率和查全率的调和平均:</p>
+<script type="math/tex; mode=display">
+\frac{1}{F1}=\frac{1}{2}\cdot(\frac{1}{Precision}+\frac{1}{Recall})</script><p>不同应用对 $P$ 和 $R$ 的重视程度是不同的. 例如, 在商品推荐系统中, 为了尽可能少打扰用户, 我们更希望推荐内容确实是用户感兴趣的, 此时查准率更重要; 而在逃犯信息检索系统中, 更希望尽可能少漏掉逃犯, 此时查全率更重要. 所以, 我们引入 $F1$ 度量的一般形式 $→$ $F_\beta$</p>
+<script type="math/tex; mode=display">
+\frac{1}{F_{\beta}}=\frac{1}{1+\beta^2}(\frac{1}{Precsion}+\frac{\beta^2}{Recall})</script><blockquote>
+<p>  $\beta$ &gt; 1时, 查全率有更大影响;</p>
+<p>  $\beta$ &lt; 1时, 查准率有更大影响;</p>
+</blockquote>
+<p>很多时候我们有多个二分类混淆矩阵, 例如进行多次训练/测试, 每次得到一个混淆矩阵. 或者我们执行多分类任务, 每两两类别的组合都对应一个混淆矩阵. 总之, 我们希望在 $n$ 个二分类混淆矩阵上综合考察 $P$ 和 $R$. 我们这里有两种做法:</p>
+<ol>
+<li><p><strong>macro-P and macro-R</strong></p>
+<p>一种直接的做法是先在各混淆矩阵上分别计算出查准率和查全率, 再计算平均值, 这样就得到<strong>宏查准率 (macro-P)</strong> 和<strong>宏查全率 (macro-R)</strong>,以及相应的<strong>宏 $F1$ .</strong></p>
+<script type="math/tex; mode=display">
+macro-P=\frac{1}{n}\sum_{i=1}^nP_i,\\
+macro-R=\frac{1}{n}\sum_{i=1}^nR_i,\\
+macro-F1=\frac{2\times macro-P\times macro-R}{macro-P+macro-R}</script></li>
+<li><p><strong>micro-P and micro-R</strong></p>
+<p>我们还可以先将各混淆矩阵的对应元素进行平均, 得到 $TP,FP,TN,FN$ 的平均值, 然后再基于这些平均值计算出:</p>
+<script type="math/tex; mode=display">
+micro-P=\frac{\overline{TP}}{\overline{TP}+\overline{FP}},\\
+micro-R = \frac{\overline{TP}}{\overline{TP}+\overline{FN}},\\
+micro-F1=\frac{2\times micro-P\times micro-R}{micro-P+micro-R}</script></li>
+</ol>
+<h5 id="4-2-1-Plot-Confusion-Matrix"><a href="#4-2-1-Plot-Confusion-Matrix" class="headerlink" title="4.2.1 Plot Confusion Matrix"></a>4.2.1 Plot Confusion Matrix</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> seaborn <span class="keyword">as</span> sns</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> confusion_matrix</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">sns.<span class="built_in">set</span>()</span><br><span class="line">f,ax=plt.subplots()</span><br><span class="line">y_true = [<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">1</span>]</span><br><span class="line">y_pred = [<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">1</span>]</span><br><span class="line">C2= confusion_matrix(y_true, y_pred,labels=[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>])</span><br><span class="line"><span class="comment"># print(C2) #打印出来看看</span></span><br><span class="line">sns.heatmap(C2,annot=<span class="literal">True</span>,ax=ax) <span class="comment">#画热力图</span></span><br><span class="line"></span><br><span class="line">ax.set_title(<span class="string">&#x27;confusion matrix&#x27;</span>) <span class="comment">#标题</span></span><br><span class="line">ax.set_xlabel(<span class="string">&#x27;predict&#x27;</span>) <span class="comment">#x轴</span></span><br><span class="line">ax.set_ylabel(<span class="string">&#x27;true&#x27;</span>) <span class="comment">#y轴</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse/image-20201219043532565.png" alt="image-20201219043532565" style="zoom:50%;" /></p>
+<h5 id="4-2-2-Plot-PR-Curve"><a href="#4-2-2-Plot-PR-Curve" class="headerlink" title="4.2.2 Plot PR Curve"></a>4.2.2 Plot PR Curve</h5><p>根据学习器的预测结果对样本进行排序, 排在前面的是学习器认为最可能是正例的样本, 排在最后的是最不可能是正例的样本, 按此顺序逐个将样本作为正例预测, 则每次可以计算出当前的查全率、查准率，以查全率为横轴、查准率为纵轴做图, 得到的查准率-查全率曲线即为P-R曲线. </p>
+<p>也就是说对每个样本预测其为正例的概率, 然后将所有样本按预测的概率进行排序, 然后依次将排序后的样本做为正例进行预测, 从而得到每次预测的查全率与查准率. 这个依次将样本做为正例的过程实际上就是逐步降低样本为正例的概率的域值, 通过降低域值, 更多的样本会被预测为正例, 从而会提高查全率, 相对的查准率可能降低, 而随着后面负样本的增加, 查全率提高缓慢甚至没有提升, 精度降低会更快.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> precision_recall_curve</span><br><span class="line"><span class="keyword">from</span> sklearn.utils.fixes <span class="keyword">import</span> signature</span><br><span class="line"></span><br><span class="line">plt.figure(<span class="string">&quot;P-R Curve&quot;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Precision/Recall Curve&#x27;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&#x27;Recall&#x27;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;Precision&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#y_true为样本实际的类别，y_scores为样本为正例的概率</span></span><br><span class="line">y_true = np.array([<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>])</span><br><span class="line">y_scores = np.array([<span class="number">0.9</span>, <span class="number">0.75</span>, <span class="number">0.86</span>, <span class="number">0.47</span>, <span class="number">0.55</span>, <span class="number">0.56</span>, <span class="number">0.74</span>, <span class="number">0.62</span>, <span class="number">0.5</span>, <span class="number">0.86</span>, <span class="number">0.8</span>, <span class="number">0.47</span>, <span class="number">0.44</span>, <span class="number">0.67</span>, <span class="number">0.43</span>, <span class="number">0.4</span>, <span class="number">0.52</span>, <span class="number">0.4</span>, <span class="number">0.35</span>, <span class="number">0.1</span>])</span><br><span class="line">precision, recall, thresholds = precision_recall_curve(y_true, y_scores)</span><br><span class="line"></span><br><span class="line"><span class="comment">#print(precision)</span></span><br><span class="line"><span class="comment">#print(recall)</span></span><br><span class="line"><span class="comment">#print(thresholds)</span></span><br><span class="line">plt.plot(recall,precision)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse/image-20201219042544752.png" alt="image-20201219042544752" style="zoom:50%;" /></p>
+<h4 id="4-3-ROC-and-AUC"><a href="#4-3-ROC-and-AUC" class="headerlink" title="4.3 ROC and AUC"></a>4.3 ROC and AUC</h4><p>很多学习器是为测试样本产生一个预测值, 然后将这个预测值与一个分类阈值 (threshold) 进行比较, 若大于阈值则分为正类, 否则为反类. 例如, 神经网络在一般情形下是对每个测试样本预测出一个 [0.0, 1.0] 之间的实值, 然后将这个值与 0.5 进行比较, 大于 0.5 则判为正例, 否则为反例. 这个实值或概率预测结果的好坏, 直接决定了学习器的泛化能力. </p>
+<p><strong>根据这个实值或概率预测结果</strong>, 我们可将测试样本进行<strong>排序</strong>, <strong>最可能</strong>是正例的排在前面, <strong>最不可能</strong>是正例的排在最后面. 这样, 分类过程就相当于在这个排序中以某个<strong>截断点 (cut point)</strong> 将样本分为两部分, 前一部分判作正例, 后一部分则判作反例. 在不同的任务中, 我们可以根据具体的任务绪论来采用不同的截断点.</p>
+<ul>
+<li><strong>排序中靠前的位置进行截断</strong> $\rightarrow$ <strong>更重视 $Precision$</strong></li>
+<li><strong>排序中靠后的位置进行截断</strong> $→$ <strong>更重视 $Recall$</strong></li>
+</ul>
+<h5 id="4-3-1-ROC"><a href="#4-3-1-ROC" class="headerlink" title="4.3.1 ROC"></a>4.3.1 ROC</h5><p><strong>因此排序本身的好坏, 体现了综合考虑学习器在不同任务下的期望泛化性能的好坏.</strong> ROC 曲线则是从这个角度出发来研究泛化性能的有力工具.</p>
+<p>ROC全称是<strong>“受试者工作特征”(Receiver Operating Characteristic)曲线</strong>, 它源于“二战”中用于敌机检测的雷达信号分析技术.</p>
+<p>具体来说, 据说在二战期间, 军队中雷达兵的任务是通过观察显示屏的雷达信号来判断是不是有敌人来了, 在以下两种情况下显示屏上会有雷达信号:</p>
+<ul>
+<li>有敌机来袭 (真实情况下的正例)</li>
+<li>有飞鸟 (真实情况下的负例)</li>
+</ul>
+<p>这个时候不同的雷达兵就可能会报出不同的结果:</p>
+<ul>
+<li>假如这个雷达兵比较谨慎, 只要有信号就报告有敌情 (可以看作更重视“查全率”), 就会增加误报的风险;</li>
+<li>假如这个雷达兵比较大胆, 只要有信号就认为是鸟 (可以看作更重视“查准率”), 就会增加漏报的风险;</li>
+</ul>
+<p>这样就有了我们针对这个问题的“混淆矩阵”:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201219003520752.png" alt="image-20201219003520752" style="zoom: 33%;" /></p>
+<p>理想情况下, 希望每个雷达兵能够好好研究飞机和飞鸟信号的区别, 进行准确的判断. 但是现实问题是, 每个雷达兵的判断标准不一, 谨慎的容易出现误报, 胆大的容易出现漏报. 针对以上问题, 雷达兵的上级管理者汇总了每个雷达兵的汇报特点, 尤其是他们的漏报和误报的概率, 并将这些概率基于二维坐标系绘制成一个图形:</p>
+<ul>
+<li>纵坐标为敏感性(真阳性率): 表示在所有敌人来袭(即真实情况为正例, TP+FN)的事件中, 每个雷达兵准确预报(即TP)的概率;</li>
+<li>横坐标为1-特异性(假阳性率): 表示在所有飞鸟信号(即真实情况为反例, TN+FP)中, 每个雷达兵预报错误(即FP)的概率;</li>
+</ul>
+<p>每个雷达兵的预报标准不同, 所以得到的敏感性和特异性的组合也不同. 一个雷达兵的敏感性和特异性的组合正好在一条曲线上, 这条曲线就是ROC曲线. 到这里就不难理解ROC曲线为什么叫做“受试者工作特征”曲线了, 在这里受试者就是指雷达兵, 绘制这个曲线的目的就是观察雷达兵的工作特征, 所以叫做受试者工作特征曲线. </p>
+<p><strong>在机器学习中, 受试者就是我们的学习器了, 绘制曲线的目的就是观察学习器的工作性能. 不同的截断点会产生不同的 P-R 曲线或 ROC 曲线. 不同的算法模型对于同一个问题也会产生不同的 P-R 曲线或 ROC 曲线.</strong></p>
+<p>现在, 我们来研究如何绘制 <strong>ROC 曲线.</strong></p>
+<p>与我们之前介绍的 P-R 曲线类似, 我们根据学习器的预测结果对样例进行排序, 按此顺序<strong>逐个把样本作为正例进行预测</strong>, 每次计算出两个重要量的值:</p>
+<ul>
+<li><p><strong>真正例率 (True Positive Rate), 也可以称为灵敏度 (Sensitivity)</strong></p>
+<script type="math/tex; mode=display">
+TPR=\frac{TP}{TP+FN}</script></li>
+<li><p><strong>假正例率 (False Positive Rate), 也可以称为 $1-Specificity$ (特异度)</strong></p>
+<script type="math/tex; mode=display">
+FPR=\frac{FP}{TN+FP}</script></li>
+</ul>
+<p>以FPR作为横轴, TPR作为纵轴作图, 就得到了“ROC曲线”, 显示ROC曲线的图叫做“ROC图”, 如下所示:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1*2nd7NTEBosPakccmLVWy9A.png" alt="ROC Curve Transforms the Way We Look at a Classification Problem | by Huy  Bui | Towards Data Science" style="zoom:50%;" /></p>
+<p>对 ROC 曲线的几点解释:</p>
+<ol>
+<li>图中的对角线 (图中的虚线), 对应随机猜测模型, 这种模型没有任何价值;</li>
+<li>$ROC$ 曲线越靠近左上角, 性能越好；</li>
+<li>点(0,1) (左上角), 对应于将所有正例排在所有反例之前的“<strong>理想模型</strong>”, 也就是 <code>FPR=0,TPR=1</code>, 结合上面的公式, 可以得到这时 <code>FP=0,FN=0</code> 模型对所有的样本分类都正确, 也就是将真实为正的预测为正, 真实为反的预测为反.</li>
+<li>$ROC$ 曲线与  $P-R$ 曲线不一样的地方在于, 当正反样例分布发生剧烈变化的时候: <strong>ROC曲线</strong>的形状基本能够保持不变, <strong>P-R曲线</strong>的形状一般会发生剧烈变化.</li>
+</ol>
+<p>对于“理想模型”, 即将所有正例排在所有反例之前, 在画 ROC 曲线过程中, 由于前 $m^+$ 个样例均为真正例, 即从 $(0,0)$ 一直沿纵轴方向增加 $m^+$ 次, 每次增加 $\frac{1}{m^+}$, 到达坐标 (0,1); 接下来 $m^-$ 个样例均为假正例, 即一直沿着横坐标走, 轨迹为从 $(0,0)$ 至 $(1,1)$.</p>
+<p>对于“随机猜测”模型, 即根据预测结果对样例进行排序基本是正例和反例均匀分布 (假如正例个数等于反例个数, 则应该是一个正例一个反例), 在画 ROC 曲线过程中, 向纵方向走一步, 然后向横轴方向走一步, 因此轨迹为从 $(0,0)$ 至 $(1,1)$.</p>
+<p>现实任务中, 通常是利用<strong>有限个</strong>测试样例来绘制ROC图, 此时仅能获得有限个(FPR,TPR)坐标对, 无法产生图中光滑的ROC曲线,绘制过程如下:</p>
+<ol>
+<li>给定 $m^+$ 个正例和 $m^-$ 个反例, 根据学习器预测结果对样例进行排序;</li>
+<li>设置不同的分类阈值:<ul>
+<li>把分类阈值设为最大, 即把所有样例均预测为反例, 此时TPR=FPR=0. 在坐标(0,0)处标记一个点.</li>
+<li>将分类阈值依次设为每个样例的预测值, 即依次将每个样例划分为正例. 设前一个标记点坐标为 $(x,y)$:<ul>
+<li>当前若为真正例 (TP), 则对应标记点的坐标为 $(x,y+\frac{1}{m^+})$</li>
+<li>当前若为假正例(FP), 则对应标记点的坐标为 $(x+\frac{1}{m^-},y)$</li>
+</ul>
+</li>
+<li>最后用线段连接相邻点即得 ROC曲线;</li>
+</ul>
+</li>
+</ol>
+<h5 id="4-3-2-AUC"><a href="#4-3-2-AUC" class="headerlink" title="4.3.2 AUC"></a>4.3.2 AUC</h5><p>进行学习器比较时, 与P-R图类似:</p>
+<ul>
+<li>若一个学习器的ROC曲线被另一个学习器的曲线完全“包住”, 则可断言后者的性能优于前者;</li>
+<li>若两个学习器的ROC曲线发生交叉, 则难以一般性地断言两者哪个更优. 此时如果一定要进行比较, 则较为合理的判据是: 比较ROC曲线下的面积, 即<strong>AUC</strong>(Area Under ROC Curve).</li>
+</ul>
+<p>从定义可知, AUC可通过对ROC曲线下各部分的面积求和而得. 我们假定 ROC 曲线是有坐标为 $\{(x_1,y_1),(x_2,y_2),…,(x_m,y_m)\}$ 的点按序连接而形成, 参见图 (b), 则 AUC 可以估算为:</p>
+<script type="math/tex; mode=display">
+AUC=\frac{1}{2}\sum_{i=1}^{m-1}(x_{i+1}-x_i)\cdot(y_i+y_{i+1})</script><h5 id="4-3-3-What-are-they"><a href="#4-3-3-What-are-they" class="headerlink" title="4.3.3 What are they?"></a>4.3.3 What are they?</h5><p><strong>看书到此, 可能感觉也知道了什么是 ROC、什么是 AUC, 却又感觉没有理解其含义.</strong></p>
+<p>先梳理四个概念: 真正例率 TPR、假正例率 FPR、真反例率 TNR、假反例率 FNR，各概念的定义如下图所示:</p>
+<p><img src="https://i.loli.net/2020/10/04/i3QDuhnlvfzpgC2.png" alt="image-20201004150516758" style="zoom: 50%;" /></p>
+<blockquote>
+<p>   注: 上图由如下步骤绘出, 首先随机生成了 10000 个样本预测值 (位于 0~1 之间); 然后将每个样本随机指派为正例或反例, 样本预测值越大被指派为正例的概率越大, 反之被指派为反例的概念越大, 指派结果作为对应的 10000 个样本真实标记; 最后将 0~1 划分为 10 个区间, 分别统计每个区间内包含的正例个数和反例个数, 并用直方图表示.</p>
+<p>   由上图可以看出, 无论分类域值设置为多少, 肯定都会有样本被分类错误. 这也是实际当中最常见的情形. 设当前分类域值等于 0.6, 则可以分别得到真正例、假正例、真反例、 假反例的个数 TP、FP、TN、FN, 进而可依次计算出真正例率 TPR、假正例率 FPR、真反 例率 TNR、假反例率 FNR.</p>
+</blockquote>
+<p>实际上, TPR、FPR、TNR、FNR 就是把<strong>混淆矩阵</strong>中的四个值均除以对应的行元素之和, 而行元素之和分别表示正例样本个数和反例样本个数, 因此还可以使用条件概率做如下解释:</p>
+<p><img src="https://i.loli.net/2020/10/04/zFOtJL8BfkrV4Nx.png" alt="image-20201004151407009.png" style="zoom: 50%;" /></p>
+<p>接下来, 我们对 ROC 和 AUC 做几条解释:</p>
+<ol>
+<li>由上图还可以看出, 绘制 ROC 曲线时使用的 TPR 和 FPR, 都是基于分类域值右侧 (大于分类域值) 的样本.</li>
+<li>由式(2.21)可知, $\ell_{rank}$ 表示任取一对正例和反例, 正例预测值小于反例预测值的概率 (简单起见可以暂不考虑预测值相等的情况); 这是因为分母表示所有正例和反例组合对的个数, 分子的求和项表示正例和反例组合对中, 正例预测值小于反例预测值的组合对个数. 显然, 这个概率越小越好 (正例预测值应该大于反例预测值).</li>
+<li>$AUC+\ell_{rank}=1$, 因此 AUC 表示任取一对正例和反例, 正例预测值大于反例预测值的概率. 显然, 这个概率越大越好.</li>
+<li>按西瓜书所述, ROC 曲线绘制的过程. 其实就是将上图中分类域值从右往左（即从 1 到 0）滑动一遍, 依次记录每个域值时的 TPR 和 FPR, 描点画线即可.</li>
+<li>ROC 曲线的绘制所使用的样本集应该是测试集, 即 ROC 曲线上的每个点表示了当取不同分类域值时, 分类器泛化性能的度量 (正例样本的精度 TPR 和反例样本的错误率 FPR).</li>
+</ol>
+<p><strong>AUC的优势</strong>：AUC的计算方法同时考虑了分类器对于正例和反例的分类能力, 在<strong>样本不均衡</strong>的情况下, 依然能够对分类器作出合理的评价. (即AUC对样本类别是否均衡并<strong>不敏感</strong>, 这也是<strong>不均衡样本</strong>通常用AUC评价分类器性能的一个原因)</p>
+<blockquote>
+<p>  <strong>例如</strong>：在反欺诈场景, 设非欺诈类样本为正例, 反例占比很少(假设为0.1%):</p>
+<ul>
+<li>如果使用<strong>准确率</strong>评估, 把所有样本预测为正, 便可以获得99.9%的准确率;</li>
+<li>但是如果使用<strong>AUC</strong>, 把所有样本预测为正例, TPR=FPR=1, AUC仅为0.5, 成功规避了样本不均衡带来的问题;</li>
+</ul>
+</blockquote>
+<h5 id="4-4-4-Plot-Curve"><a href="#4-4-4-Plot-Curve" class="headerlink" title="4.4.4 Plot Curve"></a>4.4.4 Plot Curve</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Import the data to play with </span></span><br><span class="line">iris = datasets.load_iris()</span><br><span class="line">X = iris.data</span><br><span class="line">y = iris.target</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将数据二分类</span></span><br><span class="line">X,y = X[y!=<span class="number">2</span>],y[y!=<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 增加噪声特征</span></span><br><span class="line">random_state = np.random.RandomState(<span class="number">0</span>)</span><br><span class="line">n_samples,n_features = X.shape</span><br><span class="line">X = np.c_[X,random_state.randn(n_samples,<span class="number">200</span>*n_features)]</span><br><span class="line"></span><br><span class="line">cv = StratifiedKFold(n_splits=<span class="number">5</span>) <span class="comment">#导入该模型，后面将数据划分5份</span></span><br><span class="line">classifier = svm.SVC(kernel=<span class="string">&#x27;linear&#x27;</span>,probability=<span class="literal">True</span>,random_state=random_state)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 画平均ROC曲线的两个参数</span></span><br><span class="line">mean_tpr = <span class="number">0.0</span>      <span class="comment"># 用来记录画平均ROC曲线的信息</span></span><br><span class="line">mean_fpr = np.linspace(<span class="number">0</span>,<span class="number">1</span>,<span class="number">100</span>)</span><br><span class="line">cnt = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i, (train,test) <span class="keyword">in</span> <span class="built_in">enumerate</span>(cv.split(X,y)):</span><br><span class="line">    cnt += <span class="number">1</span></span><br><span class="line">    probas_ = classifier.fit(X[train],y[train]).predict_proba(X[test]) <span class="comment"># 训练模型后预测每条样本得到两种结果的概率</span></span><br><span class="line">    fpr,tpr,thresholds =roc_curve(y[test],probas_[:,<span class="number">1</span>])  <span class="comment"># 该函数得到伪正例、真正例、阈值，这里只使用前两个</span></span><br><span class="line"></span><br><span class="line">    mean_tpr += np.interp(mean_fpr,fpr,tpr) <span class="comment"># 插值函数:两点之间的线性取值</span></span><br><span class="line"></span><br><span class="line">    roc_auc = auc(fpr,tpr)</span><br><span class="line">    plt.plot(fpr,tpr,lw=<span class="number">1</span>,label=<span class="string">&quot;K Fold &#123;0&#125; (area=&#123;1:.2f&#125;&quot;</span>.<span class="built_in">format</span>(i,roc_auc))</span><br><span class="line"></span><br><span class="line">plt.plot([<span class="number">0</span>,<span class="number">1</span>],[<span class="number">0</span>,<span class="number">1</span>],<span class="string">&#x27;--&#x27;</span>,color=(<span class="number">0.6</span>,<span class="number">0.6</span>,<span class="number">0.6</span>),label=<span class="string">&quot;Random&quot;</span>) <span class="comment"># 画对角线</span></span><br><span class="line"></span><br><span class="line">mean_tpr /= cnt <span class="comment"># 求均值</span></span><br><span class="line">mean_tpr[<span class="number">0</span>] = <span class="number">0.0</span> <span class="comment"># 将第一个真正例</span></span><br><span class="line">mean_tpr[-<span class="number">1</span>] = <span class="number">1.0</span> <span class="comment"># 坐标最后一个点为（0,1） </span></span><br><span class="line">mean_auc = auc(mean_fpr, mean_tpr)</span><br><span class="line"></span><br><span class="line">plt.plot(mean_fpr, mean_tpr, <span class="string">&#x27;k--&#x27;</span>,label=<span class="string">&#x27;Mean ROC (area = &#123;0:.2f&#125;)&#x27;</span>.<span class="built_in">format</span>(mean_auc), lw=<span class="number">2</span>)</span><br><span class="line">plt.xlim([-<span class="number">0.05</span>, <span class="number">1.05</span>])     <span class="comment"># 设置x、y轴的上下限，设置宽一点，以免和边缘重合，可以更好的观察图像的整体</span></span><br><span class="line">plt.ylim([-<span class="number">0.05</span>, <span class="number">1.05</span>])</span><br><span class="line">plt.xlabel(<span class="string">&#x27;False Positive Rate&#x27;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;True Positive Rate&#x27;</span>)    <span class="comment"># 可以使用中文，但需要导入一些库即字体</span></span><br><span class="line">plt.title(<span class="string">&#x27;Receiver Operating Characteristic Example&#x27;</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&quot;lower right&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>效果如下:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201219053227939.png" alt="image-20201219053227939" style="zoom:50%;" /></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/11/12/%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E4%B8%8E%E8%AF%84%E4%BC%B0/">https://www.facequant.com/2020/11/12/%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E4%B8%8E%E8%AF%84%E4%BC%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Others/">Others</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/ROC.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/11/12/%E8%AF%A6%E8%A7%A3%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92-Linear-Regression/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_QiU6DcP_r9qWLznMw0-M_Q.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">详解线性回归(Linear Regression)</div></div></a></div><div class="next-post pull-right"><a href="/2020/11/12/%E5%86%B3%E7%AD%96%E6%A0%91-Decision-Tree/"><img class="next-cover" src="https://i.pinimg.com/originals/68/f8/e8/68f8e8dd71485c0f0c4acd9ada4123fe.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">决策树(Decision Tree)</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/11/13/偏差和方差是什么东西/" title="偏差和方差是什么东西?"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201113182320747.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">偏差和方差是什么东西?</div></div></a></div><div><a href="/2020/11/12/机器学习中常用的-Notation/" title="机器学习中常用的 Notation"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">机器学习中常用的 Notation</div></div></a></div><div><a href="/2020/11/12/机器学习中的-Entropy/" title="机器学习中的 Entropy"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1429149470.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">机器学习中的 Entropy</div></div></a></div><div><a href="/2020/11/13/深入理解-PAC-学习理论/" title="深入理解 PAC 学习理论"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">深入理解 PAC 学习理论</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Basic-Knowledge"><span class="toc-text">1. Basic Knowledge</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Model-Evaluation"><span class="toc-text">2. Model Evaluation</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Hold-Out"><span class="toc-text">2.1 Hold-Out</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-Cross-Validation"><span class="toc-text">2.2 Cross Validation</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-Bootstrapping"><span class="toc-text">2.3 Bootstrapping</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Parameter-Tuning"><span class="toc-text">3. Parameter Tuning</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Performance-Measure"><span class="toc-text">4. Performance Measure</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-Error-Rate-and-Accuracy"><span class="toc-text">4.1 Error Rate and Accuracy</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-Precision-Recall-and-F1"><span class="toc-text">4.2 Precision, Recall and F1</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-2-1-Plot-Confusion-Matrix"><span class="toc-text">4.2.1 Plot Confusion Matrix</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-2-2-Plot-PR-Curve"><span class="toc-text">4.2.2 Plot PR Curve</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-ROC-and-AUC"><span class="toc-text">4.3 ROC and AUC</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-1-ROC"><span class="toc-text">4.3.1 ROC</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-2-AUC"><span class="toc-text">4.3.2 AUC</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-3-3-What-are-they"><span class="toc-text">4.3.3 What are they?</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-4-4-Plot-Curve"><span class="toc-text">4.4.4 Plot Curve</span></a></li></ol></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

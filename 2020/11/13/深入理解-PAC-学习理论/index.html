@@ -1,0 +1,413 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>深入理解 PAC 学习理论 | 阿平的自我修养</title><meta name="keywords" content="Others"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1. Entree   统计学中由总体集合和样本集合之分, 比如要统计国内本科生对机器学习的掌握情况, 此时全国所有的本科生就是总体集合, 但总体集合往往太大而不具有实际可操作性, 一般都是取总体集合的一部分, 也就是样本集合.   在机器学习中, 样本空间对应总体集合, 而我们手头上的样例集 $D$ 对应样本集合, 样例集 $D$ 是从样本空间中采样而得, 分布 $\mathcal{D}$ 可理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解 PAC 学习理论">
+<meta property="og:url" content="https://www.facequant.com/2020/11/13/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-PAC-%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="1. Entree   统计学中由总体集合和样本集合之分, 比如要统计国内本科生对机器学习的掌握情况, 此时全国所有的本科生就是总体集合, 但总体集合往往太大而不具有实际可操作性, 一般都是取总体集合的一部分, 也就是样本集合.   在机器学习中, 样本空间对应总体集合, 而我们手头上的样例集 $D$ 对应样本集合, 样例集 $D$ 是从样本空间中采样而得, 分布 $\mathcal{D}$ 可理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg">
+<meta property="article:published_time" content="2020-11-13T10:19:06.000Z">
+<meta property="article:modified_time" content="2020-12-25T18:31:52.806Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Others">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/11/13/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-PAC-%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-26 02:31:52'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">深入理解 PAC 学习理论</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-13T10:19:06.000Z" title="发表于 2020-11-13 18:19:06">2020-11-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-25T18:31:52.806Z" title="更新于 2020-12-26 02:31:52">2020-12-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Machine-Learning/">Machine Learning</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">3.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>14分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="1-Entree"><a href="#1-Entree" class="headerlink" title="1. Entree"></a>1. Entree</h3><blockquote>
+<p>  统计学中由<strong>总体集合</strong>和<strong>样本集合</strong>之分, 比如要统计国内本科生对机器学习的掌握情况, 此时全国所有的本科生就是总体集合, 但总体集合往往太大而不具有实际可操作性, 一般都是取总体集合的一部分, 也就是样本集合.</p>
+<p>  在机器学习中, 样本空间对应总体集合, 而我们手头上的样例集 $D$ 对应样本集合, 样例集 $D$ 是从样本空间中采样而得, 分布 $\mathcal{D}$ 可理解为当从样本空间采样获得样例集 $D$ 时每个样本被采到的概率. 我们用 $\mathcal{D}(t)$ 表示样本空间第 $t$ 个样本被采到的概率.</p>
+</blockquote>
+<p>给定样例集 $D=\{(\boldsymbol{x}_1,y_1),(\boldsymbol{x}_2,y_2),…,(\boldsymbol{x}_m,y_m)\}$, 其中 $\boldsymbol{x}_i\in\mathcal{X},y_i\in\mathcal{Y}=\{-1,+1\}$. 我们假设 $\mathcal{X}$ 中的所有样本服从一个隐含未知的分布 $\mathcal{D}$, $D$ 中所有样本都是独立地从这个分布上采样而得, 即独立同分布样本.</p>
+<p><strong>我们令 h 为 $\mathcal{X}$ 到 $\mathcal{Y}$ 的一个映射, 所以泛化误差可以表示为</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102030553434.png" alt="image-20201102030553434" style="zoom:67%;" /></p>
+<blockquote>
+<p>  $P_{\boldsymbol{x}\sim D}(h(\boldsymbol{x})\neq y)$ 表示从样本空间中按分布 $\mathcal{D}$ 取一个样本 $\boldsymbol{x}$, 预测的类别标记不等于真实类表标记的概率, 即泛化误差.</p>
+<p>  在接下来的分析中, 我们有时会省略 $\boldsymbol{x}\sim\mathcal{D}$. 同时, 我们会将 $E(h;\mathcal{D})$ 简记为 $E(h)$.</p>
+<p>  泛化误差是 $h$ 在分布 $\mathcal{D}$ 上的期望误差.</p>
+</blockquote>
+<p><strong>$h$ 在 $D$ 上的经验误差为</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102031429156.png" alt="image-20201102031429156" style="zoom:67%;" /></p>
+<blockquote>
+<p>  即是在训练集上的误差. 我们会将 $\hat{E}(h;D)$ 简写为 $\hat{E}(h)$.</p>
+<p>  经验误差是 $h$ 在训练集 $D$ 上的平均误差.</p>
+</blockquote>
+<p><strong>若 $h$ 在数据集 $D$ 上的经验误差为 0, 则称 $h$ 与 $D$ 一致, 否则称其与 $D$ 不一致.</strong> 对任意两个映射 $h_1,h_2\in\mathcal{X}→\mathcal{Y}$, 可通过其<strong>不合(disagreement)</strong>来度量它们之间的差别:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102032108896.png" alt="image-20201102032108896" style="zoom:67%;" /></p>
+<p>几个常用的不等式:</p>
+<ul>
+<li><p><strong>Jensen 不等式</strong></p>
+<p>对于任何凸函数 $f(x)$, 有</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102032357029.png" alt="image-20201102032357029" style="zoom:67%;" /></p>
+<p>我们简单介绍一下凸凹函数</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102032450850.png" alt="image-20201102032450850" style="zoom:67%;" /></p>
+<p>左为凹函数: 满足 $f(\frac{x_1+x_2}{2})\gt\frac{f(x_1)+f(x_2)}{2}$;</p>
+<p>右为凸函数: 满足 $f(\frac{x_1+x_2}{2})\lt\frac{f(x_1)+f(x_2)}{2}$;</p>
+</li>
+<li><p><strong>Hoeffding 不等式</strong></p>
+<p>若 $x_1,x_2,…,x_m$ 为 $m$ 个独立随机变量, 且满足 $0\le x_i\le1$, 则对任意 $\epsilon&gt;0$, 有</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102033228049.png" alt="image-20201102033228049" style="zoom: 50%;" /></p>
+<p>式中, $\frac{1}{m}\sum_{i=1}^mx_i$ 表示 $m$ 个独立随机变量各种的某次观测值的平均值. $\frac{1}{m}\sum_{i=1}^m\mathbb{E}(x_i)$ 表示 $m$ 个独立随机变量各自的期望的平均.</p>
+<p>第一个不等式表示事件 $\frac{1}{m}\sum_{i=1}^mx_i-\frac{1}{m}\sum_{i=1}^m\mathbb{E}(x_i)\ge\epsilon$ 出现概率不大于 $e^{-2m\epsilon^2}$, 第二个等式同理. </p>
+<p><strong>Hoeffding 不等式给出了随机变量和与其期望值偏差的概率上限.</strong></p>
+</li>
+<li><p><strong>McDiarmid 不等式</strong></p>
+<p>若 $x_1,x_2,…,x_m$ 为 $m$ 个独立随机变量, 且对任意 $1\le i\le m$, 函数 $f$ 满足</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102041115754.png" alt="image-20201102041115754" style="zoom:50%;" /></p>
+<p>则对任意 $\epsilon&gt;0$, 有</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102041155685.png" alt="image-20201102041155685" style="zoom:50%;" /></p>
+<p>首先, 函数 $f$ 有 $m$ 个输入变量, 相比于 $f(x_1,…,x_m)$, $f(x_1,…,x_{i-1},x_i’,x_{i+1},…,x_m)$ 将第 $i$ 个输出由 $x_i$ 改为 $x_i’$. 所以 $|f(x_1,…,x_m)-f(x_1,…,x_{i-1},x_i’,x_{i+1},…,x_m)|$ 表示改变第 $i$ 个输入后函数值发生的变化量. <strong>sup</strong> 表示上确界 (supremum). </p>
+<p>$x_1,x_2,…,x_m$ 为 $m$ 个独立随机变量, $f(x_1,…,x_m)$ 表示某次观测时对应的函数值. 每次观测中, 随机变量的取值不同则对应的函数值也不同.</p>
+</li>
+</ul>
+<h3 id="2-PAC-Learning-Theory"><a href="#2-PAC-Learning-Theory" class="headerlink" title="2. PAC Learning Theory"></a>2. PAC Learning Theory</h3><blockquote>
+<p>  我们希望用 PAC 理论在解释以下几个问题:</p>
+<ul>
+<li>什么样的问题能够被有效率的学习 (<em>What can be learned efficiently</em>)？</li>
+<li>什么样的问题天生无法有效地被学习 (<em>What is inherently hard to learn</em>)？</li>
+<li>成功的学习需要多少样本 (<em>How many examples are needed to learn successfully</em>)？</li>
+<li>学习有没有一个综合性的模型指导 (<em>Is there a general model of learning</em>)？</li>
+</ul>
+</blockquote>
+<p>计算学习理论中最基本的是 <strong>概率近似正确 (Probably Approximately Correct, 简称 PAC)</strong> 学习理论. 我们首先介绍两个基本概念:</p>
+<ul>
+<li><p><strong>概念类 (Concept Class)</strong></p>
+<p>我们令 $c$ 表示概念 (concept), 这是从样本空间 $\mathcal{X}$ 到标记空间 $\mathcal{Y}$ 的映射, 它决定样例 $\boldsymbol{x}$ 的真实标记 $y$, 若对任何样例 $(\boldsymbol{x},y)$ 有 $c(\boldsymbol{x})=y$ 成立, 则称 c 为目标概念, 所有目标概念所构成的集合称为<strong>概念类 (concept class)</strong>, 用符号 $\mathcal{C}$ 表示.</p>
+<blockquote>
+<p>  即 c 表示能够准确预测所有样本(不仅限于训练集或测试集)的模型.</p>
+</blockquote>
+</li>
+<li><p><strong>假设空间 (Hypothesis Space)</strong></p>
+<p>给定学习算法 $\mathfrak{L}$, 它所考虑的所有可能概念的集合称为<strong>假设空间 (Hypothesis Space)</strong>, 用符号 $\mathcal{H}$ 表示. </p>
+</li>
+</ul>
+<p>若目标概念 $c\in\mathcal{H}$, 则 $\mathcal{H}$ 中存在假设能将所有示例按与真实标记一致的方式完全分开, 我们称该问题对学习算法是 <strong>可分的 (Separable)</strong>, 也可以叫做<strong>一致的 (Consistent)</strong>. 或者按照我们课程上所说是 <strong>Realizable</strong> 的. </p>
+<p>若目标概念 $c\notin\mathcal{H}$ or $c\in\mathcal{H}$, 则 $\mathcal{H}$ 中可能存在假设能将所有示例按与真实标记一致的方式完全分开, 我们则称该学习算法是 <strong>Agnostic</strong> 的.</p>
+<p>若目标概念 $c\notin\mathcal{H}$, 则 $\mathcal{H}$ 中不存在假设能将所有示例按与真实标记一致的方式完全分开, 我们则称该学习算法是<strong>不一致的 (Inconsistent)</strong> 的.</p>
+<blockquote>
+<p>  为什么是 PAC, 或者说叫做概率近似正确?</p>
+<p>  在机器学习中, 是给定训练集, 我们基于学习算法学得的模型所对应的假设 $h$ 应该尽可能接近目标概念 $c$. 这是因为机器学习过程往往受到很多因素的制约, 比如:</p>
+<ul>
+<li>训练集仅含有限数量的样例</li>
+<li>从分布 $\mathcal{D}$ 采样得到 $D$ 的过程有一定的偶然性</li>
+</ul>
+</blockquote>
+<p>现在我们来看看一些和 PAC 相关的定义, <strong>我们令 $\delta$ 表示置信度:</strong></p>
+<p>==<strong>定义 1: PAC 辨识 (PAC Identify)</strong>==</p>
+<p>对 $0&lt;\epsilon,\delta&lt;1$, 所有 $c\in\mathcal{C}$ 和分布 $\mathcal{D}$, 若存在学习算法 $\mathfrak{L}$, 其输出假设 $h\in\mathcal{H}$ 能满足</p>
+<script type="math/tex; mode=display">P(E(h)\le\epsilon)\ge 1-\delta</script><p>我们则称学习算法 $\mathfrak{L}$ 能从假设空间 $\mathcal{H}$ 中 PAC 辨识概念类 $\mathcal{C}$.</p>
+<blockquote>
+<p>  <strong>换句通俗一点的话说就是:</strong> 输出假设 $h$ 的泛化误差 $E(h)\le\epsilon$ 的概率不小于 $1-\delta$.</p>
+<p>  <strong>再换一句更通俗的话说就是:</strong> 学习算法 $\mathfrak{L}$ 能以较大概率 (至少$1-\delta$) 学得目标概念 $c$ 的近似 (误差最大为 $\epsilon$).</p>
+</blockquote>
+<p>==<strong>定义 1.1: PAC Criterion</strong>==</p>
+<p><strong>接下来我们介绍一个在 10-601 上学到的类似概念</strong></p>
+<p>The PAC criterion is that our learner produces a high accuracy learner with high probability:</p>
+<script type="math/tex; mode=display">P(|E(h)-\hat{E}(h)|\le\epsilon)\ge 1-\delta</script><p>==<strong>定义 2: PAC 可学习 (PAC Learnable)</strong>==</p>
+<p>令 $m$ 表示从分布 $\mathcal{D}$ 中独立同分布采样得到的样例数目, $0&lt;\epsilon,\delta&lt;1$, 对所有分布 $\mathcal{D}$, 若存在学习算法 $\mathfrak{L}$ 和多项式函数 $poly(·,·,·,·)$, 使得对于任何 $m\ge poly(\frac{1}{\epsilon},\frac{1}{\delta},size(\boldsymbol{x}),size(c))$, 学习算法 $\mathfrak{L}$, 能从假设空间 $\mathcal{H}$ 中 <strong>PAC 辨识</strong> 概念类 $\mathcal{C}$, 我们则称概念类 $\mathcal{C}$ 对假设空间 $\mathcal{H}$ 而言是 <strong>PAC 可学习的</strong>.</p>
+<blockquote>
+<p>  $\epsilon$: 误差</p>
+<p>  $\delta$: 置信度</p>
+<p>  $size(\boldsymbol{x})$: 数据本身的复杂度</p>
+<p>  $size(c)$: 目标概念的复杂度</p>
+</blockquote>
+<p>因此, 我们知道, 一个概念类 $\mathcal{C}$ 被称为 PAC 可学习的则意味着: 算法在<strong>观测完一定数量</strong> (数量是 $\frac{1}{\epsilon},\frac{1}{\delta},size(\boldsymbol{x}),size(c)$ 的多项式函数) 的样本后, 所返回的假设, 在很大程度上 (至少为 $1-\delta$) 是近似正确的 (approximately right, 错误最多为 $\epsilon$).</p>
+<p>==<strong>定义 3: PAC 学习算法 (PAC Learning Algorithm)</strong>==</p>
+<p>若学习算法 $\mathfrak{L}$ 使概念类 $\mathcal{C}$ 为 PAC 可学习的, 且算法 $\mathfrak{L}$ 的运行时间也是多项式函数 $poly(\frac{1}{\epsilon},\frac{1}{\delta},size(\boldsymbol{x}),size(c))$, 我们则称概念类 $\mathcal{C}$ 是高效 PAC 可学习的, 且学习算法是 $\mathfrak{L}$ 是概念类 $\mathcal{C}$ 的 PAC 学习算法.</p>
+<p>==<strong>定义 4: PAC 样本复杂度 (Sample Complexity)</strong>==</p>
+<p>满足 PAC 学习算法 $\mathfrak{L}$ 所需的 $m\ge poly(\frac{1}{\epsilon},\frac{1}{\delta},size(\boldsymbol{x}),size(c))$ 中最小的 $m$, 称为学习算法 $\mathfrak{L}$ 的样本复杂度.</p>
+<blockquote>
+<p>  有了上述定义之后我们抛出来三个问题:</p>
+<ol>
+<li>研究某任务在什么样的条件下可学得较好的模型? <strong>定义 2</strong></li>
+<li>某算法在什么样的条件下可进行有效的学习? <strong>定义 3</strong></li>
+<li>需要多少训练样例才能获得较好的模型? <strong>定义 4</strong></li>
+</ol>
+</blockquote>
+<p><strong>PAC 的要点:</strong></p>
+<ol>
+<li>PAC框架对分布 $\mathcal{D}$ 没有任何假设, 仅假设其存在.</li>
+<li>训练样本和测试样本都是从同一分布中产生的.</li>
+<li>PAC可学习是针对概念类谈的, 而非特定的那个目标概念.</li>
+</ol>
+<h3 id="3-Hypothesis-Space"><a href="#3-Hypothesis-Space" class="headerlink" title="3. Hypothesis Space"></a>3. Hypothesis Space</h3><p><strong>有限假设空间指 $\mathcal{H}$ 中包含的假设个数是有限的, 反之则为无限假设空间. 无限假设空间更为常见. 一般而言, $\mathcal{H}$ 越大, 其包含任意目标概念的可能性越大, 但从中找到某个具体目标概念的难度也越大.</strong></p>
+<p>我们之前已经了解过了学习算法 <strong>consistent</strong>, <strong>inconsistent</strong>, <strong>agnostic</strong> 的概念. 我们现在想知道在不同的情形下我们要达成 PAC 可学习的样本数量. 在这里我们先给出结论:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201113230710434.png" alt="image-20201113230710434"></p>
+<h4 id="3-1-Finite-and-Realizable"><a href="#3-1-Finite-and-Realizable" class="headerlink" title="3.1 Finite and Realizable"></a>3.1 Finite and Realizable</h4><p>Realizable(Consistent) 意味着目标概念 $c$ 属于假设空间 $\mathcal{H}$. 给定包含 $m$ 个样本的训练集 $D$, 如何找出满足误差参数的假设呢? </p>
+<p><strong>记住! 我们要做的并不是找到 $c$, 而是要找到 $c$ 的近似! (即是训练误差为 0)</strong></p>
+<p>==我们先估计泛化误差大于 $\epsilon$ 但在训练集仍然表现完美的假设出现的概率 (我们要令这个概率小于某个值, 因为我们其实是希望泛化误差小于 $\epsilon$ 但经验误差为零的假设出现的概率不小于 $1-\delta$)==. 假定 $h$ 的泛化误差大于 $\epsilon$, 对分布 $\mathcal{D}$ 上随机采样而得的任何样例 $(\boldsymbol{x},y)$, 有</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102081759126.png" alt="image-20201102081759126" style="zoom:50%;" /></p>
+<blockquote>
+<p>  第 1 个等号是由于 $P(h(\boldsymbol{x}=y)+P(h(\boldsymbol{x}\neq y)=1$ 恒成立;</p>
+<p>  第 2 个等号是由于 $P(h(\boldsymbol{x}\neq y)$ 就是泛化误差;</p>
+<p>  第 3 个等号是由于我们之前假设泛化误差 $E(h)&gt;\epsilon$, 因此 $1-E(h)&lt;1-\epsilon$</p>
+</blockquote>
+<p>由于 $D$ 包含 $m$ 个从 $\mathcal{D}$ 独立同分布采样而得的样例, 因此, $h$ 与 $D$ 表现一致 (经验误差为 0) 的概率为</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102082737181.png" alt="image-20201102082737181" style="zoom:50%;" /></p>
+<blockquote>
+<p>  由于 $D$ 包含的 $m$ 个样例是从 $\mathcal{D}$ 独立同分布采样而得, 因此</p>
+<p>  <img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102082949151.png" alt="image-20201102082949151" style="zoom:50%;" /></p>
+<p>  其中, $\and$ 表示逻辑与, $\prod$ 表示连乘; 上述推导使用了概率论中的结论: 若事件 $A$ 和事件 $B$ 独立, 则 $P(AB)=P(A)P(B)$</p>
+</blockquote>
+<p>我们事先并不知道学习算法 $\mathfrak{L}$ 会输出 $\mathcal{H}$ 中的哪个假设, ==但我们仅需保证泛化误差大于 $\epsilon$, 且在训练集上表现完美的所有假设出现概率之和不大于 $\delta$ 即可==</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102083913494.png" alt="image-20201102083913494" style="zoom:50%;" /></p>
+<p>令上式不大于 $\delta$, 即</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102085929352.png" alt="image-20201102085929352" style="zoom:50%;" /></p>
+<p>可得 Sample Complexity</p>
+<script type="math/tex; mode=display">m\ge\frac{1}{\epsilon}(\ln|\mathcal{H}|+\ln\frac{1}{\delta})</script><p>同时我们也能得到 Error Bound</p>
+<script type="math/tex; mode=display">\epsilon\ge\frac{1}{m}(\ln|\mathcal{H}|+\ln\frac{1}{\delta})</script><p>因此用泛化边界的思路可以阐述为</p>
+<script type="math/tex; mode=display">\mathop{error}_{true}(h)\le\epsilon=\frac{1}{m}(\ln|\mathcal{H}|+\ln\frac{1}{\delta})</script><p>==在这里, 经验误差 $\hat{E}(h)=0$, 做的事情是以 $1-\delta$ 概率学得目标概念的 $\epsilon$ 近似. 因此, 我们知道有限假设空间 $\mathcal{H}$ 都是 PAC 可学习的, 所需样例数目: $m\ge\frac{1}{\epsilon}(\ln|\mathcal{H}|+\ln\frac{1}{\delta})$.== </p>
+<blockquote>
+<p>  ① 概率 $P(h\in\mathcal{H}:E(h)&gt;\epsilon\and\hat{E}(h)=0)$ 表示: 对于假设空间 $\mathcal{H}$ 中<strong>某个</strong>特定假设 $h$, 事件 $E(h)&gt;\epsilon$ 和事件 $\hat{E}(h)=0$ 同时成立的概率.</p>
+<p>  ② 根据之前的分析, 我们知道事件 $E(h)&gt;\epsilon$ 和事件 $\hat{E}(h)=0$ 同时成立的概率 $P(E(h)&gt;\epsilon\and\hat{E}(h)=0)&lt;(1-\epsilon)^m$.</p>
+<p>  ③ 假设空间 $\mathcal{H}$ 中共包含 $|\mathcal{H}|$ 个假设, 概率之和如下:</p>
+<script type="math/tex; mode=display">P(h\in\mathcal{H}:E(h)>\epsilon\and\hat{E}(h)=0)\le\sum_{i=1}^{|\mathcal{H}|}P(E(h_i)>\epsilon\and\hat{E}(h_i)=0)</script><p>  ④ 这 $|\mathcal{H}|$ 个假设各自满足事件 $E(h)&gt;\epsilon$ 和事件 $\hat{E}(h)=0$ 成立的概率均小于 $(1-\epsilon)^m$, 即对于 $\forall h_i\in\mathcal{H},P(E(h_i)&gt;\epsilon\and\hat{E}(h_i)=0)&lt;(1-\epsilon)^m$, 因此上式第一个小于号成立.</p>
+<p>  ⑤ 因为 $|\mathcal{H}|$ 和 $m$ 均为正数, 因此第二个小于号实际要证明 $(1-\epsilon)&lt;e^{-\epsilon}$.</p>
+<p>  ⑥ 令函数 $f(\epsilon)=1-\epsilon-e^{-\epsilon}$, 其中定义域为泛化误差 $\epsilon\in[0,1]$; 对函数求导得到 $f’(\epsilon)=-1+e^{-\epsilon}$, 在定义域内, 导数小于等于 0 恒成立, 因此 $f(\epsilon)$ 是单调递减函数, 最大值是 $f(0)=0$, 因此 $(1-\epsilon)\le e^{-\epsilon}$.</p>
+</blockquote>
+<h4 id="3-2-Finite-and-Agnostic"><a href="#3-2-Finite-and-Agnostic" class="headerlink" title="3.2 Finite and Agnostic"></a>3.2 Finite and Agnostic</h4><p>对较为困难的学习问题, 目标概念 $c$ 往往不存在于假设空间中. 假定对于任何 $h\in\mathcal{H}$, $\hat{E}(h)\ne0$, 也就是说, $\mathcal{H}$ 中任意一个假设都会在训练集出现或多或少的错误. </p>
+<p>==<strong>引理 1</strong>==</p>
+<p>若训练集 $D$ 包含 $m$ 个从分布 $\mathcal{D}$ 上独立同分布采样而得的样例, $0&lt;\epsilon&lt;1$, 则对任意 $h\in\mathcal{H}$, 有</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102101530293.png" alt="image-20201102101530293" style="zoom:50%;" /></p>
+<p>==<strong>推论 1</strong>==</p>
+<p>若训练集 $D$ 包含 $m$ 个从分布 $\mathcal{D}$ 上独立同分布采样而得的样例, $0&lt;\epsilon&lt;1$, 则对任意 $h\in\mathcal{H}$, 下式以至少 $1-\delta$ 的概率成立</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102101812423.png" alt="image-20201102101812423" style="zoom:50%;" /></p>
+<blockquote>
+<p>  上述推论表明, 样例数目 $m$ 较大时, $h$ 的经验误差是其泛化误差很好的近似.</p>
+<p>  <strong>上述推论的推导过程:</strong></p>
+<p>  我们令 $\delta=2e^{-2m\epsilon^2}$, 则 $\epsilon=\sqrt{\frac{\ln(\frac{2}{\delta})}{2m}}$. 因此, 引理 1 的第三式可以表示为 $P(|E(h)-\hat{E}(h)|\ge\epsilon)\le\delta$, 而这等价于 $P(|E(h)-\hat{E}(h)|\le\epsilon)\ge1-\delta$, 即 $|E(h)-\hat{E}(h)|\le\epsilon$ 成立的概率不小于 $1-\delta$.</p>
+<p>  对于不等式 $|E(h)-\hat{E}(h)|\le\epsilon$, 其等价于</p>
+<p>  <img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102102527728.png" alt="image-20201102102527728" style="zoom:50%;" /></p>
+<p>  最后将 $\delta=2e^{-2m\epsilon^2}$ 代入即可.</p>
+</blockquote>
+<p>==<strong>定理 1</strong>==</p>
+<p>若 $\mathcal{H}$ 为有限假设空间, $0&lt;\delta&lt;1$, <strong>则对任意</strong> $h\in\mathcal{H}$, 有</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102103229926.png" alt="image-20201102103229926" style="zoom:50%;" /></p>
+<blockquote>
+<p>  <strong>证明</strong> 令 $h_1,h_2,…,h_{|\mathcal{H}|}$ 表示假设空间 $\mathcal{H}$ 中的假设, 有</p>
+<p>  <img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102103638000.png" alt="image-20201102103638000" style="zoom:50%;" /></p>
+<p>  由引理 1 第三式可得</p>
+<p>  <img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201102103824620.png" alt="image-20201102103824620" style="zoom:50%;" /></p>
+<p>  于是令 $\delta=2|\mathcal{H}|\exp(-2m\epsilon^2)$ 即可得定理 1.</p>
+</blockquote>
+<p>显然, 当 $c\notin \mathcal{H}$ 时, 学习算法无法学得目标概念 $c$ 的 $\epsilon$ 近似 (因为经验误差无法做到 0). <strong>但是根据上述分析, 我们知道当给定假设空间时, 其中必存在一个泛化误差最小的假设, 找出此假设的 $\epsilon$ 近似也不失为一个较好的目标.</strong> </p>
+<h3 id="4-VC-Dimension"><a href="#4-VC-Dimension" class="headerlink" title="4. VC Dimension"></a>4. VC Dimension</h3><p><a target="_blank" rel="noopener" href="https://tangshusen.me/2018/12/09/vc-dimension/">https://tangshusen.me/2018/12/09/vc-dimension/</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/11/13/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-PAC-%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/">https://www.facequant.com/2020/11/13/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-PAC-%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Others/">Others</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/11/13/%E5%81%8F%E5%B7%AE%E5%92%8C%E6%96%B9%E5%B7%AE%E6%98%AF%E4%BB%80%E4%B9%88%E4%B8%9C%E8%A5%BF/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201113182320747.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">偏差和方差是什么东西?</div></div></a></div><div class="next-post pull-right"><a href="/2020/11/13/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/NN_network.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">深度学习基础-神经网络模型</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/11/13/偏差和方差是什么东西/" title="偏差和方差是什么东西?"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201113182320747.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">偏差和方差是什么东西?</div></div></a></div><div><a href="/2020/11/12/机器学习中常用的-Notation/" title="机器学习中常用的 Notation"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/cmu.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">机器学习中常用的 Notation</div></div></a></div><div><a href="/2020/11/12/机器学习中的-Entropy/" title="机器学习中的 Entropy"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1429149470.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">机器学习中的 Entropy</div></div></a></div><div><a href="/2020/11/12/模型选择与评估/" title="模型选择与评估"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/ROC.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">模型选择与评估</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Entree"><span class="toc-text">1. Entree</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-PAC-Learning-Theory"><span class="toc-text">2. PAC Learning Theory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Hypothesis-Space"><span class="toc-text">3. Hypothesis Space</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-Finite-and-Realizable"><span class="toc-text">3.1 Finite and Realizable</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-Finite-and-Agnostic"><span class="toc-text">3.2 Finite and Agnostic</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-VC-Dimension"><span class="toc-text">4. VC Dimension</span></a></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
