@@ -1,0 +1,438 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>鸡生蛋 or 蛋生鸡: EM 算法 | 阿平的自我修养</title><meta name="keywords" content="Supervised Learning"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1. Gaussian Single Model我们先简单回顾一下经典的高斯模型. 一维高斯分布的概率密度函数如下:  f(x)&#x3D;\frac{1}{\sqrt{2\pi}\sigma}\exp(-\frac{(x-\mu)^2}{2\sigma^2})譬如将男生身高视为变量 $X$, 假设男生的身高服从高斯分布, 则 $X\sim N(\mu,\sigma^2)$, 女生亦如此. 只是男女生身高分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="鸡生蛋 or 蛋生鸡: EM 算法">
+<meta property="og:url" content="https://www.facequant.com/2020/12/26/%E9%B8%A1%E7%94%9F%E8%9B%8B-or-%E8%9B%8B%E7%94%9F%E9%B8%A1-EM-%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="1. Gaussian Single Model我们先简单回顾一下经典的高斯模型. 一维高斯分布的概率密度函数如下:  f(x)&#x3D;\frac{1}{\sqrt{2\pi}\sigma}\exp(-\frac{(x-\mu)^2}{2\sigma^2})譬如将男生身高视为变量 $X$, 假设男生的身高服从高斯分布, 则 $X\sim N(\mu,\sigma^2)$, 女生亦如此. 只是男女生身高分">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1*vdr-VBASaYb-lRcQaKUShg.jpeg">
+<meta property="article:published_time" content="2020-12-25T18:50:19.000Z">
+<meta property="article:modified_time" content="2020-12-26T09:22:24.554Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Supervised Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1*vdr-VBASaYb-lRcQaKUShg.jpeg"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/12/26/%E9%B8%A1%E7%94%9F%E8%9B%8B-or-%E8%9B%8B%E7%94%9F%E9%B8%A1-EM-%E7%AE%97%E6%B3%95/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-26 17:22:24'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">27</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">10</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="no-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">鸡生蛋 or 蛋生鸡: EM 算法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-12-25T18:50:19.000Z" title="发表于 2020-12-26 02:50:19">2020-12-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-26T09:22:24.554Z" title="更新于 2020-12-26 17:22:24">2020-12-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Machine-Learning/">Machine Learning</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>18分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><h3 id="1-Gaussian-Single-Model"><a href="#1-Gaussian-Single-Model" class="headerlink" title="1. Gaussian Single Model"></a>1. Gaussian Single Model</h3><p>我们先简单回顾一下经典的高斯模型. 一维高斯分布的概率密度函数如下:</p>
+<script type="math/tex; mode=display">
+f(x)=\frac{1}{\sqrt{2\pi}\sigma}\exp(-\frac{(x-\mu)^2}{2\sigma^2})</script><p>譬如将男生身高视为变量 $X$, 假设男生的身高服从高斯分布, 则 $X\sim N(\mu,\sigma^2)$, 女生亦如此. 只是男女生身高分布可能具有不同的均值和方差.</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1489423811240.jpg" alt="1-dimension gaussian"></p>
+<p>但有些时候数据并不是一维的而是多维的, 因此我们再来看一下<strong>多维高斯分布的概率密度函数.</strong> 多维变量 $X=(x_1,x_2,…,x_n)$ 的联合概率密度函数为:</p>
+<script type="math/tex; mode=display">
+f(X)=\frac{1}{(2\pi)^{\frac{d}{2}}|\Sigma|^{\frac{1}{2}}}\exp[-\frac{1}{2}(X-\mu)^T\Sigma^{-1}(X-\mu)]</script><p>其中:</p>
+<ul>
+<li><p>d: 表示变量维度, 比如我们身高中的例子中 $d=1$.</p>
+</li>
+<li><p>$\mu$: 表示各个变量的均值, $\mu=(\mu_1,\mu_2,…,\mu_n)$.</p>
+</li>
+<li><p>$\Sigma$: 协方差矩阵, 描述各维变量之间的相关度. 对于二维高斯分布, 我们有</p>
+<script type="math/tex; mode=display">
+\Sigma=
+\begin{equation}
+\left(
+\begin{array}{cc}
+\delta_{11} & \delta_{12}\\
+\delta_{21} & \delta_{22}
+\end{array}
+\right)
+\end{equation}</script></li>
+</ul>
+<p>我们看几个二维高斯分布的例子:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/bivariateNormalRev.png" alt="R Code" style="zoom:50%;" /></p>
+<p>关于各个变量对于图像形状的影响我们则有以下总结:</p>
+<ol>
+<li>均值表征的是各维变量的中心, 其对二维高斯曲面的影响较好理解, 它使得整个二维高斯曲面在xoy平面上移动;</li>
+<li>协方差矩阵对角线上的两个元素, 即 $\delta_{11},\delta_{22}$ 是x维和y维变量的方差, 决定了整个高斯曲面在某一维度上的“跨度”, 方差越大, “跨度”越大;</li>
+<li>协方差矩阵斜对角线上的两个元素, 即 $\delta_{12}=\delta_{21}$ 是各维变量之间的相关性. 若其大于0, 则说明 $x$ 和 y 正相关, 小于0, 则负相关, 等于0, 则不相关. 绝对值大小则衡量了相关程度.</li>
+</ol>
+<h3 id="2-Gaussian-Mixture-Model"><a href="#2-Gaussian-Mixture-Model" class="headerlink" title="2. Gaussian Mixture Model"></a>2. Gaussian Mixture Model</h3><p>我们先来看一组数据, 数据的生成代码如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">mean1 = [<span class="number">0</span>,<span class="number">0</span>]</span><br><span class="line">cov1 = [[<span class="number">1</span>,<span class="number">0</span>],</span><br><span class="line">        [<span class="number">0</span>,<span class="number">3</span>]]</span><br><span class="line">data1 = np.random.multivariate_normal(mean1,cov1,<span class="number">200</span>)</span><br><span class="line"></span><br><span class="line">mean2 = [<span class="number">5</span>,<span class="number">5</span>]</span><br><span class="line">cov2 = [[<span class="number">3</span>,-<span class="number">0.5</span>],</span><br><span class="line">        [-<span class="number">0.5</span>,<span class="number">1</span>]]</span><br><span class="line">data2 = np.random.multivariate_normal(mean2,cov2,<span class="number">200</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">x1,y1 = data1.T</span><br><span class="line">x2,y2 = data2.T</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">12</span>,<span class="number">10</span>))</span><br><span class="line">plt.scatter(x1,y1,marker=<span class="string">&quot;+&quot;</span>,c=<span class="string">&#x27;b&#x27;</span>,s=<span class="number">10</span>)</span><br><span class="line">plt.scatter(x2,y2,marker=<span class="string">&quot;*&quot;</span>,c=<span class="string">&#x27;r&#x27;</span>,s=<span class="number">10</span>)</span><br><span class="line">plt.axis()</span><br><span class="line">plt.xlabel(<span class="string">&quot;x&quot;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;y&quot;</span>)</span><br><span class="line">plt.xlim((-<span class="number">3</span>,<span class="number">10</span>))</span><br><span class="line">plt.ylim((-<span class="number">5</span>,<span class="number">8</span>))</span><br><span class="line">plt.xticks(np.arange(-<span class="number">3</span>,<span class="number">11</span>,<span class="number">1</span>))</span><br><span class="line">plt.yticks(np.arange(-<span class="number">5</span>,<span class="number">9</span>,<span class="number">1</span>))</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201223033929922.png" alt="image-20201223033929922" style="zoom: 33%;" /></p>
+<p>我们现在假设这个数据是由某个单独的高斯分布产生的, 我们利用 MLE 对这个高斯分布做参数估计, 得到一个最佳的高斯分布模型如下:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201223034543569.png" alt="image-20201223034543569" style="zoom: 50%;" /></p>
+<p>但这明显是存在问题的, 因为一般来讲越靠近椭圆的中心样本出现的概率越大, 这是由概率密度函数决定的, 但是这个高斯分布的椭圆中心的样本量却极少, 显然样本服从单高斯分布的假设并不合理, 单高斯模型无法产生这样的样本. 而根据我们产生数据的代码, 我们知道这是由两个不同的高斯分布模型所产生的数据.</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201223034859896.png" alt="image-20201223034859896" style="zoom:50%;" /></p>
+<p><strong>正当单高斯模型抓耳挠腮的时候, 混合高斯模型就大摇大摆地进场了</strong>. 它通过求解两个高斯模型, 并通过一定的权重将两个高斯模型融合成一个模型, 即最终的混合高斯模型. 这个混合高斯模型可以产生这样的样本. </p>
+<p>更一般化的描述为: 假设混合高斯模型由 $K$ 个高斯模型组成 (即数据包含K个类), 则 GMM 的概率密度函数如下:</p>
+<script type="math/tex; mode=display">
+f(x)=\sum_{k=1}^Kp(k)p(x|k)=\sum_{k=1}^K\pi_kN(x|\mu_k,\small{\Sigma}_k)</script><p>其中, $p(k)=\pi_k$ 是第 $k$ 个高斯模型的权重, 称作选择第 $k$ 个模型的先验概率, 且满足 $\sum_{k=1}^K\pi_k=1$. 而 $p(x|k)=N(x|\mu_k,\Sigma_k)$ 则是第 $k$ 个高斯模型的概率密度函数, 可以看成选定第 $k$ 个模型之后, 该模型产生 $x$ 的概率.</p>
+<h4 id="2-1-Intuition"><a href="#2-1-Intuition" class="headerlink" title="2.1 Intuition"></a>2.1 Intuition</h4><p>我们接下来通过几张图片来帮助理解混合高斯模型, 我们先从简单的一维混合高斯模型说起.</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse/1965151-20200622153245790-498226080.png" alt="机器学习笔记-EM算法与混合高斯模型(GMM)-一维"></p>
+<p>在上图中, $y_1,y_2,y_3$ 分别表示三个一维高斯模型, 他们的参数设定如图例所示. $y_4$ 表示将三个模型的概率密度函数直接相加, 注意的是这并不是一个混合高斯模型, 因为并不满足 $\sum_{k=1}^K\pi_k=1$ 的条件. 而 $y_5$ 和 $y6$ 则分别是由不同的权重对 $y_1,y_2,y_3$ 进行混合所得的模型. 由此可见, 调整权重将极大影响混合模型的概率密度函数曲线. 另一方面也可以直观地理解混合高斯模型可以更好地拟合样本的原因: 它有更复杂更多变的概率密度函数曲线. <strong>理论上, 混合高斯模型的概率密度函数曲线可以是任意形状的非线性函数.</strong> </p>
+<p>我们接下来再给出一个二维空间 3 个高斯混合模型的例子. </p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201223042049882.png" alt="image-20201223042049882" style="zoom:40%;" /></p>
+<p>这个图是 3 个高斯模型的截面轮廓图, 图中数字是各个模型组成 GMM 的权重系数. 由截面轮廓图可知3个模型之间存在很多重叠区域. 其实这也正是混合高斯模型所希望的. 因为如果它们之间的重叠区域较少, 那么生成的混合高斯模型一般较为简单, 难以生成较为复杂的样本.</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201223042158904.png" alt="image-20201223042158904" style="zoom:40%;" /></p>
+<p>设定好了 3 个高斯模型和它们之间的权重系数之后, 就可以确定二维混合高斯分布的概率密度函数曲面. 我们可以看到, 整个混合高斯分布曲面相对比于单高斯分布曲面已经异常复杂. 实际上, 通过调整混合高斯分布的系数 $(\pi,\mu,\sum)$, 我们可以使得高斯分布概率密度图去拟合任意的三维曲面, 从而采样生成所需的数据样本. </p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201223042240407.png" alt="image-20201223042240407" style="zoom:40%;" /></p>
+<h4 id="2-2-Parameter-Estimation"><a href="#2-2-Parameter-Estimation" class="headerlink" title="2.2 Parameter Estimation"></a>2.2 Parameter Estimation</h4><p>如果看过我之前讲贝叶斯和逻辑回归的文章, 那么你已经对最大似然估计非常熟悉了. 我们现在也可以用最大似然估计来求解 GMM 模型.  我们首先来回顾一下 GMM 的概率密度函数:</p>
+<script type="math/tex; mode=display">
+f(x)=\sum_{k=1}^Kp(k)p(x|k)=\sum_{k=1}^K\pi_kN(x|\mu_k,\small{\Sigma}_k)</script><p>我们根据上式不难写出对数似然函数为:</p>
+<script type="math/tex; mode=display">
+\ell(\pi,\mu,\Sigma)=\ln p(X;\pi,\mu,\Sigma)=\sum_{i=1}^N\ln(\sum_{k=1}^K\pi_kN(x_i;\mu_k,\Sigma_k))</script><p>好了, 然后求导, 令导数为0, 得到模型参数 $\pi,\mu,\Sigma$.</p>
+<p>貌似问题已经解决了! 然而仔细观察可以发现, 对数似然函数里面还有求和. 实际上没有办法通过求导的方法来求这个对数似然函数的最大值. 怎么办？</p>
+<p><strong>这时候就要要到EM算法求解</strong>.</p>
+<p>我们接下来看看 EM 算法和 MLE 的不同适用场景:</p>
+<ol>
+<li><p><strong>MLE</strong></p>
+<p>已知: </p>
+<ul>
+<li>数据分布模型</li>
+<li>采样数据</li>
+</ul>
+<p>未知: </p>
+<ul>
+<li>数据分布模型参数</li>
+</ul>
+</li>
+<li><p><strong>EM Algorithm</strong></p>
+<p>已知:</p>
+<ul>
+<li>各个类的分布模型</li>
+<li>采样数据</li>
+</ul>
+<p>未知:</p>
+<ul>
+<li>采样数据分别来自哪一类</li>
+<li>各个模型的参数</li>
+</ul>
+</li>
+</ol>
+<p>如果我们已经清楚了某个变量服从的高斯分布, 而且通过采样得到了这个变量的样本数据, 想求高斯分布的参数, 这时候极大似然估计可以胜任这个任务. </p>
+<p>而如果我们要求解的是一个混合模型, 只知道混合模型中各个类的分布模型 (譬如都是高斯分布) 和对应的采样数据, 而不知道这些采样数据分别来源于哪一类 (隐变量), 那这时候就可以借鉴EM算法. EM算法可以用于解决数据缺失的参数估计问题 (隐变量的存在实际上就是数据缺失问题, 缺失了各个样本来源于哪一类的记录).</p>
+<h3 id="3-EM-Algorithm"><a href="#3-EM-Algorithm" class="headerlink" title="3. EM Algorithm"></a>3. EM Algorithm</h3><h4 id="3-1-Intuition"><a href="#3-1-Intuition" class="headerlink" title="3.1 Intuition"></a>3.1 Intuition</h4><p>我们先通过一个简单的案例来引入 EM 算法.</p>
+<p>假设有 1 枚硬币 A, 这枚硬币正面出现的概率是 $p$. 进行掷硬币试验: 投掷硬币 A, 出现正面记作 1, 出现反面记作 0; 独立地重复 $n$ 次. 这是一个参数为 $p$ 的伯努利分布:</p>
+<script type="math/tex; mode=display">
+p(x)=p^x(1-p)^{1-x}</script><p>如果给定一个结果序列 $n=10$, 如下:</p>
+<script type="math/tex; mode=display">
+1 \quad 1\quad 0\quad 1\quad 1\quad 1\quad 0\quad 0\quad 1\quad 1</script><p>$p$ 可以通过极大似然估计得到:</p>
+<script type="math/tex; mode=display">
+p=\frac{\sum_{i=1}^nI(x_i=1)}{n}=\frac{7}{10}</script><p>现在考虑更复杂的情况, 假设有3枚硬币, 分别记作A, B, C. 这些硬币正面出现的概率分别是 $\pi$, $p$ 和 $q$. 进行如下掷硬币试验: 先掷硬币A, 根据其结果选出硬币B或硬币C, 如果是正面选择硬币B, 如果是反面选择硬币C; 然后掷选出的硬币, 掷硬币的结果, 出现正面记作1, 出现反面记作0; 独立地重复 $n$ 次试验 (这里, $n=10$), 观察结果如下:</p>
+<script type="math/tex; mode=display">
+1 \quad 1\quad 0\quad 0\quad 1\quad 0\quad 1\quad 0\quad 1\quad 1</script><p>这种情况下, 如果我们知道了如下带有颜色的结果, 红色表示由硬币B掷出, 绿色表示由硬币C掷出, 即我们知道每次硬币A掷出的结果:</p>
+<script type="math/tex; mode=display">
+\color{red}{1} \quad \color{red}{1}\quad \color{green}{0}\quad \color{green}{0}\quad \color{red}{1}\quad \color{green}{0}\quad \color{red}{1}\quad \color{red}{0}\quad \color{green}{1}\quad \color{red}{1}</script><p>我们可以很容易的估计出参数 $\pi$, $p$ 和 $q$:</p>
+<script type="math/tex; mode=display">
+\pi = \frac{红色的个数}{总个数} \quad p=\frac{红色中1的个数}{红色的个数} \quad q=\frac{绿色中1的个数}{绿色的个数}</script><p>但是现在的问题是, 我们并不知道每次硬币A掷出的结果, 也就是我们并不能够看到如上的带有颜色的结果, 这时怎么估计参数 $\pi$, $p$ 和 $q$ 呢?</p>
+<p>对于这个问题, 按照极大似然估计的思路, 令 $θ=(π,p,q)$, 我们希望求得参数 $\theta$, 使得</p>
+<script type="math/tex; mode=display">
+\theta=\mathop{\arg\max}_\theta p(x;\theta)</script><p>但是因为此时我们无法观测到掷硬币A的结果, 所以需要引入隐变量 $z$, $z∈{0,1}$, 若 $z=1$ 表示使用硬币B，若 $z=0$ 表示使用硬币C, 因此</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{aligned}
+p(x;\theta)=&\sum_{z}p(x,z;\theta) \\
+=&\sum_{z}p(x|z;\theta)p(z;\theta) \\
+=& p(x|z=1;\theta)p(z=1;\theta)+p(x|z=0;\theta)p(z=0;\theta)
+\end{aligned}
+\end{equation}</script><p>其中, 我们知道:</p>
+<script type="math/tex; mode=display">
+p(x|z=1;\theta) = p^x(1-p)^{1-x} \\
+p(x|z=0;\theta) = q^x(1-q)^{1-x} \\
+p(z=1;\theta)=\pi \quad p(z=0;\theta)=1-\pi</script><p>所以有:</p>
+<script type="math/tex; mode=display">
+p(x;\theta) = {\color{red}{\pi p^x(1-p)^{1-x}}} + \color{green}{(1-\pi)q^x(1-q)^{1-x}}</script><p>我们用 $\mu$ 表示在给定当前参数 $θ=(π,p,q)$ 情况下, 每个试验结果 $x$ 由硬币B产生的概率, 则</p>
+<script type="math/tex; mode=display">
+\mu=\frac{\pi p^x(1-p)^{1-x}}{\pi p^x(1-p)^{1-x} + (1-\pi)q^x(1-q)^{1-x}}, x\in \{0,1\}</script><p>给定一个观测到的结果序列 $x=\{x_1,x_2,…,x_N\}$, 则有:</p>
+<script type="math/tex; mode=display">
+\mu_i=\frac{\pi p^{x_i}(1-p)^{1-{x_i}}}{\pi p^{x_i}(1-p)^{1-{x_i}} + (1-\pi)q^{x_i}(1-q)^{1-{x_i}}}</script><p>至此, 需要发挥一点想象力, 假设我们观察到一个结果为正面的硬币, 现在它不再如之前所述的完全是红色(硬币B产生)和绿色(硬币C产生), 而是有一部分红色(概率是 $\mu_i$), 一部分绿色(概率是 $1-\mu_i$), 如下图所示:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1965151-20200622153028167-1655058706.png" alt="img" style="zoom:75%;" /></p>
+<p>接下来我们就可以根据 $\mu_i$ 重新估计参数 $\theta=(\pi,p,q)$, 注意, 为什么说是重新估计参数, 因为 $\mu_i$ 是根据当时给定参数 $\theta=(\pi,p,q)$ 计算出来的. 根据我们之前初始化参数的方法, 有:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\pi=\frac{红色的个数}{总个数}=\frac{\sum_{i=1}^N\mu_i}{N} \\
+&p=\frac{红色中1的个数}{红色的个数}=\frac{\sum_{i=1}^N\mu_ix_i}{\sum_{i=1}^N\mu_i} \\
+&q=\frac{绿色中1的个数}{绿色的个数}=\frac{\sum_{i=1}^N(1-\mu_i)x_i}{\sum_{i=1}^N(1-\mu_i)}
+\end{aligned}</script><p>好了, 通过不断的重复上述步骤, 直到参数 $\theta=(\pi,p,q)$ 不再变化, 我们就得到了参数的最优估计. 至此, 我们直观地解释了 EM 算法:</p>
+<ul>
+<li><p><strong>E Step:</strong></p>
+<p>E 是 Expectation, 也就是期望. 代入到我们问题中, 也就是求在当前参数 $\theta$ 下, 计算 $\mu$ 的期望.</p>
+<p>Note: 初始化时, 我们可以根据数据先验分布去计算 $\theta$.</p>
+</li>
+<li><p><strong>M Step:</strong></p>
+<p>使用通过 E Step 得到的 $\mu$ 根据最大似然估计来重新计算 $\theta$.</p>
+</li>
+</ul>
+<p><strong>重复上述步骤, 直至收敛.</strong></p>
+<h4 id="3-2-Math-Trick"><a href="#3-2-Math-Trick" class="headerlink" title="3.2 Math Trick"></a>3.2 Math Trick</h4><p>给定给定训练样本是 $\{x^{(1)},x^{(2)},…,x^{(m)}\}$, 样本独立同分布, 我们想要找到每个样例隐含类别 $z$, 能使得 $p(x,z)$ 最大. $p(x,z)$ 的最大似然估计如下:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\ell(\theta)=&\sum_{i=1}^m \log p(x;\theta)\\
+=&\sum_{i=1}^m\log \sum_{z}p(x,z;\theta) 
+\end{aligned}</script><p>第一步是对极大似然取对数; 第二步是对每个样例的每个可能类别 $z$ 求联合分布概率和. 但是直接求 $\theta$ 一般比较困难, 因为有隐藏变量 $z$ 的存在, 但是一般确定了 $z$ 后, 求解就容易了. </p>
+<p>EM是一种解决存在隐含变量优化问题的有效方法. 既然不能直接最大化 $\ell(\theta)$, 我们可以不断地建立 $\ell(\theta)$ 的下界 (E Step), 然后优化下界 (M Step). 这句话比较抽象, 看下面的.</p>
+<p>对每个样例 $i$, 让 $Q_i$ 表示该样例隐含变量 $z$ 的某种分布, $Q_i$ 满足的条件是 $\sum_zQ_i(z)=1$, $Q_i(z)\ge0$. （如果 $z$ 是连续性的, 那么 $Q_i(z)$ 是概率密度函数, 需要将求和符号换做积分符号). 比如要将班上的学生聚类, 假设隐藏变量 $z$ 是身高, 那么就是连续的高斯分布. 如果按照隐藏变量 $z$ 是性别, 那就是伯努利分布了.</p>
+<p>可以由前面阐述的内容得到下面的公式:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+    \sum_{i}\log p(x^{(i)};\theta) &=  \sum_{i}\log \sum_{z^{(i)}}p(x^{(i)},z^{(i)};\theta) \\
+    &= \sum_{i}\log \sum_{z^{(i)}} Q_i(z^{(i)}) \cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})} \\
+    &\ge \sum_{i} \sum_{z^{(i)}} Q_i(z^{(i)}) \log \cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})}
+\end{aligned} \tag{1}</script><blockquote>
+<p>  Jensen 不等式:</p>
+<p>  若 $f(x)$ 为凸函数, 那么有:</p>
+<script type="math/tex; mode=display">
+  E(f(x))\ge f(E(x))</script><p>  若 f(x) 为凹函数, 那么正好相反:</p>
+<script type="math/tex; mode=display">
+  E(f(x))\le f(E(x))</script></blockquote>
+<p>此处推导利用 Jensen 不等式, 考虑 $\log(x)$ 是凹函数, 那么有</p>
+<script type="math/tex; mode=display">
+E(\log(x))\le \log(E(x))</script><p>而这里的</p>
+<script type="math/tex; mode=display">
+\log \sum_{z^{(i)}} Q_i(z^{(i)}) \cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})}</script><p>可以看成是 $\cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})}$ 的期望, 因此我们可以根据 Jessen 不等式, 推导出不等关系:</p>
+<script type="math/tex; mode=display">
+f\bigg(E_{z^{(i)\sim Q_i}}\bigg[\cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})}\bigg]\bigg) \ge E_{z^{(i)\sim Q_i}}\bigg[f\bigg(\cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})}\bigg)\bigg]</script><p>因此, 式 (1) 是完全成立的, 而且这个过程可以看作是对 $\ell(\theta)$ 求下界函数. 现在, 我们将式 (1) 写成: 对数似然函数 $\ell(\theta)\ge J(Q,\theta)$:</p>
+<script type="math/tex; mode=display">
+J(Q,\theta)=\ge \sum_{i} \sum_{z^{(i)}} Q_i(z^{(i)}) \log \cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})}</script><p>显然, $J(Q,\theta)$ 是容易通过求导数, 然后求得极值. 但是由于是不等式, 所以 $J(Q,\theta)$ 的极大值并不是 $\ell(\theta)$ 极大值, 而我们想得到的是 $\ell(\theta)$ 的极大值, 那怎么办?</p>
+<p>我们可以通过不断的最大化这个下界 $J$, 来使得 $\ell(\theta)$ 不断提高, 最终达到它的最大值, 如下图所示:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1965151-20200622153057730-475353799.png" alt="img" style="zoom:75%;" /></p>
+<p>对于 $Q_i$ 的选择, 有多种可能, 那么哪种更好呢? 假设 $\theta$ 已经给定, 即 $θ$ 已经固定, 那么 $ℓ(θ)$ 的值就决定于 $Q_i(z^{(i)})$ 和 $p(x^{(i)},z^{(i)})$ 了. 我们可以通过调整这两个概率使下界 $J(Q,θ)$ 不断上升, 以逼近 $ℓ(θ)$ 的真实值, 那么什么时候算是调整好了呢? <strong>当不等式变成等式时</strong>, 说明我们调整后的概率值能够等价于 $\ell(\theta)$ 了 (浅蓝色曲线到蓝色曲线). 然后固定 $Q(z)$, 调整 $\theta$ 使下界 $J(Q,θ)$ 达到最大值 ( $θ_t$ 到 $θ_{t+1}$), 重复上述过程直至收敛到对数似然函数 $ℓ(θ)$ 的极大值处 $\theta^{*}$.</p>
+<p>按照这个思路, 我们要找到等式成立的条件. 根据Jensen不等式, 要想等式成立, 需要让随机变量变成常数值, 这里得到:</p>
+<script type="math/tex; mode=display">
+\cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})} = c</script><blockquote>
+<p>  取等条件的本质: <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/338571213">https://zhuanlan.zhihu.com/p/338571213</a></p>
+</blockquote>
+<p>其中, $c$ 为常数, 不依赖于 $z_{(i)}$. 对此式子做进一步推导, 我们知道 $\sum_zQ_i(z^{(i)})=1$, 那么也就有 $\sum_zp(x^{(i)},z^{(i)};\theta)=c$, 那么就有了下式:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+    Q_i(z^{(i)}) &= \cfrac{p(x^{(i)},z^{(i)};\theta)}{\sum_{z}p(x^{(i)},z^{(i)};\theta)} \\
+    & = \cfrac{p(x^{(i)},z^{(i)};\theta)}{p(x^{(i)};\theta)} \\
+    &= p(z^{(i)}|x^{(i)};\theta)
+\end{aligned}</script><p>至此, 我们推出了在固定其他参数 $\theta$ 后, $Q_i(z^{(i)})$ 的计算公式就是后验概率, 解决了 $Q_i(z^{(i)})$ 如何选择的问题. 这一步就是 $E$ 步, 建立 $ℓ(θ)$ 的下界. 接下来的 $M$ 步, 就是在给定 $Q_i(z^{(i)})$ 后, 调整 $θ$, 极大化 $ℓ(θ)$ 的下界 (在固定 $Q_i(z^{(i)})$后, 下界还可以调整的更大). 那么<strong>一般的EM算法的步骤</strong>如下:</p>
+<p>循环重复直至算法收敛:</p>
+<p>（$E$ 步） 对于每一个样例 $i$, 计算:</p>
+<script type="math/tex; mode=display">
+Q_i(z^{(i)}) := p(z^{(i)}|x^{(i)};\theta)</script><p>（$M$ 步） 计算:</p>
+<script type="math/tex; mode=display">
+\theta := arg \smash{\max_\theta} \sum_{i} \sum_{z^{(i)}} Q_i(z^{(i)}) \log \cfrac{p(x^{(i)},z^{(i)};\theta)}{Q_i(z^{(i)})}</script><p>那么, 究竟怎么确保 EM 收敛? 我们假定 $\theta^{(t)}$ 和 $\theta^{(t+1)}$ 是 EM 的第 $t$ 次和 $t + 1$ 次迭代后的结果. 如果我们证明了 $\ell(\theta^{(t)}) \le \ell(\theta^{(t+1)})$, 也就是说极大似然估计单调增加, 那么最终我们会得到极大似然估计的最大值. 下面来证明, 选定 $\theta^{(t)}$ 后, 我们得到 $E$ 步:</p>
+<script type="math/tex; mode=display">
+Q_i^{(t)}(z^{(i)}) := p(z^{(i)}|x^{(i)};\theta^{(t)})</script><p>这一步保证了在给定 $\theta^{(t)}$ 时, Jensen不等式中的等式成立, 也就是:</p>
+<script type="math/tex; mode=display">
+\ell(\theta^{(t)})=\sum_{i} \sum_{z^{(i)}} Q_i^{(t)}(z^{(i)}) log \cfrac{p(x^{(i)},z^{(i)};\theta^{(t)})}{Q_i^{(t)}(z^{(i)})}</script><p>然后进行 M 步, 固定 $Q_i^{(t)}(z^{(i)})$, 并将 $\theta^{(t)}$ 视作变量, 对上面的 $\theta^{(t)}$ 求导后, 得到 $\theta^{(t+1)}$, 这样经过一些推导会有以下式子成立:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+    \ell{(\theta^{(t+1)})} &\ge \sum_{i} \sum_{z^{(i)}} Q_i^{(t)}(z^{(i)}) \log \cfrac{p(x^{(i)},z^{(i)};\theta^{(t+1)})}{Q_i^{(t)}(z^{(i)})} \\
+    &\ge \sum_{i} \sum_{z^{(i)}} Q_i^{(t)}(z^{(i)}) \log \cfrac{p(x^{(i)},z^{(i)};\theta^{(t)})}{Q_i^{(t)}(z^{(i)})} \\
+    &= \ell(\theta^{(t)})
+\end{aligned}</script><p>解释上式第一步, 得到 $θ_{(t+1)}$ 时, 只有最大化 $ℓ(θ^{(t)})$, 也就是 $ℓ(θ^{(t+1)})$ 的下界, 而没有使等式成立, 等式成立只有在固定 $θ$, 并按 $E$ 步得到 $Q_i^{(t+1)}$ 时才能成立.</p>
+<p>这样就证明了 $ℓ(θ)$ 会单调增加. 一种收敛方法是 $ℓ(θ)$ 不再变化, 还有一种就是变化幅度很小.</p>
+<h4 id="3-3-Solving-GMM"><a href="#3-3-Solving-GMM" class="headerlink" title="3.3 Solving GMM"></a>3.3 Solving GMM</h4><p>[To be done]</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/12/26/%E9%B8%A1%E7%94%9F%E8%9B%8B-or-%E8%9B%8B%E7%94%9F%E9%B8%A1-EM-%E7%AE%97%E6%B3%95/">https://www.facequant.com/2020/12/26/%E9%B8%A1%E7%94%9F%E8%9B%8B-or-%E8%9B%8B%E7%94%9F%E9%B8%A1-EM-%E7%AE%97%E6%B3%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Supervised-Learning/">Supervised Learning</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1*vdr-VBASaYb-lRcQaKUShg.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/12/27/%E7%89%A9%E4%BB%A5%E7%B1%BB%E8%81%9A-%E4%BA%BA%E4%BB%A5%E7%BE%A4%E5%88%86/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201227195826121.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">物以类聚, 人以群分</div></div></a></div><div class="next-post pull-right"><a href="/2020/12/26/%E6%97%A7%E6%97%B6%E4%BB%A3%E7%9A%84%E6%98%8E%E7%8F%A0-SVM/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201227182605307.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">旧时代的明珠: SVM</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/12/26/旧时代的明珠-SVM/" title="旧时代的明珠: SVM"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201227182605307.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-26</div><div class="title">旧时代的明珠: SVM</div></div></a></div><div><a href="/2020/11/13/深度学习基础-神经网络模型/" title="深度学习基础-神经网络模型"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/NN_network.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">深度学习基础-神经网络模型</div></div></a></div><div><a href="/2020/11/12/详解逻辑回归-Logistic-Regression/" title="详解逻辑回归(Logistic Regression)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/sigmoid.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">详解逻辑回归(Logistic Regression)</div></div></a></div><div><a href="/2020/11/13/防止过拟合-正则化-Regularization/" title="防止过拟合-正则化(Regularization)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_o6H_R3Do1zpch-3MZk_fjQ.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">防止过拟合-正则化(Regularization)</div></div></a></div><div><a href="/2020/11/22/隐马尔可夫模型-HMM/" title="隐马尔可夫模型(HMM)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/markov-chains.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-22</div><div class="title">隐马尔可夫模型(HMM)</div></div></a></div><div><a href="/2020/11/12/决策树-Decision-Tree/" title="决策树(Decision Tree)"><img class="cover" src="https://i.pinimg.com/originals/68/f8/e8/68f8e8dd71485c0f0c4acd9ada4123fe.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">决策树(Decision Tree)</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Gaussian-Single-Model"><span class="toc-text">1. Gaussian Single Model</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Gaussian-Mixture-Model"><span class="toc-text">2. Gaussian Mixture Model</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Intuition"><span class="toc-text">2.1 Intuition</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-Parameter-Estimation"><span class="toc-text">2.2 Parameter Estimation</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-EM-Algorithm"><span class="toc-text">3. EM Algorithm</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-Intuition"><span class="toc-text">3.1 Intuition</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-Math-Trick"><span class="toc-text">3.2 Math Trick</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-Solving-GMM"><span class="toc-text">3.3 Solving GMM</span></a></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

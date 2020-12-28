@@ -1,0 +1,581 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>集成学习真不难 | 阿平的自我修养</title><meta name="keywords" content="Supervised Learning"><meta name="author" content="阿平"><meta name="copyright" content="阿平"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1. Introduction当做重要决定时, 大家可能都会考虑吸取多个专家而不只是一个人的意见. 集成学习也是如此. 集成学习就是组合多个个体学习器, 最后可以得到一个更好的学习器. 集成学习方法:  Bagging: 大部分情况下, 经过 bagging 得到的结果方差 (Variance) 更小, 且个体学习器之间不存在强依赖关系. Boosting: 大部分情况下, 经过 boosting">
+<meta property="og:type" content="article">
+<meta property="og:title" content="集成学习真不难">
+<meta property="og:url" content="https://www.facequant.com/2020/12/26/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0%E7%9C%9F%E4%B8%8D%E9%9A%BE/index.html">
+<meta property="og:site_name" content="阿平的自我修养">
+<meta property="og:description" content="1. Introduction当做重要决定时, 大家可能都会考虑吸取多个专家而不只是一个人的意见. 集成学习也是如此. 集成学习就是组合多个个体学习器, 最后可以得到一个更好的学习器. 集成学习方法:  Bagging: 大部分情况下, 经过 bagging 得到的结果方差 (Variance) 更小, 且个体学习器之间不存在强依赖关系. Boosting: 大部分情况下, 经过 boosting">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201227183120981.png">
+<meta property="article:published_time" content="2020-12-25T18:46:41.000Z">
+<meta property="article:modified_time" content="2020-12-27T10:32:43.198Z">
+<meta property="article:author" content="阿平">
+<meta property="article:tag" content="Supervised Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201227183120981.png"><link rel="shortcut icon" href="/images/panda.png"><link rel="canonical" href="https://www.facequant.com/2020/12/26/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0%E7%9C%9F%E4%B8%8D%E9%9A%BE/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="_MQwHkUtYfuk8J0qAPSV-zpAugCAnNbea8RvdD-C5DA"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-153134572-1"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-153134572-1');
+</script><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'mediumZoom',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2020-12-27 18:32:43'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}})()</script><meta name="generator" content="Hexo 5.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/images/human.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">27</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">10</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div id="body-wrap"><header class="no-top-img" id="page-header"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">阿平的自我修养</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">集成学习真不难</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-12-25T18:46:41.000Z" title="发表于 2020-12-26 02:46:41">2020-12-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-27T10:32:43.198Z" title="更新于 2020-12-27 18:32:43">2020-12-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Machine-Learning/">Machine Learning</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">7.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>25分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div><article class="post-content" id="article-container"><h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h3><p>当做重要决定时, 大家可能都会考虑吸取多个专家而不只是一个人的意见. 集成学习也是如此. 集成学习就是组合多个<strong>个体学习器</strong>, 最后可以得到一个更好的学习器.</p>
+<p>集成学习方法:</p>
+<ul>
+<li><strong>Bagging:</strong> 大部分情况下, 经过 bagging 得到的结果<strong>方差</strong> (Variance) 更小, 且个体学习器之间<strong>不存在强依赖关系.</strong></li>
+<li><strong>Boosting:</strong> 大部分情况下, 经过 boosting 得到的结果<strong>偏差</strong> (Bias) 更小, 且个体学习器之间<strong>存在强依赖关系.</strong></li>
+</ul>
+<p>集成学习的第一个问题就是如何得到若干个个体学习器, 这里我们有两种选择. </p>
+<ul>
+<li>第一种就是所有的个体学习器都是一个种类的, 或者说是<strong>同质</strong>的. 比如都是决策树个体学习器, 或者都是神经网络个体学习器. </li>
+<li>第二种是所有的个体学习器不全是一个种类的, 或者说是<strong>异质</strong>的. 比如我们有一个分类问题, 对训练集采用支持向量机个体学习器, 逻辑回归个体学习器和朴素贝叶斯个体学习器来学习, 再通过某种结合策略来确定最终的分类强学习器.</li>
+</ul>
+<p>目前来说, 同质个体学习器的应用是最广泛的, 一般我们常说的集成学习的方法都是指的同质个体学习器. 而同质个体学习器使用最多的模型是<strong>CART决策树</strong>和<strong>神经网络</strong>.</p>
+<h3 id="2-Bagging"><a href="#2-Bagging" class="headerlink" title="2. Bagging"></a>2. Bagging</h3><p>Bagging 是 Bootstrap Aggregating 的缩写. 我们之前在模型选择和评估已经介绍了过一次了, 我们重温一遍, 其具体步骤如下:</p>
+<p>给定包含 $m$ 个样本的数据集 $D$, 我们对它进行采样数据集 $D’$: 每次随机从 $D$ 中挑选一个样本, 将其拷贝放入 $D’$, 然后再将该样本放回初始数据集 $D$ 中, 使得该样本在下次采样时仍有可能被采到; 这个过程重复执行 $m$ 次后, 我们就得到了包含 $m$ 个样本的数据集 $D’$, 这就是自助采样的结果. 显然, $D$ 中的一部分样本会在 $D’$ 中多次出现, 而另外一部分样本不出现. 我们可以做一个简单的估计, 样本在 $m$ 次采样中始终不被采到的概率是 $(1-\frac{1}{m})^m$, 取极限得到:</p>
+<script type="math/tex; mode=display">
+\lim\limits_{m\rightarrow\inf}(1-\frac{1}{m})\approx\frac{1}{e}\approx0.368</script><p>通过自助采样, 初始数据集 $D$ 中约有 36.8% 的样本未出现在采样数据集 $D’$ 中. 于是我们可以将 $D’$ 用作训练集, $D\backslash D’$ 用作测试集.</p>
+<p>在 Bagging 方法中, 利用bootstrap方法从整体数据集中采取有放回抽样得到N个数据集, 在每个数据集上学习出一个模型, 最后的预测结果利用N个模型的输出得到, 具体地: <strong>分类问题采用N个模型预测投票的方式, 回归问题采用N个模型预测平均的方式.</strong> 图示如下:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/un-115.png" alt="Bagging and Pasting in Machine Learning" style="zoom:50%;" /></p>
+<p>对于 <strong>Bagging</strong> 需要注意的是, 每次训练集可以取全部的特征进行训练, 也可以随机选取部分特征训练, 例如随机森林就是每次随机选取部分特征.</p>
+<h4 id="2-1-Random-Forest"><a href="#2-1-Random-Forest" class="headerlink" title="2.1 Random Forest"></a>2.1 Random Forest</h4><p>随机森林是非常具有代表性的Bagging集成算法, 它在Bagging基础上进行了强化. 它的所有基学习器都是CART决策树, 传统决策树在选择划分属性时是在当前结点的属性集合 (假定有d个属性) 中选择最优属性. 但是随机森林的决策树, 现在每个结点的属性集合随机选择部分 $k$ 个属性的子集, 然后在子集中选择一个最优的特征来做决策树的左右子树划分, 一般建议 $k=\log_2d$. 分类决策树组成的森林就叫做随机森林分类器, 回归决策树所集成的森林就叫做随机森林回归器.</p>
+<p>随机森林的算法实现思路非常简单, 只需要记住一句口诀: <strong>抽等量样本, 选几个特征, 构建多棵树.</strong></p>
+<ol>
+<li><p><strong>抽等量样本</strong></p>
+<p>随机森林训练每棵树之前, 都会从训练集中随机抽出一部分样本来训练. 所以说训练每棵树用到的样本其实都是有差别的, 这样就保证了不同的树可以重点学习不同的样本. 而为了达到抽等量样本的目的, 抽样方式一般是有放回的抽样, 也就是说, 在训练某棵树的时候，这一次被抽到的样本会被放回数据集中, 下一次还可能被抽到. 因此，原训练集中有的样本会多次被抽出用来训练, 而有的样本可能不会被使用到.</p>
+<p>但是不用担心有的样本没有用到, 只要训练的树的棵数足够多, 大多数训练样本总会被取到的. 有极少量的样本成为漏网之鱼也不用担心, 后边我们会筛选他们出来用来测试模型.</p>
+</li>
+<li><p><strong>选几个特征</strong></p>
+<p>在训练某棵树的时候, 也不是将样本的所有特征都用来训练, 而是会随机选择一部分特征用来训练. 这样做的目的就是让不同的树重点关注不同的特征. 在scikit-learn中, 用“max_features”这个参数来控制训练每棵树选取的样本数.</p>
+</li>
+<li><p><strong>构建多棵树</strong></p>
+<p>通过前面两个步骤, 训练多棵树. 鲁迅曾经说过: 世界上本没有森林, 长得树多了, 就成了森林. 正是一棵棵决策树构成了整个随机森林. 具体构建树的数量, 在scikit-learn中, 用“n_estimators”这个参数来控制. </p>
+</li>
+</ol>
+<p>那最终的预测结果怎么得到呢? 随机森林是非常民主的算法, 最终的结果由每棵决策树综合给出: 如果是分类问题, 那么对于每个测试集, 树都会预测出一个类别进行投票, 最终统计票数多的那个类别为最终类别. 如果是回归问题, 那就更简单了, 各个树得到的结果相加求得一个平均值为最终回归结果. </p>
+<p>从上边的流程中可以看出，随机森林的随机性主要体现在两个方面：<strong>数据集的随机选取、每棵树所使用特征的随机选取。</strong>以上两个随机性使得随机森林中的决策树都能够彼此不同，提升系统的多样性，从而提升分类性能。</p>
+<h4 id="2-2-Code"><a href="#2-2-Code" class="headerlink" title="2.2 Code"></a>2.2 Code</h4><p>我们已经具备了理论基础, 现在用一个案例在实操一下.</p>
+<p>数据集: <a target="_blank" rel="noopener" href="https://www.kaggle.com/mlg-ulb/creditcardfraud">https://www.kaggle.com/mlg-ulb/creditcardfraud</a></p>
+<p>项目地址: <a target="_blank" rel="noopener" href="https://github.com/alvisdeng/Credit-Card-Fraud-Detection">https://github.com/alvisdeng/Credit-Card-Fraud-Detection</a></p>
+<h3 id="3-Boosting"><a href="#3-Boosting" class="headerlink" title="3. Boosting"></a>3. Boosting</h3><p>Boosting 指的是通过算法集合将弱学习器转换为强学习器. <strong>Boosting</strong> 的主要原则是训练一系列的弱学习器, 所谓弱学习器是指仅比随机猜测好一点点的模型, 例如较小的决策树, 训练的方式是利用加权的数据. 在训练的早期对于错分数据给予较大的权重.</p>
+<p>对于训练好的弱分类器, 如果是分类任务按照权重进行投票, 而对于回归任务进行加权, 然后再进行预测. <strong>boosting</strong> 和 <strong>bagging</strong> 的区别在于是对加权后的数据利用弱分类器依次进行训练. </p>
+<p><strong>boosting</strong> 是一族可将弱学习器提升为强学习器的算法, 这族算法的工作机制类似:</p>
+<ol>
+<li>先从初始训练集训练出一个基学习器；</li>
+<li>再根据基学习器的表现对训练样本分布进行调整, 使得先前基学习器做错的训练样本在后续受到更多关注;</li>
+<li>基于调整后的样本分布来训练下一个基学习器;</li>
+<li>重复进行上述步骤, 直至基学习器数目达到事先指定的值 T, 最终将这 T 个基学习器进行加权结合.</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1217276-20181109013848078-1434590711.png" alt="機器學習演算法原理解析——整合- IT閱讀"></p>
+<p>提到结合, 我们就不得不来看一下有哪些个体学习器的结合策略:</p>
+<ol>
+<li><p><strong>平均法</strong></p>
+<p>对于数值类的回归预测问题, 通常使用的结合策略是平均法. 也就是说, 对于若干个弱学习器的输出进行平均得到最终的预测输出.</p>
+<p>最简单的平均是算术平均, 也就是说最终预测是:</p>
+<script type="math/tex; mode=display">
+H(x)=\frac{1}{T}\sum_{i=1}^Th_i(x)</script><p>如果个体学习器有一个对应的权重 $w$, 则最终预测是:</p>
+<script type="math/tex; mode=display">
+H(x)=\sum_{i=1}^Tw_ih_i(x) \\
+w_i\ge0,\quad \sum_{i=1}^Tw_i=1</script></li>
+<li><p><strong>投票法</strong></p>
+<p>对于分类问题的预测, 我们通常使用的是投票法. 假设我们的预测类别是 $c_1,c_2,…,c_k$, 对于任意一个预测样本 $x$, 我们的 $T$ 个弱学习分类器的预测结果分别是: $h_1(x),h_2(x),…,h_T(x)$ .</p>
+<p>最简单的投票法是相对多数投票法, 也就是我们常说的少数服从多数, 也就是在 $T$ 个弱学习器对样本 $x$ 的预测中, 数量最多的类别 $c_i$ 为最终的分类类别. 如果不止一个类别获得最高票, 则随机选择一个做最终类别.</p>
+<p>稍微复杂的投票法是绝对多数投票法, 也就是我们常说的要票过半数. 在相对多数投票法的基础上, 不光要求获得最高票, 还要求票过半数, 否则会拒绝预测.</p>
+<p>更加复杂的是加权投票法, 和加权平均法一样, 每个弱学习器的分类票数要乘以一个权重, 最终将各个类别的加权票数求和, 最大的值对应的类别为最终类别.</p>
+</li>
+<li><p><strong>学习法</strong></p>
+<p>投票和平均相对比较简单, 但是可能学习误差较大, 于是就有了学习法这种方法, 对于学习法, 代表方法是 <strong>stacking</strong>, 当使用 <strong>stacking</strong> 的结合策略时, 我们不是对弱学习器的结果做简单的逻辑处理, 而是再加上一层学习器. 也就是说, 我们将训练集弱学习器的学习结果作为输入, 将训练集的输出作为输出, 重新训练一个学习器来得到最终结果.</p>
+<p>在这种情况下, 我们将弱学习器称为<strong>初级学习器</strong>, 将用于结合的学习器称为<strong>次级学习器</strong>. 对于测试集, 我们首先用初级学习器预测一次, 得到次级学习器的输入样本, 再用次级学习器预测一次, 得到最终的预测结果.</p>
+</li>
+</ol>
+<h4 id="3-1-AdaBoost"><a href="#3-1-AdaBoost" class="headerlink" title="3.1 AdaBoost"></a>3.1 AdaBoost</h4><p>首先我们用一个幽默的例子来看一看 AdaBoost 是个什么东西: <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/37671791">https://zhuanlan.zhihu.com/p/37671791</a></p>
+<p> 对于我们提到的 <strong>Boosting</strong> 算法步骤, 需要回答两个问题:</p>
+<ol>
+<li>如何调整每一轮的训练集的样本权重?</li>
+<li>如何将得到的 $M$ 个学习器组合成最终的学习器?</li>
+</ol>
+<p><strong>AdaBoost</strong> (Adaptive Boosting, 自适应增强) 算法采取的方法是:</p>
+<ol>
+<li>提高上一轮被错误分类的样本的权值, 降低被正确分类的样本的权值;</li>
+<li>线性加权求和, 误差率小的基学习器拥有较大的权值, 误差率较大的基学习器拥有较小的权值.</li>
+</ol>
+<p><strong>AdaBoost</strong> 算法结构如下图所示:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201222012513828.png" alt="image-20201222012513828" style="zoom:50%;" /></p>
+<p>考虑如下形式的二分类 (标准AdaBoost算法只适用于二分类任务) 训练数据集:</p>
+<script type="math/tex; mode=display">
+(x_1,y_1),(x_2,y_2),...,(x_N,y_N)</script><p>其中 $x_i$ 是一个含有 $d$ 个元素的列向量, 即 $x_i\in\mathcal{X}\subseteq \mathbf{R}^d$ , $y_i$ 是标量, $y\in(+1,-1)$.</p>
+<p><strong>AdaBoost</strong> 算法具体步骤如下:</p>
+<ol>
+<li><p>初始化样本的权重</p>
+<script type="math/tex; mode=display">
+D_1=(w_{11},w_{12},...,w_{1N}), \quad w_{1i}=\frac{1}{N},i=1,2,...,N</script></li>
+<li><p>对 $m=1,2,…,M$, 重复以下操作得到 $M$ 个基学习器</p>
+<p>(1) 按照样本权重分布 $D_m$ 训练数据得到第 $m$ 个基学习器 $G_m(x)$:</p>
+<script type="math/tex; mode=display">
+G_m(x):\mathcal{X}\rightarrow-1,+1</script><p>还是通过最小化分类误差来学习.</p>
+<p>(2) 计算 $G_m(x)$ 在<strong>加权训练数据集</strong>上的分类误差率:</p>
+<script type="math/tex; mode=display">
+e_m=\sum_{i=1}^NP(G_m(x_i)\ne y_i)=\sum_{i=1}^Nw_{mi}I(G_m(x_i)\ne y_i)</script><p>上式中的 $I(\cdot)$ 是指示函数, 考虑更加周全的AdaBoost算法在这一步还应该判断是否满足基本条件(例如生成的基学习器是否比随机猜测好), 如果不满足, 则当前基学习器被抛弃, 学习过程提前终止.</p>
+<p>(3) 计算 $G_m(x)$ 的系数 (即最终集成使用的基学习器的权重):</p>
+<script type="math/tex; mode=display">
+\alpha_m=\frac{1}{2}\log\frac{1-e_m}{e_m}</script><p>当基学习器 $G_m(x)$ 的误差率 $e_m\le0.5$ 时, $\alpha_m\ge0$, 并且 $\alpha_m$ 随着 $e_m$ 的减小而增大, 即分类误差率越小的基学习器在最终集成时占比也越大. 即AdaBoost能够适应各个弱分类器的训练误差率，这也是它的名称中”适应性(Adaptive)”的由来.</p>
+<p>我们可以看到所有的 $\alpha_m$ 的和并不为 1, 因为我们并没有做 Softmax 的操作.</p>
+<p>(4) 更新训练样本的权重:</p>
+<script type="math/tex; mode=display">
+D_{m+1}=(w_{m+1,1},w_{m+1,2},...,w_{m+1,N}) \\
+\ \\
+w_{m+1,i}=\frac{w_{mi}}{Z_m}\exp(-\alpha_my_iG_m(x_i)),\quad i=1,2,...,N</script><p>其中 $Z_m$ 是规范化因子, 目的是为了使 $D_{m+1}$ 的所有元素和为 1 (想一下我们之前在神经网络讲过的 Softmax), 即:</p>
+<script type="math/tex; mode=display">
+Z_m=\sum_{i=1}^Nw_{mi}\exp(-\alpha_my_iG_m(x_i))</script><p>通过权重更新的公式, 被基学习器 $G_m(x)$ 误分类的样本权值得以扩大, 而被正确分类的样本的权值得以缩小.</p>
+</li>
+<li><p>构建最终的分类器线性组合</p>
+<script type="math/tex; mode=display">
+f(x)=\sum_{i=1}^M\alpha_mG_m(x)</script><p>得到最终的分类器为</p>
+<script type="math/tex; mode=display">
+G(x)=sign(f(x))=sign(\sum_{i=1}^M\alpha_mG_m(x))</script><p>$f(x)$ 的符号决定了所预测的类, 其绝对值代表了分类的确信度.</p>
+</li>
+</ol>
+<h5 id="3-1-1-Why"><a href="#3-1-1-Why" class="headerlink" title="3.1.1 Why?"></a>3.1.1 Why?</h5><p>我们来思考思考为什么 AdaBoost 算法长上面这个样子. 但在解释 AdaBoost 算法之前我们需要先介绍前向分步算法 (Forward Stagewise Algorithm). 我们就以 AdaBoost 算法的最终模型表达式为例:</p>
+<script type="math/tex; mode=display">
+f(x)=\sum_{i=1}^M\alpha_mG_m(x)</script><p>可以看到这是一个“加性模型 (Additive Model)”, 我们希望在这个模型上的经验误差最小, 即</p>
+<script type="math/tex; mode=display">
+\min\sum_{i=1}^NL(y_i,f(x))\Longleftrightarrow\min\sum_{i=1}^NL(y_i,\sum_{i=1}^M\alpha_mG_m(x))</script><p>通常这是一个复杂的优化问题. 前向分步算法求解这一优化问题的思想就是: 因为最终模型是一个加性模型, 如果能从前往后, 每一步只学习一个基学习器 $G_m(x)$ 及其权重 $\alpha_m$, 不断迭代得到最终的模型, 那么就可以简化问题复杂度. 具体的, 当我们经过 $m-1$ 轮迭代得到了最优模型 $f_{m-1}(x)$, 因为</p>
+<script type="math/tex; mode=display">
+f_m(x)=f_{m-1}(x)+\alpha_mG_m(x)</script><p> 所以, 此轮的优化目标就为</p>
+<script type="math/tex; mode=display">
+\min\sum_{i=1}^NL(y_i,f_{m-1}(x)+\alpha_mG_m(x))</script><p>求解上式即可得到第 $m$ 个基分类器 $G_m(x)$ 及其权重 $\alpha_m$.</p>
+<p>ok, 上我们已经介绍了前向分步算法逐一学习基学习器, 这一过程也即是 AdaBoost 算法逐一学习基学习器的过程. 但是为什么 AdaBoost 中公式为什么长那样还是没有解释. 所以我们就证明前向分步算法的损失函数是<strong>指数损失函数 (Exponential Loss Function)</strong>. </p>
+<blockquote>
+<p>  指数损失函数即</p>
+<script type="math/tex; mode=display">
+  L(y,f(x))=\exp(-yf(x))</script><p>  周志华 《机器学习》 p174 有证明, 指数损失函数是分类任务原本0/1损失函数的一致(consistent)替代损失函数, 由于指数损失函数有更好的数学性质, 例如处处可微, 所以我们用它替代0/1损失作为优化目标.</p>
+</blockquote>
+<p> 我们将指数损失函数代入 $\min\sum_{i=1}^NL(y_i,f_{m-1}(x)+\alpha_mG_m(x))$, 优化目标就为</p>
+<script type="math/tex; mode=display">
+\mathop{\arg\min}_{\alpha_m,G_m}\sum_{i=1}^N\exp[-y_i(f_{m-1}(x)+\alpha_mG_m(x))]</script><p>因为 $y_if_{m-1}(x)$ 与优化变量 $\alpha_m$ 和 $G_m(x)$ 无关, 如果令</p>
+<script type="math/tex; mode=display">
+w_{mi}=\exp[-y_if_{m-1}(x)]</script><p>那么优化目标就变成了</p>
+<script type="math/tex; mode=display">
+\mathop{\arg\min}_{\alpha_m,G_m}\sum_{i=1}^Nw_{mi}\exp(-y_i\alpha_mG_m(x))</script><p>我们分两步来求上式的最优解 $\hat{\alpha}_m$ 和 $\hat{G}_m(x)$:</p>
+<ol>
+<li><p>对任意的 $\alpha_m&gt;0$, 求 $\hat{G}_m(x)$:</p>
+<script type="math/tex; mode=display">
+\hat{G}_m(x)=\mathop{\arg\min}_{G_m}\sum_{i=1}^Nw_{mi}I(y_i\ne G_m(x_i))</script><blockquote>
+<p>  上式将指数损失函数转换成指示函数是因为前面说的指数损失函数和0/1损失函数是一致等价的.</p>
+</blockquote>
+<p>我们不难发现, 上面这个式子就是 AdaBoost 算法的基学习器的学习过程, 得到的 $\hat{G}_m(x)$ 是使第 $m$ 轮加权训练数据分类误差最小的基分类器.</p>
+</li>
+<li><p>求解 $\hat{\alpha}_m$:</p>
+<p>我们将目标函数展开</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{aligned}
+\sum_{i=1}^Nw_{mi}\exp(-y_i\alpha_mG_m(x))
+=&\sum_{y_i=G_m(x_i)}w_{mi}\exp(-\alpha_m)+\sum_{y_i\ne G_m(x_i)}w_{mi}\exp(\alpha_m) \\
+=&(e^{\alpha_m}-e^{-\alpha_m})\sum_{i=1}^Nw_{mi}I(y_i\ne G_m(x_i))+e^{-\alpha_m}\sum_{i=1}^Nw_{mi}
+\end{aligned}
+\end{equation}</script><p>将上式对 $\alpha_m$ 求导并令导数为 0, 即</p>
+<script type="math/tex; mode=display">
+(e^{\alpha_m}+e^{-\alpha_m})\sum_{i=1}^Nw_{mi}I(y_i\ne G_m(x_i))-e^{-\alpha_m}\sum_{i=1}^Nw_{mi}=0</script><p>解得</p>
+<script type="math/tex; mode=display">
+\alpha_m=\frac{1}{2}\log\frac{1-e_m}{e_m}</script><p>其中, $e_m$ 是分类误差率</p>
+<script type="math/tex; mode=display">
+e_m=\frac{\sum_{i=1}^Nw_{mi}I(y_i\ne G_m(x_i))}{\sum_{i=1}^Nw_{mi}}</script><p>如果将上式进行归一化那么也和我们在 Adaboost 中的误差率计算一模一样了.</p>
+<p>最后我们来看看每一轮样本权值的更新, 由下面两式:</p>
+<script type="math/tex; mode=display">
+f_m(x)=f_{m-1}(x)+\alpha_mG_m(x) \\
+w_{mi}=\exp[-y_if_{m-1}(x)]</script><p>我们可以得到</p>
+<script type="math/tex; mode=display">
+w_{m+1,i}=w_{mi}\exp(-y_i\alpha_mG_m(x))</script><p>将上式进行归一化那么也和我们在 Adaboost 中的误差率计算一模一样了.</p>
+</li>
+</ol>
+<p>由此可见, AdaBoost 的算法步骤是可以经过严密推导得到的. 总结一下, 推导有如下关键点:</p>
+<ul>
+<li>AdaBoost 算法是一个加性模型, 将其简化成<strong>前向分步算法求解;</strong></li>
+<li>将0/1损失函数用数学性质更好的指数损失函数替代.</li>
+</ul>
+<h5 id="3-1-2-Example"><a href="#3-1-2-Example" class="headerlink" title="3.1.2 Example"></a>3.1.2 Example</h5><p>请查看李航 《统计学习方法》 P158</p>
+<h5 id="3-1-2-Code"><a href="#3-1-2-Code" class="headerlink" title="3.1.2 Code"></a>3.1.2 Code</h5><p>AdaBoost 算法实现如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_adaboost_clf</span>(<span class="params">Y_train, X_train, Y_test, X_test, M=<span class="number">20</span>, weak_clf=DecisionTreeClassifier(<span class="params">max_depth = <span class="number">1</span></span>)</span>):</span></span><br><span class="line">    n_train, n_test = <span class="built_in">len</span>(X_train), <span class="built_in">len</span>(X_test)</span><br><span class="line">    <span class="comment"># Initialize weights</span></span><br><span class="line">    w = np.ones(n_train) / n_train</span><br><span class="line">    pred_train, pred_test = [np.zeros(n_train), np.zeros(n_test)]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(M):</span><br><span class="line">        <span class="comment"># Fit a classifier with the specific weights</span></span><br><span class="line">        weak_clf.fit(X_train, Y_train, sample_weight = w)</span><br><span class="line">        pred_train_i = weak_clf.predict(X_train)</span><br><span class="line">        pred_test_i = weak_clf.predict(X_test)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Indicator function</span></span><br><span class="line">        miss = [<span class="built_in">int</span>(x) <span class="keyword">for</span> x <span class="keyword">in</span> (pred_train_i != Y_train)]</span><br><span class="line">        print(<span class="string">&quot;weak_clf_%02d train acc: %.4f&quot;</span></span><br><span class="line">         % (i + <span class="number">1</span>, <span class="number">1</span> - <span class="built_in">sum</span>(miss) / n_train))</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Error</span></span><br><span class="line">        err_m = np.dot(w, miss)</span><br><span class="line">        <span class="comment"># Alpha</span></span><br><span class="line">        alpha_m = <span class="number">0.5</span> * np.log((<span class="number">1</span> - err_m) / <span class="built_in">float</span>(err_m))</span><br><span class="line">        <span class="comment"># New weights</span></span><br><span class="line">        miss2 = [x <span class="keyword">if</span> x==<span class="number">1</span> <span class="keyword">else</span> -<span class="number">1</span> <span class="keyword">for</span> x <span class="keyword">in</span> miss] <span class="comment"># -1 * y_i * G(x_i): 1 / -1</span></span><br><span class="line">        w = np.multiply(w, np.exp([<span class="built_in">float</span>(x) * alpha_m <span class="keyword">for</span> x <span class="keyword">in</span> miss2]))</span><br><span class="line">        w = w / <span class="built_in">sum</span>(w)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Add to prediction</span></span><br><span class="line">        pred_train_i = [<span class="number">1</span> <span class="keyword">if</span> x == <span class="number">1</span> <span class="keyword">else</span> -<span class="number">1</span> <span class="keyword">for</span> x <span class="keyword">in</span> pred_train_i]</span><br><span class="line">        pred_test_i = [<span class="number">1</span> <span class="keyword">if</span> x == <span class="number">1</span> <span class="keyword">else</span> -<span class="number">1</span> <span class="keyword">for</span> x <span class="keyword">in</span> pred_test_i]</span><br><span class="line">        pred_train = pred_train + np.multiply(alpha_m, pred_train_i)</span><br><span class="line">        pred_test = pred_test + np.multiply(alpha_m, pred_test_i)</span><br><span class="line">    </span><br><span class="line">    pred_train = (pred_train &gt; <span class="number">0</span>) * <span class="number">1</span></span><br><span class="line">    pred_test = (pred_test &gt; <span class="number">0</span>) * <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    print(<span class="string">&quot;My AdaBoost clf train accuracy: %.4f&quot;</span> % (<span class="built_in">sum</span>(pred_train == Y_train) / n_train))</span><br><span class="line">    print(<span class="string">&quot;My AdaBoost clf test accuracy: %.4f&quot;</span> % (<span class="built_in">sum</span>(pred_test == Y_test) / n_test))</span><br></pre></td></tr></table></figure>
+<h4 id="3-2-GBDT"><a href="#3-2-GBDT" class="headerlink" title="3.2 GBDT"></a>3.2 GBDT</h4><h5 id="3-2-1-Intuition"><a href="#3-2-1-Intuition" class="headerlink" title="3.2.1 Intuition"></a>3.2.1 Intuition</h5><p>GBDT是 Gradient Boosting Decision Tree 的缩写, 即梯度提升决策树. 我们可以看出 GBDT 的基础还是决策树, 而且是我们之前已经提到过的 CART 算法.</p>
+<p>现在我们从直觉的角度来看一看 GBDT 是如何拟合的. 假设现在有样本集</p>
+<script type="math/tex; mode=display">
+(x_1,y_1),(x_2,y_2),...,(x_n,y_n)</script><p>然后我们用一个模型, 现在我们用 $F(x)$ 去拟合这些数据, 使得这批样本的均方误差最小. 最后我们发现, 虽然模型的拟合效果很好, 但仍然有一些差距. 比如, 预测值 $F(x_1)=0.8$, 而真实值 $y_1=0.9$, $F(x_2)=1.4$, $y_2=1.3$ 等等. 但是现在我们却没有办法去更改模型 $F(x)$ 的参数, 那么有什么办法进一步来提高模型的拟合能力呢?</p>
+<p>既然不能更改原来模型的参数, 那么意味着必须在原来模型的基础上做改善, 那么直观的做法就是建立一个新的模型 $f(x)$ 来拟合 $F(x)$ 未完全拟合真实样本的残差, 即 $y-F(x)$. 所以对于每个样本来说, 拟合的样本集就变成了:</p>
+<script type="math/tex; mode=display">
+(x_1,y_1-F(x_1)),(x_2,y_2-F(x_2)),...,(x_n,y_n-F(x_n))</script><p>而在这个新的待拟合样本集中, $y_i-F(x_i)$ 被称为残差, 将交给新的模型来完成. 我们知道 GBDT 的全称是 Gradient Boosting Decision Tree, 其中 Gradient 被称为梯度, 那么这里的残差与梯度是什么关系呢? 我们之前提到了均方误差, 也就是下面这个式子:</p>
+<script type="math/tex; mode=display">
+L=\frac{1}{2}\sum_{i=1}^n(y_i-F(x_i))^2</script><p>熟悉其他算法的原理应该知道, 这个损失函数主要针对回归类型的问题, 分类则是用熵值类的损失函数. 具体到平方损失函数的式子, 你可能已经发现它的一阶导其实就是残差的形式, 所以基于残差的 GBDT 是一种特殊的 GBDT 模型, 它的损失函数是均方误差, 常用来处理回归类问题, 且残差就是负梯度.</p>
+<script type="math/tex; mode=display">
+\frac{\partial L}{\partial F(x_i)}=F(x_i)-y_i \\
+
+y_i-F(x_i)=-\frac{\partial L}{\partial F(x_i)}</script><p>我们可以用 $r_{mi}$ 来表示第 $m$ 棵回归树对于样本 $i$ 的训练目标, 它的公式为:</p>
+<script type="math/tex; mode=display">
+r_{mi}=y_i-F(x_i)</script><p>但注意, 不能把残差简单理解成目标值和 $F(x_i)$ 的差值, 它本质是由损失函数计算负梯度得到的. 至于为什么拟合负梯度可以得到一个好的模型呢? 因为沿着负梯度的方向学习, 效率是最高的, 当负梯度为0时, 全局损失函数就是最好的, 得到的强学习器 $F(x)$ 自然也是比较好的.</p>
+<p><strong>但是!!! 基于残差的 GDBT 并不是一个很好的选择.</strong> 一个比较明显的缺点就是对异常值过于敏感, 我们来看一个例子.</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">$y_i$</th>
+<th style="text-align:center">$F(x_i)$</th>
+<th style="text-align:center">$L=(y-F)^2/2$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0.5</td>
+<td style="text-align:center">0.6</td>
+<td style="text-align:center">0.005</td>
+</tr>
+<tr>
+<td style="text-align:center">1.2</td>
+<td style="text-align:center">1.4</td>
+<td style="text-align:center">0.02</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">1.5</td>
+<td style="text-align:center">0.125</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">1.7</td>
+<td style="text-align:center">5.445</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>很明显后续的模型会对第4个值关注过多, 这不是一种好的现象, 所以一般回归类的损失函数会用绝对损失或者huber损失函数来代替平方损失函数:</p>
+<ul>
+<li><p>Absolute Loss (More robust to outliers)</p>
+<script type="math/tex; mode=display">
+L(y,F)=|y-F|</script></li>
+<li><p>Huber Loss (More robust to outliers)</p>
+<script type="math/tex; mode=display">
+L(y,F)=
+\begin{cases}
+\begin{aligned}
+\frac{1}{2}(y-F)^2\quad |y-F|\le\delta \\
+\delta(|y-F|-\frac{\delta}{2})\quad |y-F|\gt\delta
+\end{aligned}
+\end{cases}</script></li>
+</ul>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">$y_i$</th>
+<th style="text-align:center">$F(x_i)$</th>
+<th style="text-align:center">Square Loss</th>
+<th style="text-align:center">Absolute Loss</th>
+<th style="text-align:center">Huber Loss ($\delta=0.5$)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0.5</td>
+<td style="text-align:center">0.6</td>
+<td style="text-align:center">0.005</td>
+<td style="text-align:center">0.1</td>
+<td style="text-align:center">0.005</td>
+</tr>
+<tr>
+<td style="text-align:center">1.2</td>
+<td style="text-align:center">1.4</td>
+<td style="text-align:center">0.02</td>
+<td style="text-align:center">0.2</td>
+<td style="text-align:center">0.02</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">1.5</td>
+<td style="text-align:center">0.125</td>
+<td style="text-align:center">0.5</td>
+<td style="text-align:center">0.125</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">1.7</td>
+<td style="text-align:center">5.445</td>
+<td style="text-align:center">3.3</td>
+<td style="text-align:center">1.525</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h5 id="3-2-2-Regression-Algorithm"><a href="#3-2-2-Regression-Algorithm" class="headerlink" title="3.2.2 Regression Algorithm"></a>3.2.2 Regression Algorithm</h5><p>我们现在把模型训练的整个过程摆出来, 把所有细节串联起来.</p>
+<p>首先我们明确几个参数, $M$ 表示基学习器 CART 的数量, $f_m(x_i)$ 表示第 $m$ 轮训练之后的整体模型. $f_m(x_i)$ 即为最终输出的 GBDT 模型.</p>
+<ol>
+<li><p><strong>初始化</strong></p>
+<p>首先, 我们创建第一棵回归树即 $f_1(x)$, 在回归问题当中, 它是直接用回归树拟合目标值的结果, 所以:</p>
+<script type="math/tex; mode=display">
+f_1(x)=\mathop{\arg\min}_c\sum_{i=1}^NL(y_i,c)</script></li>
+<li><p><strong>迭代</strong></p>
+<p>(1) 对于第 2 到第 m 棵回归树, 我们要计算出每一颗树的训练目标, 也就是<strong>前面结果</strong>的残差(当损失函数是均方误差时):</p>
+<script type="math/tex; mode=display">
+r_{mi}=-[\frac{\partial L(y_i,f(x_i))}{\partial f(x_i)}]_{f(x)=f_{m-1}(x)}</script><p>(2) 对于当前第 $m$ 棵子树而言, 我们需要将上面得到的残差作为样本新的真实值, 并将数据 $(x_i,r_{mi}),i=1,2,…,N$ 作为下棵树的训练数据, 得到一颗新的回归树.  我们需要遍历可行特征以及切分点 (阈值), 找到最优的预测值 $c$ 对应的参数, 使第 $m$ 棵树尽可能逼近残差, 公式表达如下:</p>
+<script type="math/tex; mode=display">
+c_{mj} = \mathop{\arg\min}_c\sum_{x_i\in R_{mj}}L(y_i,f_{m-1}(x_i)+c)</script><p>$R_{mj}$ 指的是第 $m$ 棵子树按照划分方法 $j$ 所得到的特征空间, $j=1,2,3…,J$. 如果你对这个感到模糊, 可以看我的决策树笔记.</p>
+<p>接着我们更新我们的模型:</p>
+<script type="math/tex; mode=display">
+f_m(x)=f_{m-1}(x)+\sum_{j=1}^Jc_{mj}I(x\in R_{mj})</script></li>
+<li><p>最后我们得到回归树</p>
+<script type="math/tex; mode=display">
+F(x)=f_M(x)=\sum_{m=1}^Mf_m(x)=\sum_{i=1}^M\sum_{j=1}^Jc_{mj}I(x\in R_{mj})</script></li>
+</ol>
+<h5 id="3-2-3-Classification-Algorithm"><a href="#3-2-3-Classification-Algorithm" class="headerlink" title="3.2.3 Classification Algorithm"></a>3.2.3 Classification Algorithm</h5><p>我们现在来看看 GBDT 分类算法, GBDT的分类算法从思想上和GBDT的回归算法没有区别, 但是由于样本输出不是连续的值, 而是离散的类别, 导致我们无法直接从输出类别去拟合类别输出的误差.</p>
+<p>为了解决这个问题, 主要有两个方法, 一个是用指数损失函数, 此时GBDT退化为Adaboost算法. 另一种方法是用类似于逻辑回归的对数似然损失函数的方法. 也就是说, 我们用的是类别的预测概率值和真实概率值的差来拟合损失.</p>
+<p>逻辑回归的单个样本 $(x_i,y_i)$ 的损失函数可以表达为:</p>
+<script type="math/tex; mode=display">
+L(\theta)=-y_i\log\hat{y}_i-(1-y)\log(1-\hat{y}_i)</script><p>现在我们假设 GBDT 第 $M$ 步迭代之后学习器为:</p>
+<script type="math/tex; mode=display">
+F(x)=\sum_{i=1}^Mf_m(x)</script><p>我们将 $y_i$ 替换为 $f(x)$ 代入上式之后, 可以将损失函数写为:</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+\begin{aligned}
+L(y_i,f(x_i))=&-y_i\log(\frac{1}{1+\exp(-f(x_i))})-(1-y_i)\log(1-\frac{1}{1+\exp(-f(x_i))}) \\
+=&y_i\log(1+\exp(-f(x_i)))+(1-y_i)[f(x_i)+\log(1+\exp(-f(x_i)))]
+\end{aligned}
+\end{equation}</script><p>此时, 第 $m$ 棵树所要拟合的负梯度为:</p>
+<script type="math/tex; mode=display">
+r_{mi}=-[\frac{\partial L(y_i,f(x_i))}{\partial f(x_i)}]_{f(x)=f_{m-1}(x)}=y_i-\frac{1}{1+\exp(-f(x_i))}=y_i-\hat{y}_i</script><p>对于生成的决策树, 计算各个叶子节点的最佳残差拟合值为:</p>
+<script type="math/tex; mode=display">
+c_{mj}=\mathop{\arg\min}_c\sum_{x_i\in R_{mj}}L(y_i,f_{m-1}(x_i)+c)</script><p>由于上式没有闭式解 (closed form solution), 我们一般使用近似值代替:</p>
+<script type="math/tex; mode=display">
+c_{mj}=\frac{\sum_{x_i\in R_{mj}}r_{mi}}{\sum_{x_i\in R_{mj}}(y_i-r_{mi})(1-y_i+r_{mi})}</script><p>因此我们现在可以给出 GBDT 二分类算法的完整过程:</p>
+<ol>
+<li><p><strong>初始化</strong></p>
+<p>我们首先建立第一个弱学习器 $f_0(x)$</p>
+<script type="math/tex; mode=display">
+f_0(x)=\log\frac{P(Y=1)}{1-P(Y=1)}</script><p>其中, $P(Y=1)$ 是训练样本中 $y=1$ 的比例, 我们利用先验信息来初始化学习器. </p>
+</li>
+<li><p><strong>迭代</strong></p>
+<p>(1) 对于第 1 到第 m 棵回归树, 我们要计算出每一颗树的训练目标, 也就是损失函数的负梯度, 即伪残差:</p>
+<script type="math/tex; mode=display">
+r_{mi}=-[\frac{\partial L(y_i,f(x_i))}{\partial f(x_i)}]_{f(x)=f_{m-1}(x)}=y_i-\frac{1}{1+\exp(-f(x_i))}</script><p>(2) 利用 CART 回归树拟合新的数据集 $(x_i,r_{mi})$, 得到第 $m$ 棵回归树</p>
+<script type="math/tex; mode=display">
+c_{mj}=\frac{\sum_{x_i\in R_{mj}}r_{mi}}{\sum_{x_i\in R_{mj}}(y_i-r_{mi})(1-y_i+r_{mi})}</script><p>(3) 更新强学习器 $f_m(x)$</p>
+<script type="math/tex; mode=display">
+f_m(x)=f_{m-1}(x)+\sum_{j=1}^Jc_{mj}I(x\in R_{mj})</script></li>
+<li><p>得到最用强学习器 $F(x)$ 的表达式</p>
+<script type="math/tex; mode=display">
+F(x)=f_M(x)=\sum_{i=0}^Mf_m(x)=f_0(x)+\sum_{m=1}^M\sum_{j=1}^Jc_{mj}I(x\in R_{mj})</script></li>
+</ol>
+<p>从以上过程中可知, 除了由损失函数引起的负梯度计算和叶子节点的最佳残差拟合值的计算不同, 二元GBDT分类和GBDT回归算法过程基本相似. 那二元GBDT是如何做分类呢?</p>
+<p>将逻辑回归的公式进行整理, 我们可以得到 $\log\frac{p}{1-p}=\theta^Tx$, 其中 $p=P(Y=1|x)$, 也就是将给定输入 $x$ 预测为正样本的概率. 逻辑回归用一个线性模型去拟合这个事件的对数几率. 二元GBDT分类算法和逻辑回归思想一样, 用一系列的梯度提升树去拟合这个对数几率, 其分类模型可以表达为:</p>
+<script type="math/tex; mode=display">
+P(Y=1|x)=\frac{1}{1+\exp(-F(x))}</script></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">阿平</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.facequant.com/2020/12/26/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0%E7%9C%9F%E4%B8%8D%E9%9A%BE/">https://www.facequant.com/2020/12/26/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0%E7%9C%9F%E4%B8%8D%E9%9A%BE/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.facequant.com" target="_blank">阿平的自我修养</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Supervised-Learning/">Supervised Learning</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201227183120981.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/12/26/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A0%B8%E6%AD%A6%E5%99%A8-%E6%A0%B8%E5%87%BD%E6%95%B0/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201226173203204.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">机器学习核武器: 核方法</div></div></a></div><div class="next-post pull-right"><a href="/2020/12/25/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92-%E8%82%A1%E7%A5%A8%E4%B9%B0%E5%8D%96%E9%97%AE%E9%A2%98/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/0*zuhXdNAIUoxEem4-.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">动态规划-股票买卖问题</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/12/26/旧时代的明珠-SVM/" title="旧时代的明珠: SVM"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/image-20201227182605307.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-26</div><div class="title">旧时代的明珠: SVM</div></div></a></div><div><a href="/2020/11/13/深度学习基础-神经网络模型/" title="深度学习基础-神经网络模型"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/NN_network.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">深度学习基础-神经网络模型</div></div></a></div><div><a href="/2020/11/12/详解逻辑回归-Logistic-Regression/" title="详解逻辑回归(Logistic Regression)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/sigmoid.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">详解逻辑回归(Logistic Regression)</div></div></a></div><div><a href="/2020/11/13/防止过拟合-正则化-Regularization/" title="防止过拟合-正则化(Regularization)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/1_o6H_R3Do1zpch-3MZk_fjQ.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-13</div><div class="title">防止过拟合-正则化(Regularization)</div></div></a></div><div><a href="/2020/11/22/隐马尔可夫模型-HMM/" title="隐马尔可夫模型(HMM)"><img class="cover" src="https://cdn.jsdelivr.net/gh/alvisdeng/ImgHouse@main/markov-chains.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-22</div><div class="title">隐马尔可夫模型(HMM)</div></div></a></div><div><a href="/2020/11/12/决策树-Decision-Tree/" title="决策树(Decision Tree)"><img class="cover" src="https://i.pinimg.com/originals/68/f8/e8/68f8e8dd71485c0f0c4acd9ada4123fe.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-12</div><div class="title">决策树(Decision Tree)</div></div></a></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Introduction"><span class="toc-text">1. Introduction</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Bagging"><span class="toc-text">2. Bagging</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Random-Forest"><span class="toc-text">2.1 Random Forest</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-Code"><span class="toc-text">2.2 Code</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Boosting"><span class="toc-text">3. Boosting</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-AdaBoost"><span class="toc-text">3.1 AdaBoost</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-1-Why"><span class="toc-text">3.1.1 Why?</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-2-Example"><span class="toc-text">3.1.2 Example</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-2-Code"><span class="toc-text">3.1.2 Code</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-GBDT"><span class="toc-text">3.2 GBDT</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-1-Intuition"><span class="toc-text">3.2.1 Intuition</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-2-Regression-Algorithm"><span class="toc-text">3.2.2 Regression Algorithm</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-3-Classification-Algorithm"><span class="toc-text">3.2.3 Classification Algorithm</span></a></li></ol></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By 阿平</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
